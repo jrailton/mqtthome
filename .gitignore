@@ -1,0 +1,9 @@
+*.svclog
+.vs
+*.suo
+*.user
+*/bin/*
+logs
+obj
+Publish
+packages
