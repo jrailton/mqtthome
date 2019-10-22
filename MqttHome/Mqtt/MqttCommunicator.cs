@@ -106,6 +106,10 @@ namespace InfluxDbLoader.Mqtt
                     foreach (var device in Program.MqttDevices.Where(d => d.IsSubscribedToStateTopic(e.ApplicationMessage.Topic)))
                         device.ParseStatePayload(e.ApplicationMessage);
 
+                    // states
+                    foreach (var device in Program.MqttDevices.Where(d => d.IsSubscribedToCommandResponseTopic(e.ApplicationMessage.Topic)))
+                        device.ParseCommandResponsePayload(e.ApplicationMessage);
+
                     // sensors
                     foreach (var device in Program.MqttDevices.Where(d => d.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic)))
                         device.ParseSensorPayload(e.ApplicationMessage);

@@ -66,7 +66,8 @@ namespace InfluxDbLoader
 
                 // this is a hack which needs more thought
                 MqttDeviceTopics = MqttDevices.Select(d => d.StateTopic).ToList();
-                MqttDeviceTopics.AddRange(MqttDevices.Select(d => d.SensorTopic).ToList());
+                MqttDeviceTopics.AddRange(MqttDevices.SelectMany(d => d.SensorTopics).ToList());
+                MqttDeviceTopics.AddRange(MqttDevices.Select(d => d.CommandResponseTopic).ToList());
                 MqttDeviceTopics = MqttDeviceTopics.Where(s => !string.IsNullOrEmpty(s)).ToList();
 
                 var mqttBrokerIp = ConfigurationManager.AppSettings["mqttbroker_ip"] ?? "localhost";

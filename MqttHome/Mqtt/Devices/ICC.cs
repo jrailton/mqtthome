@@ -1,49 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MQTTnet;
 
 namespace InfluxDbLoader.Mqtt.Devices
 {
-    public class ICCSensorData : SensorData
-    {
-        public ICCSensorData(MqttApplicationMessage mqtt)
-        {
-            var message = Encoding.UTF8.GetString(mqtt.Payload);
-            var array = message.Split(' ');
-
-            switch (mqtt.Topic)
-            {
-                case "Inverter/AllValues":
-                    // 0 loadwatts, 1 x, 2 pvwatts, 3 loadwatts, 4 loadpcnt, 5 invertertemp, 6 x, 7 batteryvolts, 8 batterysoc, 9 batteryamps, 10 inverterfreq, 11 x, 12 batterywatts, 13 x, 14 x
-
-                    LoadWatts = decimal.Parse(array[0]);
-                    PvWatts = decimal.Parse(array[2]);
-                    LoadWatts = decimal.Parse(array[3]);
-                    LoadPcnt = decimal.Parse(array[4]);
-                    InverterTemp = decimal.Parse(array[5]);
-                    BatteryVoltage = decimal.Parse(array[7]);
-                    BatterySoC = decimal.Parse(array[8]);
-                    BatteryAmps = decimal.Parse(array[9]);
-                    InverterFreq = decimal.Parse(array[10]);
-                    BatteryWatts = decimal.Parse(array[12]);
-
-                    break;
-            }
-        }
-
-        public decimal LoadWatts { get; set; }
-        public decimal BatteryAmps { get; set; }
-        public decimal PvWatts { get; set; }
-        public decimal LoadPcnt { get; set; }
-        public decimal InverterTemp { get; set; }
-        public decimal BatteryVoltage { get; set; }
-        public decimal BatterySoC { get; set; }
-        public decimal InverterFreq { get; set; }
-        public decimal BatteryWatts { get; set; }
-    }
 
     public class ICC : MqttDevice
     {
@@ -51,7 +13,7 @@ namespace InfluxDbLoader.Mqtt.Devices
         {
         }
 
-        public override string SensorTopic => "Inverter/AllValues";
+        public override List<string> SensorTopics => new List<string>{ "Inverter/AllValues", "Inverter/AllValues2", "Pylontech/Cycles" , "Pylontech/Watts", "Pylontech/Temperature", "Pylontech/Remaining_AH", "Pylontech/TimeRemaining", "Pylontech/AH_Use", "Pylontech/AH_Remaining_Till_20SOC" };
         public override string StateTopic => null;
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.ICC;

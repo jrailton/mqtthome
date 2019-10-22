@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using InfluxDB.LineProtocol.Payload;
 using MQTTnet;
@@ -16,10 +18,6 @@ namespace InfluxDbLoader.Mqtt
         public MqttDevice(string id)
         {
             Id = id;
-
-            StateTopic = StateTopic?.Replace("@id", id);
-            SensorTopic = SensorTopic.Replace("@id", id);
-            RebootDevice = new MqttCommand(id, $"cmnd/{id}/Restart", "1");
         }
 
         public string Id;
@@ -29,14 +27,24 @@ namespace InfluxDbLoader.Mqtt
             set { }
         }
 
+        public virtual string CommandResponseTopic
+        {
+            get => $"stat/{Id}/POWER";
+            set { }
+        }
+
         // commands
         public virtual MqttCommand SetPowerStateOn { get; set; }
         public virtual MqttCommand SetPowerStateOff { get; set; }
-        public virtual MqttCommand RebootDevice { get; set; }
-
-        public virtual string SensorTopic
+        public virtual MqttCommand RebootDevice
         {
-            get => $"tele/{Id}/SENSOR";
+            get { return new MqttCommand(Id, $"cmnd/{Id}/Restart", "1"); }
+            set { }
+        }
+
+        public virtual List<string> SensorTopics
+        {
+            get => new List<string>{ $"tele/{Id}/SENSOR" };
             set { }
         }
         public abstract MqttDeviceType DeviceType { get; set; }
@@ -46,7 +54,8 @@ namespace InfluxDbLoader.Mqtt
         public bool PowerOn
         {
             get => _powerOn;
-            protected set {
+            protected set
+            {
                 _powerOn = value;
                 WriteToInflux(_powerOn);
             }
@@ -68,13 +77,41 @@ namespace InfluxDbLoader.Mqtt
             return (StateTopic ?? "").Equals(topic, StringComparison.CurrentCultureIgnoreCase);
         }
 
+        public bool IsSubscribedToCommandResponseTopic(string topic)
+        {
+            return (CommandResponseTopic ?? "").Equals(topic, StringComparison.CurrentCultureIgnoreCase);
+        }
+
         public bool IsSubscribedToSensorTopic(string topic)
         {
-            return (SensorTopic ?? "").Equals(topic, StringComparison.CurrentCultureIgnoreCase);
+            return (SensorTopics ?? new List<string>()).Contains(topic, StringComparer.CurrentCultureIgnoreCase);
         }
 
         public abstract void ParseStatePayload(MqttApplicationMessage message);
         public abstract void ParseSensorPayload(MqttApplicationMessage message);
+
+        /// <summary>
+        /// This works for Sonoff Tasmota devices -- will need to be overridden for others
+        /// </summary>
+        public virtual void ParseCommandResponsePayload(MqttApplicationMessage message)
+        {
+            var test = new Regex(@"^(?<topic>.+)\/(?<device>.+)\/(?<subject>.+)$");
+            var match = test.Match(message.Topic);
+            var payload = Encoding.UTF8.GetString(message.Payload);
+
+            if (match.Success)
+            {
+                switch (match.Groups["subject"].Value)
+                {
+                    case "POWER":
+                        PowerOn = payload.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
 
         private void WriteToInflux(SensorData data)
         {
