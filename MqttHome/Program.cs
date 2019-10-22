@@ -20,6 +20,9 @@ using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Diagnostics;
 using System.Configuration;
+using log4net;
+using log4net.Config;
+using System.Reflection;
 
 namespace InfluxDbLoader
 {
@@ -31,6 +34,12 @@ namespace InfluxDbLoader
         public static List<string> MqttDeviceTopics;
         public static bool Debug;
 
+        public static ILog RuleLog;
+        public static ILog DeviceLog;
+        public static ILog GeneralLog;
+        public static ILog InfluxLog;
+        public static ILog MqttLog;
+
         public static void Log(string description)
         {
             Console.WriteLine($"{DateTime.Now.ToString("dd-MMM-yy HH:mm:ss")} {description}");
@@ -41,6 +50,16 @@ namespace InfluxDbLoader
             try
             {
                 Debug = args.Any(s => s.Equals("debug", StringComparison.CurrentCultureIgnoreCase));
+
+                // configure log4net
+                var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+                XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+
+                RuleLog = LogManager.GetLogger("RuleLogger", "RuleLogger");
+                DeviceLog = LogManager.GetLogger("DeviceLog", "DeviceLog");
+                GeneralLog = LogManager.GetLogger("GeneralLog", "GeneralLog");
+                InfluxLog = LogManager.GetLogger("InfluxLog", "InfluxLog");
+                MqttLog = LogManager.GetLogger("MqttLog", "MqttLog");
 
                 var influxUrl = ConfigurationManager.AppSettings["influxdb_url"] ?? "http://localhost:8086";
                 var influxDatabase = ConfigurationManager.AppSettings["influxdb_database"] ?? "home_db";
