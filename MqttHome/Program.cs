@@ -29,7 +29,7 @@ namespace InfluxDbLoader
     class Program
     {
         public static MqttCommunicator MqttCommunicator;
-        public static List<MqttDevice> MqttDevices;
+        public static IQueryable<MqttDevice> MqttDevices;
         public static InfluxCommunicator InfluxCommunicator;
         public static List<string> MqttDeviceTopics;
         public static bool Debug;
@@ -79,9 +79,9 @@ namespace InfluxDbLoader
                     new SonoffPowR2Device("powr2_4"),
                     new SonoffPowR2Device("powr2_5"),
                     new SonoffGenericSwitchDevice("s26_2", MqttDeviceType.SonoffS26),
-                };
+                }.AsQueryable();
 
-                Log($"Adding {MqttDevices.Count} MQTT devices...");
+                Log($"Adding {MqttDevices.Count()} MQTT devices...");
 
                 // this is a hack which needs more thought
                 MqttDeviceTopics = MqttDevices.Select(d => d.StateTopic).ToList();
@@ -97,7 +97,7 @@ namespace InfluxDbLoader
                 MqttCommunicator = new MqttCommunicator(mqttBrokerIp, mqttBrokerPort);
                 MqttCommunicator.Start();
 
-                Log($@"Started listening to {MqttDevices.Count} MQTT devices. Topic list is:
+                Log($@"Started listening to {MqttDevices.Count()} MQTT devices. Topic list is:
 {string.Join(Environment.NewLine, MqttDeviceTopics)}");
 
                 // only print on screen if in ui mode
@@ -124,7 +124,7 @@ namespace InfluxDbLoader
 
                 foreach (var device in MqttDevices)
                 {
-                    builder.AppendLine($@"Class: {device.DeviceClass}, Type: {device.DeviceType}, ID: {device.Id}, State: {(device.PowerOn ? "On" : "Off")}");
+                    builder.AppendLine($@"Class: {device.DeviceClass}, Type: {device.DeviceType}, ID: {device.Id}, State: {(device.PowerOn ? "On" : $"Off ({device.PowerOffTime?.ToString("HH:mm:ss") ?? "n/a"})")}");
                     if (device.SensorData != null)
                         builder.AppendLine($@"{string.Join(Environment.NewLine, device.SensorData.ToDictionary().Select(k => $"{k.Key}: {k.Value}"))}");
                 }

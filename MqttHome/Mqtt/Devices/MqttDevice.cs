@@ -49,6 +49,7 @@ namespace InfluxDbLoader.Mqtt
         }
         public abstract MqttDeviceType DeviceType { get; set; }
         public abstract MqttDeviceClass DeviceClass { get; set; }
+        public DateTime? PowerOffTime { get; private set; }
 
         private bool _powerOn;
         public bool PowerOn
@@ -57,6 +58,17 @@ namespace InfluxDbLoader.Mqtt
             protected set
             {
                 _powerOn = value;
+
+                if (_powerOn)
+                {
+                    // clear power off time (used for flipflop prevention)
+                    PowerOffTime = null;
+                }
+                else {
+                    // maintain power off time if its already set
+                    PowerOffTime = PowerOffTime ?? DateTime.Now;
+                }
+
                 WriteToInflux(_powerOn);
             }
         }
@@ -139,13 +151,27 @@ namespace InfluxDbLoader.Mqtt
             Program.InfluxCommunicator.Write(lpp);
         }
 
-        public void SwitchOn()
+        public void SwitchOn(string reason, int? flipFlopSeconds)
         {
-            SetPowerStateOn.Execute();
+            // default to 15 seconds if null
+            flipFlopSeconds = flipFlopSeconds ?? 15;
+
+            Program.DeviceLog.Info($"SwitchOn :: Reason - {reason}");
+
+            // prevent flipflop
+            if (PowerOffTime.HasValue && PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value) > DateTime.Now)
+            {
+                Program.DeviceLog.Warn($"SwitchOn :: Reason - {reason} :: Aborted - Flipflop prevention. Need to wait until {PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value).ToString("HH:mm:ss")}");
+            }
+            else
+            {
+                SetPowerStateOn.Execute();
+            }
         }
 
-        public void SwitchOff()
+        public void SwitchOff(string reason)
         {
+            Program.DeviceLog.Info($"SwitchOff :: Reason - {reason}");
             SetPowerStateOff.Execute();
         }
     }
