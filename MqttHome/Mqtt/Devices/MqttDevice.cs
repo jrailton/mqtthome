@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using InfluxDbLoader.Influx;
 using InfluxDB.LineProtocol.Payload;
 using MQTTnet;
 
@@ -11,6 +12,12 @@ namespace InfluxDbLoader.Mqtt
 {
     public abstract class MqttDevice
     {
+        private InfluxCommunicator _db;
+
+        public delegate void StateChange(MqttDeviceState state);
+
+        public event StateChange StateChangeEvent;
+
         /// <summary>
         /// Constructor
         /// </summary>

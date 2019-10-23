@@ -21,29 +21,26 @@ using MQTTnet.Client.Options;
 using MQTTnet.Diagnostics;
 using System.Configuration;
 
-namespace InfluxDbLoader
+namespace MqttHome
 {
-    class Program
+    public class MqttHomeController
     {
-        public static MqttCommunicator MqttCommunicator;
-        public static List<MqttDevice> MqttDevices;
-        public static InfluxCommunicator InfluxCommunicator;
-        public static List<string> MqttDeviceTopics;
-        public static bool Debug;
+        public MqttCommunicator MqttCommunicator;
+        public List<MqttDevice> MqttDevices;
+        public InfluxCommunicator InfluxCommunicator;
+        public List<string> MqttDeviceTopics;
+        public bool Debug;
 
         public static void Log(string description)
         {
             Console.WriteLine($"{DateTime.Now.ToString("dd-MMM-yy HH:mm:ss")} {description}");
         }
 
-        static void Main(string[] args)
+        public MqttHomeController(bool debug, string influxUrl = "http://localhost:8086", string influxDatabase = "home_db")
         {
             try
             {
-                Debug = args.Any(s => s.Equals("debug", StringComparison.CurrentCultureIgnoreCase));
-
-                var influxUrl = ConfigurationManager.AppSettings["influxdb_url"] ?? "http://localhost:8086";
-                var influxDatabase = ConfigurationManager.AppSettings["influxdb_database"] ?? "home_db";
+                Debug = debug;
 
                 Log($"Connecting to Influx on '{influxUrl}' using database '{influxDatabase}'...");
 
@@ -81,22 +78,14 @@ namespace InfluxDbLoader
                 Log($@"Started listening to {MqttDevices.Count} MQTT devices. Topic list is:
 {string.Join(Environment.NewLine, MqttDeviceTopics)}");
 
-                // only print on screen if in ui mode
-                if (args.Any(s => s.Equals("ui", StringComparison.CurrentCultureIgnoreCase)))
-                    Task.Run(() => UpdateUI());
-
             }
             catch (Exception err)
             {
                 Log($"Exception in Main - {err.Message}");
             }
-
-            // basically dont ever stop -- user will need to close the app ctrl+c
-            while (true)
-                Console.ReadKey(true);
         }
 
-        private static void UpdateUI()
+        private void UpdateUI()
         {
             var whitespace = string.Empty;
             while (true)
