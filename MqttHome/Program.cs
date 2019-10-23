@@ -20,16 +20,25 @@ using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Diagnostics;
 using System.Configuration;
+using log4net;
+using log4net.Config;
+using System.Reflection;
 
 namespace MqttHome
 {
     public class MqttHomeController
     {
         public MqttCommunicator MqttCommunicator;
-        public List<MqttDevice> MqttDevices;
+        public IQueryable<MqttDevice> MqttDevices;
         public InfluxCommunicator InfluxCommunicator;
         public List<string> MqttDeviceTopics;
         public bool Debug;
+
+        public static ILog RuleLog;
+        public static ILog DeviceLog;
+        public static ILog GeneralLog;
+        public static ILog InfluxLog;
+        public static ILog MqttLog;
 
         public static void Log(string description)
         {
@@ -40,6 +49,16 @@ namespace MqttHome
         {
             try
             {
+
+                // configure log4net
+                var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+                XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+
+                RuleLog = LogManager.GetLogger("RuleLogger", "RuleLogger");
+                DeviceLog = LogManager.GetLogger("DeviceLog", "DeviceLog");
+                GeneralLog = LogManager.GetLogger("GeneralLog", "GeneralLog");
+                InfluxLog = LogManager.GetLogger("InfluxLog", "InfluxLog");
+                MqttLog = LogManager.GetLogger("MqttLog", "MqttLog");
                 Debug = debug;
 
                 Log($"Connecting to Influx on '{influxUrl}' using database '{influxDatabase}'...");
@@ -57,9 +76,9 @@ namespace MqttHome
                     new SonoffPowR2Device("powr2_4"),
                     new SonoffPowR2Device("powr2_5"),
                     new SonoffGenericSwitchDevice("s26_2", MqttDeviceType.SonoffS26),
-                };
+                }.AsQueryable();
 
-                Log($"Adding {MqttDevices.Count} MQTT devices...");
+                Log($"Adding {MqttDevices.Count()} MQTT devices...");
 
                 // this is a hack which needs more thought
                 MqttDeviceTopics = MqttDevices.Select(d => d.StateTopic).ToList();
@@ -75,7 +94,7 @@ namespace MqttHome
                 MqttCommunicator = new MqttCommunicator(mqttBrokerIp, mqttBrokerPort);
                 MqttCommunicator.Start();
 
-                Log($@"Started listening to {MqttDevices.Count} MQTT devices. Topic list is:
+                Log($@"Started listening to {MqttDevices.Count()} MQTT devices. Topic list is:
 {string.Join(Environment.NewLine, MqttDeviceTopics)}");
 
             }
@@ -94,7 +113,7 @@ namespace MqttHome
 
                 foreach (var device in MqttDevices)
                 {
-                    builder.AppendLine($@"Class: {device.DeviceClass}, Type: {device.DeviceType}, ID: {device.Id}, State: {(device.PowerOn ? "On" : "Off")}");
+                    builder.AppendLine($@"Class: {device.DeviceClass}, Type: {device.DeviceType}, ID: {device.Id}, State: {(device.PowerOn ? "On" : $"Off ({device.PowerOffTime?.ToString("HH:mm:ss") ?? "n/a"})")}");
                     if (device.SensorData != null)
                         builder.AppendLine($@"{string.Join(Environment.NewLine, device.SensorData.ToDictionary().Select(k => $"{k.Key}: {k.Value}"))}");
                 }

@@ -13,7 +13,10 @@
 
 <ItemGroup>
   <PackageReference Include="InfluxDB.LineProtocol" Version="1.1.0" />
+  <PackageReference Include="log4net" Version="2.0.8" />
   <PackageReference Include="MQTTnet.AspNetCore" Version="3.0.8" />
+  <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.6.0" />
+  <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.19" />
 </ItemGroup>
 </Project>
