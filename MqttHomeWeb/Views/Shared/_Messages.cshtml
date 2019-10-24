@@ -1,0 +1,11 @@
+﻿
+@{
+    var keys = new List<string> {"success", "warning", "danger"};
+}
+
+@foreach (var key in TempData.Keys.Where(k => keys.Contains(k)))
+{
+    <div class="alert alert-@key">
+        @TempData[key];
+    </div>
+}
