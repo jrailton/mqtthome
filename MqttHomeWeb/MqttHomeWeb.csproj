@@ -5,8 +5,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="rules.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="rules.config" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MqttHome\MqttHome.csproj" />
   </ItemGroup>
 
 </Project>

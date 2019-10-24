@@ -4,12 +4,12 @@ using InfluxDB.LineProtocol.Payload;
 using MQTTnet;
 using Newtonsoft.Json;
 
-namespace InfluxDbLoader.Mqtt
+namespace MqttHome.Mqtt
 {
     public class SonoffGenericSwitchDevice : MqttDevice
     {
-        public SonoffGenericSwitchDevice(string id, MqttDeviceType type)
-            : base(id)
+        public SonoffGenericSwitchDevice(MqttHomeController controller, string id, MqttDeviceType type)
+            : base(controller, id)
         {
             DeviceType = type;
         }

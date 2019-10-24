@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace InfluxDbLoader.Mqtt
+namespace MqttHome.Mqtt
 {
     public class SonoffTHSensorData : SensorData
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace InfluxDbLoader.Mqtt
+namespace MqttHome.Mqtt
 {
     /// <summary>
     /// tele/<id>/STATE

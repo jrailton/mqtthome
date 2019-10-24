@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace InfluxDbLoader.Mqtt
+namespace MqttHome.Mqtt
 {
     public class SensorData
     {

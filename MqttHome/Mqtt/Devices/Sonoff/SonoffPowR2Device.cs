@@ -3,15 +3,15 @@ using InfluxDB.LineProtocol.Payload;
 using MQTTnet;
 using Newtonsoft.Json;
 
-namespace InfluxDbLoader.Mqtt
+namespace MqttHome.Mqtt
 {
     public class SonoffPowR2Device : MqttDevice
     {
-        public SonoffPowR2Device(string id)
-            : base(id)
+        public SonoffPowR2Device(MqttHomeController controller, string id)
+            : base(controller, id)
         {
-            SetPowerStateOn = new MqttCommand(id, $"cmnd/{id}/Power", "ON");
-            SetPowerStateOff = new MqttCommand(id, $"cmnd/{id}/Power", "OFF");
+            SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
+            SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");
         }
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.SonoffPowR2;

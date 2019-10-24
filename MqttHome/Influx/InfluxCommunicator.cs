@@ -5,15 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using InfluxDB.LineProtocol.Client;
 using InfluxDB.LineProtocol.Payload;
+using log4net;
 
-namespace InfluxDbLoader.Influx
+namespace MqttHome.Influx
 {
     public class InfluxCommunicator
     {
         private LineProtocolClient _client;
+        private ILog _logger;
 
-        public InfluxCommunicator(Uri uri, string databaseName, string username = null, string password = null)
+        public InfluxCommunicator(ILog logger, Uri uri, string databaseName, string username = null, string password = null)
         {
+            _logger = logger;
+
+            _logger.Debug($"Connecting to Influx on '{uri.OriginalString}' using database '{databaseName}'...");
+
             _client = new LineProtocolClient(uri, databaseName, username, password);
         }
 

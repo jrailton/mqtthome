@@ -6,9 +6,11 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
    <RuntimeIdentifiers>win8-arm;ubuntu.14.04-arm;ubuntu.16.04-arm</RuntimeIdentifiers>
+   <ApplicationIcon />
+   <StartupObject />
   </PropertyGroup>
 
 <ItemGroup>
@@ -19,4 +21,6 @@
   <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.6.0" />
   <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.19" />
 </ItemGroup>
+
+<ProjectExtensions><VisualStudio><UserProperties rules_1json__JSONSchema="http://json.schemastore.org/appsettings" /></VisualStudio></ProjectExtensions>
 </Project>

@@ -4,15 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using InfluxDbLoader.Influx;
 using InfluxDB.LineProtocol.Payload;
+using log4net;
+using MqttHome.Influx;
+using MqttHome.Mqtt.Devices;
 using MQTTnet;
 
-namespace InfluxDbLoader.Mqtt
+namespace MqttHome.Mqtt
 {
     public abstract class MqttDevice
     {
-        private InfluxCommunicator _db;
+        private MqttHomeController _controller;
 
         public delegate void StateChange(MqttDeviceState state);
 
@@ -22,9 +24,11 @@ namespace InfluxDbLoader.Mqtt
         /// Constructor
         /// </summary>
         /// <param name="id">Id is the device ID that will be used as the topic and influx data tag</param>
-        public MqttDevice(string id)
+        public MqttDevice(MqttHomeController controller, string id)
         {
+            _controller = controller;
             Id = id;
+            _controller.DeviceLog.Debug($"Adding {DeviceType} {DeviceClass} device {id}");
         }
 
         public string Id;
@@ -40,12 +44,22 @@ namespace InfluxDbLoader.Mqtt
             set { }
         }
 
+        public IEnumerable<string> AllTopics {
+            get
+            {
+                var topics = SensorTopics;
+                topics.Add(StateTopic);
+                topics.Add(CommandResponseTopic);
+                return topics.Where(s => !string.IsNullOrEmpty(s));
+            }
+        }
+
         // commands
-        public virtual MqttCommand SetPowerStateOn { get; set; }
-        public virtual MqttCommand SetPowerStateOff { get; set; }
+        protected virtual MqttCommand SetPowerStateOn { get; set; }
+        protected virtual MqttCommand SetPowerStateOff { get; set; }
         public virtual MqttCommand RebootDevice
         {
-            get { return new MqttCommand(Id, $"cmnd/{Id}/Restart", "1"); }
+            get { return new MqttCommand(_controller, Id, $"cmnd/{Id}/Restart", "1"); }
             set { }
         }
 
@@ -76,7 +90,12 @@ namespace InfluxDbLoader.Mqtt
                     PowerOffTime = PowerOffTime ?? DateTime.Now;
                 }
 
-                WriteToInflux(_powerOn);
+                StateChangeEvent?.Invoke(new MqttDeviceState{
+                    Device = this,
+                    PowerOn = value,
+                    Type = eMqttDeviceStateChangeType.Power,
+                    SensorData = _sensorData
+                });
             }
         }
 
@@ -87,7 +106,13 @@ namespace InfluxDbLoader.Mqtt
             set
             {
                 _sensorData = value;
-                WriteToInflux(_sensorData);
+                StateChangeEvent?.Invoke(new MqttDeviceState
+                {
+                    Device = this,
+                    PowerOn = _powerOn,
+                    Type = eMqttDeviceStateChangeType.SensorData,
+                    SensorData = _sensorData
+                });
             }
         }
 
@@ -132,43 +157,19 @@ namespace InfluxDbLoader.Mqtt
             }
         }
 
-        private void WriteToInflux(SensorData data)
-        {
-            var lpp = new LineProtocolPoint(DeviceClass.ToString(),
-                data.ToDictionary(),
-                new Dictionary<string, string>
-                {
-                    {"device", Id}
-                });
-
-            Program.InfluxCommunicator.Write(lpp);
-        }
-
-        private void WriteToInflux(bool powerOn)
-        {
-            var lpp = new LineProtocolPoint("Switch",
-                new Dictionary<string, object>{
-                    { "On", (powerOn ? "1" : "0") }
-                },
-                new Dictionary<string, string>
-                {
-                    {"device", Id}
-                });
-
-            Program.InfluxCommunicator.Write(lpp);
-        }
-
         public void SwitchOn(string reason, int? flipFlopSeconds)
         {
             // default to 15 seconds if null
             flipFlopSeconds = flipFlopSeconds ?? 15;
 
-            Program.DeviceLog.Info($"SwitchOn :: Reason - {reason}");
+            _controller.DeviceLog.Info($"SwitchOn :: Reason - {reason}");
 
             // prevent flipflop
             if (PowerOffTime.HasValue && PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value) > DateTime.Now)
             {
-                Program.DeviceLog.Warn($"SwitchOn :: Reason - {reason} :: Aborted - Flipflop prevention. Need to wait until {PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value).ToString("HH:mm:ss")}");
+                var error = $"Flipflop prevention. Need to wait until {PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value).ToString("HH:mm:ss")}";
+                _controller.DeviceLog.Warn($"SwitchOn :: Reason - {reason} :: Aborted - {error}");
+                throw new Exception(error);
             }
             else
             {
@@ -178,31 +179,8 @@ namespace InfluxDbLoader.Mqtt
 
         public void SwitchOff(string reason)
         {
-            Program.DeviceLog.Info($"SwitchOff :: Reason - {reason}");
+            _controller.DeviceLog.Info($"SwitchOff :: Reason - {reason}");
             SetPowerStateOff.Execute();
-        }
-    }
-
-    public class MqttCommand
-    {
-        public MqttCommand(string deviceId, string topic, string payload) : this(deviceId, topic, Encoding.UTF8.GetBytes(payload))
-        {
-        }
-
-        public MqttCommand(string deviceId, string topic, IEnumerable<byte> payload)
-        {
-            Topic = topic;
-            Payload = payload;
-            DeviceId = deviceId;
-        }
-
-        public string DeviceId { get; set; }
-        public string Topic { get; set; }
-        public IEnumerable<byte> Payload { get; set; }
-
-        public void Execute()
-        {
-            Program.MqttCommunicator.PublishCommand(this);
         }
     }
 }

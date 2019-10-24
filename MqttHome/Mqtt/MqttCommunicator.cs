@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
@@ -11,18 +12,27 @@ using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Publishing;
 
-namespace InfluxDbLoader.Mqtt
+namespace MqttHome.Mqtt
 {
     public class MqttCommunicator
     {
         private IMqttClient _mqttClient;
         private IMqttClientOptions _mqttOptions;
         private Queue<MqttCommand> _commandQueue;
+        private MqttHomeController _controller;
+
         public bool Connected { get; private set; }
         public string TopicFilter { get; private set; }
+        public string BrokerIpAddress { get; private set; }
+        public int BrokerPort { get; private set; }
 
-        public MqttCommunicator(string brokerIpAddress = "localhost", int port = 1883)
+        public MqttCommunicator(MqttHomeController controller, string brokerIpAddress = "localhost", int brokerPort = 1883)
         {
+            BrokerIpAddress = brokerIpAddress;
+            BrokerPort = brokerPort;
+
+            _controller = controller;
+
             // Create a new MQTT client.
             var factory = new MqttFactory();
 
@@ -36,7 +46,7 @@ namespace InfluxDbLoader.Mqtt
             // Create TCP based options using the builder.
             _mqttOptions = new MqttClientOptionsBuilder()
                 .WithClientId("mqtt-logger")
-                .WithTcpServer(brokerIpAddress, port)
+                .WithTcpServer(brokerIpAddress, brokerPort)
                 //.WithCredentials("jimbo", "27Collins")
                 //.WithTls()
                 .WithCleanSession()
@@ -57,6 +67,8 @@ namespace InfluxDbLoader.Mqtt
 
         public void Start(string topicFilter = "#")
         {
+            _controller.MqttLog.Debug($"Connecting to MQTT broker on {BrokerIpAddress}:{BrokerPort}...");
+
             TopicFilter = topicFilter;
 
             _mqttClient.ConnectAsync(_mqttOptions, CancellationToken.None);
@@ -66,8 +78,7 @@ namespace InfluxDbLoader.Mqtt
         {
             Connected = true;
 
-            if (Program.Debug)
-                Console.WriteLine("### CONNECTED WITH SERVER ###");
+            _controller.MqttLog.Debug("MqttClientConnectedEvent");
 
             // send commands from queue
             while (_commandQueue.Count > 0)
@@ -81,43 +92,39 @@ namespace InfluxDbLoader.Mqtt
             // Subscribe to topics
             await _mqttClient.SubscribeAsync(topicFilter);
 
-            if (Program.Debug)
-                Console.WriteLine($"### SUBSCRIBED TO {topicFilter.Topic} ###");
+            _controller.MqttLog.Debug($"MqttClientConnectedEvent :: SUBSCRIBED TO {topicFilter.Topic}");
         }
 
         private async Task MqttClientReceivedMessageEvent(MqttApplicationMessageReceivedEventArgs e)
         {
-            if (Program.MqttDeviceTopics.Contains(e.ApplicationMessage.Topic))
+            if (_controller.MqttDeviceTopics.Contains(e.ApplicationMessage.Topic))
             {
-
-                if (Program.Debug)
-                {
-                    Console.WriteLine("### RECEIVED APPLICATION MESSAGE ###");
-                    Console.WriteLine($"+ Topic = {e.ApplicationMessage.Topic}");
-                    Console.WriteLine($"+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}");
-                    Console.WriteLine($"+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}");
-                    Console.WriteLine($"+ Retain = {e.ApplicationMessage.Retain}");
-                    Console.WriteLine();
-                }
+                _controller.MqttLog.Debug($@"MqttClientReceivedMessageEvent
+----------------------------------------
++ Topic = {e.ApplicationMessage.Topic}
++ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}
++ QoS = {e.ApplicationMessage.QualityOfServiceLevel}
++ Retain = {e.ApplicationMessage.Retain}
+========================================
+");
 
                 try
                 {
                     // states
-                    foreach (var device in Program.MqttDevices.Where(d => d.IsSubscribedToStateTopic(e.ApplicationMessage.Topic)))
+                    foreach (var device in _controller.MqttDevices.Where(d => d.IsSubscribedToStateTopic(e.ApplicationMessage.Topic)))
                         device.ParseStatePayload(e.ApplicationMessage);
 
                     // states
-                    foreach (var device in Program.MqttDevices.Where(d => d.IsSubscribedToCommandResponseTopic(e.ApplicationMessage.Topic)))
+                    foreach (var device in _controller.MqttDevices.Where(d => d.IsSubscribedToCommandResponseTopic(e.ApplicationMessage.Topic)))
                         device.ParseCommandResponsePayload(e.ApplicationMessage);
 
                     // sensors
-                    foreach (var device in Program.MqttDevices.Where(d => d.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic)))
+                    foreach (var device in _controller.MqttDevices.Where(d => d.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic)))
                         device.ParseSensorPayload(e.ApplicationMessage);
                 }
                 catch (Exception err)
                 {
-                    if (Program.Debug)
-                        Console.WriteLine(err.Message);
+                    _controller.MqttLog.Error($"MqttClientReceivedMessageEvent :: Error - {err.Message}", err);
                 }
 
             }
@@ -128,18 +135,17 @@ namespace InfluxDbLoader.Mqtt
         {
             Connected = false;
 
-            if (Program.Debug)
-                Console.WriteLine("### DISCONNECTED FROM SERVER ###");
+            _controller.MqttLog.Warn("MqttClientDisconnectedEvent");
+
             await Task.Delay(TimeSpan.FromSeconds(5));
 
             try
             {
                 await _mqttClient.ConnectAsync(_mqttOptions, CancellationToken.None);
             }
-            catch
+            catch(Exception err)
             {
-                if (Program.Debug)
-                    Console.WriteLine("### RECONNECTING FAILED ###");
+                _controller.MqttLog.Error($"MqttClientDisconnectedEvent :: Reconnect failed. {err.Message}", err);
             }
         }
     }

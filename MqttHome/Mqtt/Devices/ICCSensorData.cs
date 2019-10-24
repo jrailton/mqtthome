@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using MQTTnet;
 
-namespace InfluxDbLoader.Mqtt.Devices
+namespace MqttHome.Mqtt.Devices
 {
     public class ICCSensorData : SensorData
     {

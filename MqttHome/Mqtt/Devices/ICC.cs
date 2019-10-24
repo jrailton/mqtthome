@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using MQTTnet;
 
-namespace InfluxDbLoader.Mqtt.Devices
+namespace MqttHome.Mqtt.Devices
 {
 
     public class ICC : MqttDevice
     {
-        public ICC(string id) : base(id)
+        public ICC(MqttHomeController controller, string id) : base(controller, id)
         {
         }
 

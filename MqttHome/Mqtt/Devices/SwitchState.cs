@@ -1,4 +1,4 @@
-﻿namespace InfluxDbLoader.Mqtt
+﻿namespace MqttHome.Mqtt
 {
     public abstract class SwitchState
     {

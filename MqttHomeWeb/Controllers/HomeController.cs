@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using MqttHome;
 using MqttHomeWeb.Models;
 
 namespace MqttHomeWeb.Controllers
@@ -12,32 +13,22 @@ namespace MqttHomeWeb.Controllers
     {
         public IActionResult Index()
         {
-            return View();
-        }
-
-        public IActionResult About()
-        {
-            ViewData["Message"] = "Your application description page.";
-
-            return View();
-        }
-
-        public IActionResult Contact()
-        {
-            ViewData["Message"] = "Your contact page.";
-
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
+            return View(Program.MqttHomeController);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        }
+
+        public IActionResult Restart()
+        {
+            Program.RestartMqttHomeController();
+
+            TempData["success"] = "MqttHomeController was restarted";
+
+            return RedirectToAction("Index");
         }
     }
 }

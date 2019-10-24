@@ -38,15 +38,16 @@
         </div>
     </nav>
 
-    <partial name="_CookieConsentPartial" />
+<div class="container body-content">
+    
+    @Html.Partial("_Messages")
 
-    <div class="container body-content">
-        @RenderBody()
-        <hr />
-        <footer>
-            <p>&copy; 2019 - MqttHomeWeb</p>
-        </footer>
-    </div>
+    @RenderBody()
+    <hr/>
+    <footer>
+        <p>&copy; 2019 - MqttHomeWeb</p>
+    </footer>
+</div>
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
