@@ -99,7 +99,7 @@ namespace MqttHome.Mqtt
             }
         }
 
-        private SensorData _sensorData;
+        protected SensorData _sensorData = new SensorData();
         public SensorData SensorData
         {
             get => _sensorData;
@@ -132,7 +132,6 @@ namespace MqttHome.Mqtt
         }
 
         public abstract void ParseStatePayload(MqttApplicationMessage message);
-        public abstract void ParseSensorPayload(MqttApplicationMessage message);
 
         /// <summary>
         /// This works for Sonoff Tasmota devices -- will need to be overridden for others

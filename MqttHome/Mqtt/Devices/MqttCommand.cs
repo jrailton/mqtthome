@@ -9,7 +9,7 @@ namespace MqttHome.Mqtt
         {
         }
 
-        public MqttCommand(MqttHomeController controller, string deviceId, string topic, IEnumerable<byte> payload)
+        public MqttCommand(MqttHomeController controller, string deviceId, string topic, byte[] payload)
         {
             Topic = topic;
             Payload = payload;
@@ -20,7 +20,7 @@ namespace MqttHome.Mqtt
         private MqttHomeController _controller;
         public string DeviceId { get; set; }
         public string Topic { get; set; }
-        public IEnumerable<byte> Payload { get; set; }
+        public byte[] Payload { get; set; }
 
         public void Execute()
         {

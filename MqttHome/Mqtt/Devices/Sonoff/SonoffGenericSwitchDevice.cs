@@ -12,6 +12,8 @@ namespace MqttHome.Mqtt
             : base(controller, id)
         {
             DeviceType = type;
+            SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
+            SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");
         }
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.Unknown;
@@ -21,12 +23,6 @@ namespace MqttHome.Mqtt
         {
             var state = JsonConvert.DeserializeObject<SonoffGenericStateData>(Encoding.UTF8.GetString(message.Payload));
             PowerOn = state.POWER.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
-        }
-
-        public override void ParseSensorPayload(MqttApplicationMessage message)
-        {
-            // generic switches dont have sensor payloads
-            throw new NotImplementedException();
         }
     }
 }

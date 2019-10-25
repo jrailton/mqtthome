@@ -1,11 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using MQTTnet;
 
 namespace MqttHome.Mqtt
 {
     public class SensorData
     {
+        public virtual void Update(MqttApplicationMessage message)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected void UpdateValues(SensorData newValues)
+        {
+            foreach (var property in GetType().GetProperties())
+            {
+                var newValue = property.GetValue(newValues);
+                if (property.GetValue(this) != newValue && !IsNullOrDefault(newValue))
+                    property.SetValue(this, newValue);
+            }
+        }
+
         /// <summary>
         /// Generic ToDictionary which simply converts sensors properties to a dictionary of values -- and removes values that are null or default 
         /// (because sensors like ICC will accept many topics, not all of which will create values for all properties, and always return a full list 

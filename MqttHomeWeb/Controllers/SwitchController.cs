@@ -12,7 +12,7 @@ namespace MqttHomeWeb.Controllers
         {
             try
             {
-                Program.MqttHomeController.MqttDevices.Single(d => d.Id == id).SwitchOn("UI Request", null);
+                Program.MqttHomeController.MqttDevices.Single(d => d.Id == id).SwitchOff("UI Request");
                 TempData["success"] = $"Switch {id} was sent a request to switch OFF";
             }
             catch (Exception err)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -38,7 +39,11 @@ namespace MqttHomeWeb
                 LogManager.GetLogger(logRepository, "DeviceLog"),
                 LogManager.GetLogger(logRepository, "GeneralLog"),
                 LogManager.GetLogger(logRepository, "InfluxLog"),
-                LogManager.GetLogger(logRepository, "MqttLog")
+                LogManager.GetLogger(logRepository, "MqttLog"),
+                MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["MqttBrokerIp"],
+                int.Parse(MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["MqttBrokerPort"]),
+                MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbUrl"],
+                MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbDatabase"]
             );
 
             MqttHomeController.Start();

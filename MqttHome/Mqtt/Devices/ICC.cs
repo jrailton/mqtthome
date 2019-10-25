@@ -23,11 +23,6 @@ namespace MqttHome.Mqtt.Devices
             throw new NotImplementedException();
         }
 
-        public override void ParseSensorPayload(MqttApplicationMessage message)
-        {
-            SensorData = new ICCSensorData(message);
-        }
-
         // loadwatts, x, pvwatts, loadwatts, loadpcnt, invertertemp, x, batteryvolts, batterysoc, batteryamps, inverterfreq, batterywatts, x, x
         //Inverter/AllValues 158 0 1343 158.00 3 46.0 0 50.30 95.00 20.38 50.0 0.0 1025 0 0
         // x, falsesoc, pvamps, x, pvvolts, x, x, invertername, icc uptime, invertervoltage, mode

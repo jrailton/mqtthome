@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Linq;
+using System.Text;
 using MQTTnet;
 
 namespace MqttHome.Mqtt.Devices
@@ -69,6 +70,11 @@ namespace MqttHome.Mqtt.Devices
                     PylontechAhRemainingTill20Soc = decimal.Parse(array[0]);
                     break;
             }
+        }
+
+        public override void Update(MqttApplicationMessage message)
+        {
+            UpdateValues(new ICCSensorData(message));
         }
 
         /// <summary>

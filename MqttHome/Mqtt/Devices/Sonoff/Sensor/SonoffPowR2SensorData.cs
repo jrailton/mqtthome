@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
+using MQTTnet;
+using Newtonsoft.Json;
 
 namespace MqttHome.Mqtt
 {
@@ -9,6 +12,11 @@ namespace MqttHome.Mqtt
         //tele/powr2_1/SENSOR {"Time":"2019-10-15T12:25:55","ENERGY":{"TotalStartTime":"2019-10-05T15:45:37","Total":6.592,"Yesterday":1.117,"Today":0.664,"Period":0,"Power":12,"ApparentPower":53,"ReactivePower":52,"Factor":0.22,"Voltage":229,"Current":0.232}}
         public string Time { get; set; }
         public SonoffPowR2EnergyData ENERGY { get; set; }
+
+        public override void Update(MqttApplicationMessage message)
+        {
+            UpdateValues(JsonConvert.DeserializeObject<SonoffPowR2SensorData>(Encoding.UTF8.GetString(message.Payload)));
+        }
 
         public override Dictionary<string, object> ToDictionary() => new Dictionary<string, object>{
             { "Power", ENERGY.Power },

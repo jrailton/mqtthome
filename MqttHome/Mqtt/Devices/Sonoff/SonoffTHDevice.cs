@@ -23,10 +23,5 @@ namespace MqttHome.Mqtt
             var state = JsonConvert.DeserializeObject<SonoffGenericStateData>(Encoding.UTF8.GetString(message.Payload));
             PowerOn = state.POWER.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
         }
-
-        public override void ParseSensorPayload(MqttApplicationMessage message)
-        {
-            SensorData = JsonConvert.DeserializeObject<SonoffTHSensorData>(Encoding.UTF8.GetString(message.Payload));
-        }
     }
 }

@@ -76,10 +76,6 @@
                                 @device.DeviceType
                             </div>
                             <div>
-                                <label>Sensor Data</label>
-                                @device.SensorData
-                            </div>
-                            <div>
                                 <label>MQTT Topics</label>
                                 @Html.Raw(string.Join("<br />", device.AllTopics))
                             </div>
@@ -90,11 +86,13 @@
                             @if (device.SensorData != null)
                             {
                                 <div>
-                                    <label>Data</label>
+                                    <label>Sensor Data</label>
                                     @foreach (var pair in device.SensorData.ToDictionary())
                                     {
+                                        <div>
                                         <label>@pair.Key</label>
                                         @pair.Value
+                                        </div>
                                     }
                                 </div>
                             }

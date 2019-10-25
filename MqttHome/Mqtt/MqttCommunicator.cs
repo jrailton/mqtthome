@@ -57,12 +57,24 @@ namespace MqttHome.Mqtt
 
         public async void PublishCommand(MqttCommand command)
         {
-            if (Connected)
+            try
             {
-                var x = _mqttClient.PublishAsync(command.Topic, command.Payload);
-            }
+                if (Connected)
+                {
+                    _controller.MqttLog.Debug($"PublishCommand :: Publishing - Device: {command.DeviceId}, Topic: {command.Topic}, Payload: {Encoding.UTF8.GetString(command.Payload)}");
+                    var x = _mqttClient.PublishAsync(command.Topic, command.Payload);
+                }
+                else
+                {
+                    _controller.MqttLog.Debug($"PublishCommand :: Enqueuing - Device: {command.DeviceId}, Topic: {command.Topic}, Payload: {Encoding.UTF8.GetString(command.Payload)}");
 
-            _commandQueue.Enqueue(command);
+                    _commandQueue.Enqueue(command);
+                }
+            }
+            catch (Exception err)
+            {
+                _controller.MqttLog.Debug($"PublishCommand :: Failed - {err.Message}");
+            }
         }
 
         public void Start(string topicFilter = "#")
@@ -99,14 +111,14 @@ namespace MqttHome.Mqtt
         {
             if (_controller.MqttDeviceTopics.Contains(e.ApplicationMessage.Topic))
             {
-                _controller.MqttLog.Debug($@"MqttClientReceivedMessageEvent
-----------------------------------------
-+ Topic = {e.ApplicationMessage.Topic}
-+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}
-+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}
-+ Retain = {e.ApplicationMessage.Retain}
-========================================
-");
+//                _controller.MqttLog.Debug($@"MqttClientReceivedMessageEvent
+//----------------------------------------
+//+ Topic = {e.ApplicationMessage.Topic}
+//+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}
+//+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}
+//+ Retain = {e.ApplicationMessage.Retain}
+//========================================
+//");
 
                 try
                 {
@@ -120,7 +132,7 @@ namespace MqttHome.Mqtt
 
                     // sensors
                     foreach (var device in _controller.MqttDevices.Where(d => d.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic)))
-                        device.ParseSensorPayload(e.ApplicationMessage);
+                        device.SensorData.Update(e.ApplicationMessage);
                 }
                 catch (Exception err)
                 {
