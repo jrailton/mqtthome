@@ -18,7 +18,7 @@ namespace MqttHome.Mqtt
             UpdateValues(JsonConvert.DeserializeObject<SonoffPowR2SensorData>(Encoding.UTF8.GetString(message.Payload)));
         }
 
-        public override Dictionary<string, object> ToDictionary() => new Dictionary<string, object>{
+        public override Dictionary<string, object> DSerialize() => new Dictionary<string, object>{
             { "Power", ENERGY.Power },
             { "Factor", ENERGY.Factor },
             { "Voltage", ENERGY.Voltage },

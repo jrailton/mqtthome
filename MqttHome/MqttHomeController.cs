@@ -7,14 +7,29 @@ using System.Threading;
 using log4net;
 using MqttHome.Influx;
 using MqttHome.Mqtt;
+using MqttHome.Mqtt.BrokerCommunicator;
 using MqttHome.Mqtt.Devices;
+using MqttHome.Mqtt.Devices.Victron;
 
 namespace MqttHome
 {
     public class MqttHomeController
     {
-        public MqttCommunicator MqttCommunicator;
+        public List<MqttCommunicator> MqttCommunicators = new List<MqttCommunicator>();
         public IQueryable<MqttDevice> MqttDevices;
+        public List<ISensorDevice> MqttSensorDevices {
+            get
+            {
+                var output = new List<ISensorDevice>();
+                foreach (var device in MqttDevices)
+                {
+                    if (device is ISensorDevice)
+                        output.Add(device as ISensorDevice);
+                }
+                
+                return output;
+            }
+        }
         public InfluxCommunicator InfluxCommunicator;
         public List<string> MqttDeviceTopics;
         public RuleEngine RuleEngine;
@@ -26,7 +41,7 @@ namespace MqttHome
         public ILog InfluxLog;
         public ILog MqttLog;
 
-        public MqttHomeController(bool debug, ILog ruleLog, ILog deviceLog, ILog generalLog, ILog influxLog, ILog mqttLog, string mqttBrokerIp = "localhost", int mqttBrokerPort = 1883, string influxUrl = "http://localhost:8086", string influxDatabase = "home_db")
+        public MqttHomeController(bool debug, ILog ruleLog, ILog deviceLog, ILog generalLog, ILog influxLog, ILog mqttLog, List<MqttBroker> mqttBrokers, string influxUrl = "http://localhost:8086", string influxDatabase = "home_db")
         {
             try
             {
@@ -50,6 +65,7 @@ namespace MqttHome
                     new SonoffPowR2Device(this, "powr2_3"),
                     new SonoffPowR2Device(this, "powr2_4"),
                     new SonoffPowR2Device(this, "powr2_5"),
+                    new VenusGxDevice(this, "venusgx", "7c386655e76b"),
                     new SonoffGenericSwitchDevice(this, "s26_2", MqttDeviceType.SonoffS26),
                 }.AsQueryable();
 
@@ -58,7 +74,8 @@ namespace MqttHome
                 // this is a hack which needs more thought
                 MqttDeviceTopics = MqttDevices.SelectMany(d => d.AllTopics).Distinct().ToList();
 
-                MqttCommunicator = new MqttCommunicator(this, mqttBrokerIp, mqttBrokerPort);
+                foreach (var broker in mqttBrokers)
+                    MqttCommunicators.Add(new MqttCommunicator(this, broker));
 
                 RuleEngine = new RuleEngine(this);
 
@@ -74,7 +91,10 @@ namespace MqttHome
 
         public void Start()
         {
-            MqttCommunicator.Start();
+            // start all mqttbroker connections
+            foreach (var communicator in MqttCommunicators)
+                communicator.Start();
+
             RuleEngine.Start();
         }
 
@@ -88,8 +108,11 @@ namespace MqttHome
                 foreach (var device in MqttDevices)
                 {
                     builder.AppendLine($@"Class: {device.DeviceClass}, Type: {device.DeviceType}, ID: {device.Id}, State: {(device.PowerOn ? "On" : $"Off ({device.PowerOffTime?.ToString("HH:mm:ss") ?? "n/a"})")}");
-                    if (device.SensorData != null)
-                        builder.AppendLine($@"{string.Join(Environment.NewLine, device.SensorData.ToDictionary().Select(k => $"{k.Key}: {k.Value}"))}");
+                    if (device is MqttSensorDevice<SensorData>)
+                    {
+                        var sensordevice = device as MqttSensorDevice<SensorData>;
+                        builder.AppendLine($@"{string.Join(Environment.NewLine, sensordevice.SensorData.DSerialize().Select(k => $"{k.Key}: {k.Value}"))}");
+                    }
                 }
 
                 builder.AppendLine(@"

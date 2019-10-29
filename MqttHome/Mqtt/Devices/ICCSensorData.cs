@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using MQTTnet;
 
@@ -6,16 +7,22 @@ namespace MqttHome.Mqtt.Devices
 {
     public class ICCSensorData : SensorData
     {
+        public ICCSensorData()
+        {
+            // set default sensor state here -- could just remain blank
+        }
+
         public ICCSensorData(MqttApplicationMessage mqtt)
         {
             var message = Encoding.UTF8.GetString(mqtt.Payload);
-            var array = message.Split(' ');
+            string[] array;
 
             switch (mqtt.Topic)
             {
                 case "Inverter/AllValues":
                     // 0 loadwatts, 1 grid voltage, 2 pvwatts, 3 loadwatts, 4 loadpcnt, 5 invertertemp, 6 grid watts??, 7 batteryvolts, 8 batterysoc, 9 batteryamps, 10 inverterfreq, 11 grid freq, 12 batterywatts, 13 x, 14 x
 
+                    array = message.Split(' ');
                     LoadWatts = decimal.Parse(array[0]);
                     GridVoltage = decimal.Parse(array[1]);
                     PvWatts = decimal.Parse(array[2]);
@@ -35,6 +42,8 @@ namespace MqttHome.Mqtt.Devices
                 case "Inverter/AllValues2":
                     // 0.00 87.00                   0.00 0.00 236.60        0.00 1    Axpert5kvaSingle 316:04:19     230.70            B
                     // 0 x, 1 inverter battery soc, 2 x, 3 x, 4 pv voltage, 5 x, 6 x, 7 inverter name, 8 icc uptime, 9 inverter volts, 10 inverter mode
+
+                    array = message.Split(' ');
                     PvVolts = decimal.Parse(array[4]);
                     IccUptimeSeconds = DeriveSeconds(array[8]);
                     InverterVolts = decimal.Parse(array[9]);
@@ -43,38 +52,38 @@ namespace MqttHome.Mqtt.Devices
                     break;
 
                 case "Pylontech/Cycles":
-                    PylontechCycles = int.Parse(array[0]);
+                    PylontechCycles = int.Parse(message);
                     break;
 
                 case "Pylontech/Watts":
-                    PylontechWatts = decimal.Parse(array[0]);
+                    PylontechWatts = decimal.Parse(message);
                     break;
 
                 case "Pylontech/Temperature":
-                    PylontechTemp = decimal.Parse(array[0]);
+                    PylontechTemp = decimal.Parse(message);
                     break;
 
                 case "Pylontech/Remaining_AH":
-                    PylontechAhRemaining = decimal.Parse(array[0]);
+                    PylontechAhRemaining = decimal.Parse(message);
                     break;
 
                 case "Pylontech/TimeRemaining":
-                    PylontechSecondsRemaining = DeriveSeconds(array[0]);
+                    PylontechSecondsRemaining = DeriveSeconds(message);
                     break;
 
                 case "Pylontech/AH_Use":
-                    PylontechAhUsed = decimal.Parse(array[0]);
+                    PylontechAhUsed = decimal.Parse(message);
                     break;
 
                 case "Pylontech/AH_Remaining_Till_20SOC":
-                    PylontechAhRemainingTill20Soc = decimal.Parse(array[0]);
+                    PylontechAhRemainingTill20Soc = decimal.Parse(message);
                     break;
             }
         }
 
         public override void Update(MqttApplicationMessage message)
         {
-            UpdateValues(new ICCSensorData(message));
+            UpdateValues(new VenusGxSensorData(message));
         }
 
         /// <summary>
@@ -82,11 +91,14 @@ namespace MqttHome.Mqtt.Devices
         /// </summary>
         private int DeriveSeconds(string timespan)
         {
+            if (timespan == " --- ")
+                return 0;
+
             int output = 0;
             var array = timespan.Split(':');
-            var multipliers = new[] {3600, 60, 1};
+            var multipliers = new[] { 3600, 60, 1 };
 
-            for(int i = array.Length - 1; i >= 0; i--)
+            for (int i = array.Length - 1; i >= 0; i--)
                 output += (int.Parse(array[i]) * multipliers[i]);
 
             return output;

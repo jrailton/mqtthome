@@ -1,15 +1,20 @@
-﻿@model MqttHome.MqttHomeController
+﻿@using MqttHome.Mqtt
+@using MqttHome.Mqtt.Devices
+@model MqttHome.MqttHomeController
 @{
     ViewData["Title"] = "MQTT Home";
 }
 <div class="row">
-    <div class="panel panel-default">
-        <div class="panel-heading">MQTT Server (Connected: @Model.MqttCommunicator.Connected)</div>
-        <div class="panel-body">
-            <label>Server</label>
-            @Model.MqttCommunicator.BrokerIpAddress : @Model.MqttCommunicator.BrokerPort
+    @foreach (var communicator in Model.MqttCommunicators)
+    {
+        <div class="panel panel-default">
+            <div class="panel-heading">MQTT Servers</div>
+            <div class="panel-body">
+                <label>@communicator.Broker.Name (@(communicator.Connected ? "Connected" : "Disconnected"))</label>
+                @communicator.Broker.IpAddress:@communicator.Broker.Port
+            </div>
         </div>
-    </div>
+    }
 </div>
 
 <div class="row">
@@ -83,18 +88,19 @@
                                 <label>Power On</label>
                                 @device.PowerOn
                             </div>
-                            @if (device.SensorData != null)
+                            @if (device is ISensorDevice)
                             {
-                                <div>
-                                    <label>Sensor Data</label>
-                                    @foreach (var pair in device.SensorData.ToDictionary())
-                                    {
-                                        <div>
+                                var sensor = device as ISensorDevice;
+                            <div>
+                                <label>Sensor Data</label>
+                                @foreach (var pair in sensor.SensorValues())
+                                {
+                                    <div>
                                         <label>@pair.Key</label>
                                         @pair.Value
-                                        </div>
-                                    }
-                                </div>
+                                    </div>
+                                }
+                            </div>
                             }
 
                         </div>

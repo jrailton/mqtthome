@@ -15,7 +15,7 @@ namespace MqttHomeWeb.Helpers
         {
             AppSetting = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.json", reloadOnChange: true, optional: false)
                 .Build();
         }
     }

@@ -8,11 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="rules.config" />
+    <Content Remove="rules.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="rules.config" />
+    <None Include="rules.json" />
   </ItemGroup>
 
   <ItemGroup>

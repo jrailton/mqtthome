@@ -17,7 +17,6 @@ namespace MqttHome.Mqtt
         private MqttHomeController _controller;
 
         public delegate void StateChange(MqttDeviceState state);
-
         public event StateChange StateChangeEvent;
 
         /// <summary>
@@ -44,13 +43,11 @@ namespace MqttHome.Mqtt
             set { }
         }
 
-        public IEnumerable<string> AllTopics {
+        public virtual List<string> AllTopics {
             get
             {
-                var topics = SensorTopics;
-                topics.Add(StateTopic);
-                topics.Add(CommandResponseTopic);
-                return topics.Where(s => !string.IsNullOrEmpty(s));
+                var topics = new List<string> {StateTopic, CommandResponseTopic};
+                return topics.Where(s => !string.IsNullOrEmpty(s)).ToList();
             }
         }
 
@@ -63,16 +60,11 @@ namespace MqttHome.Mqtt
             set { }
         }
 
-        public virtual List<string> SensorTopics
-        {
-            get => new List<string>{ $"tele/{Id}/SENSOR" };
-            set { }
-        }
         public abstract MqttDeviceType DeviceType { get; set; }
         public abstract MqttDeviceClass DeviceClass { get; set; }
         public DateTime? PowerOffTime { get; private set; }
 
-        private bool _powerOn;
+        protected bool _powerOn;
         public bool PowerOn
         {
             get => _powerOn;
@@ -93,25 +85,7 @@ namespace MqttHome.Mqtt
                 StateChangeEvent?.Invoke(new MqttDeviceState{
                     Device = this,
                     PowerOn = value,
-                    Type = eMqttDeviceStateChangeType.Power,
-                    SensorData = _sensorData
-                });
-            }
-        }
-
-        protected SensorData _sensorData = new SensorData();
-        public SensorData SensorData
-        {
-            get => _sensorData;
-            set
-            {
-                _sensorData = value;
-                StateChangeEvent?.Invoke(new MqttDeviceState
-                {
-                    Device = this,
-                    PowerOn = _powerOn,
-                    Type = eMqttDeviceStateChangeType.SensorData,
-                    SensorData = _sensorData
+                    Type = eMqttDeviceStateChangeType.Power
                 });
             }
         }
@@ -125,13 +99,6 @@ namespace MqttHome.Mqtt
         {
             return (CommandResponseTopic ?? "").Equals(topic, StringComparison.CurrentCultureIgnoreCase);
         }
-
-        public bool IsSubscribedToSensorTopic(string topic)
-        {
-            return (SensorTopics ?? new List<string>()).Contains(topic, StringComparer.CurrentCultureIgnoreCase);
-        }
-
-        public abstract void ParseStatePayload(MqttApplicationMessage message);
 
         /// <summary>
         /// This works for Sonoff Tasmota devices -- will need to be overridden for others
@@ -180,6 +147,63 @@ namespace MqttHome.Mqtt
         {
             _controller.DeviceLog.Info($"SwitchOff :: Reason - {reason}");
             SetPowerStateOff.Execute();
+        }
+    }
+
+    public abstract class MqttSensorDevice<TSensorData> : MqttDevice where TSensorData : SensorData, new()
+    {
+        public delegate void StateChange(MqttDeviceState state);
+        public event StateChange StateChangeEvent;
+
+        public MqttSensorDevice(MqttHomeController controller, string id) : base(controller, id)
+        {
+            _sensorData = new TSensorData();
+            DeviceClass = MqttDeviceClass.Sensor;
+        }
+
+        protected TSensorData _sensorData;
+        public TSensorData SensorData
+        {
+            get => _sensorData;
+            set
+            {
+                _sensorData = value;
+                StateChangeEvent?.Invoke(new MqttDeviceState
+                {
+                    Device = this,
+                    PowerOn = _powerOn,
+                    Type = eMqttDeviceStateChangeType.SensorData,
+                    SensorData = _sensorData
+                });
+            }
+        }
+
+        public virtual Dictionary<string, object> SensorValues()
+        {
+            return SensorData.DSerialize();
+        }
+
+        public virtual List<string> SensorTopics
+        {
+            get => new List<string> { $"tele/{Id}/SENSOR" };
+            set { }
+        }
+
+        public virtual bool IsSubscribedToSensorTopic(string topic)
+        {
+            return (SensorTopics ?? new List<string>()).Contains(topic, StringComparer.CurrentCultureIgnoreCase);
+        }
+
+        public override List<string> AllTopics
+        {
+            get
+            {
+                var topics = base.AllTopics;
+
+                topics.AddRange(SensorTopics);
+
+                return topics.Where(s => !string.IsNullOrEmpty(s)).ToList();
+            }
         }
     }
 }

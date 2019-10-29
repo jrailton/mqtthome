@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MqttHome;
+using MqttHome.Mqtt.BrokerCommunicator;
+using Newtonsoft.Json;
 
 namespace MqttHomeWeb
 {
@@ -34,14 +36,15 @@ namespace MqttHomeWeb
         {
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()).Name;
 
+            var mqttBrokers = Helpers.ConfigurationManager.AppSetting.GetSection("MqttBrokers").Get<List<MqttBroker>>();
+
             MqttHomeController = new MqttHomeController(false,
                 LogManager.GetLogger(logRepository, "RuleLog"),
                 LogManager.GetLogger(logRepository, "DeviceLog"),
                 LogManager.GetLogger(logRepository, "GeneralLog"),
                 LogManager.GetLogger(logRepository, "InfluxLog"),
                 LogManager.GetLogger(logRepository, "MqttLog"),
-                MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["MqttBrokerIp"],
-                int.Parse(MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["MqttBrokerPort"]),
+                mqttBrokers,
                 MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbUrl"],
                 MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbDatabase"]
             );

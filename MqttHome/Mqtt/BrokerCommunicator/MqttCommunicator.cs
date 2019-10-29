@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
+using MqttHome.Mqtt.BrokerCommunicator;
+using MqttHome.Mqtt.Devices;
 using MQTTnet;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
@@ -23,13 +25,12 @@ namespace MqttHome.Mqtt
 
         public bool Connected { get; private set; }
         public string TopicFilter { get; private set; }
-        public string BrokerIpAddress { get; private set; }
+        public MqttBroker Broker { get; private set; }
         public int BrokerPort { get; private set; }
 
-        public MqttCommunicator(MqttHomeController controller, string brokerIpAddress = "localhost", int brokerPort = 1883)
+        public MqttCommunicator(MqttHomeController controller, MqttBroker broker)
         {
-            BrokerIpAddress = brokerIpAddress;
-            BrokerPort = brokerPort;
+            Broker = broker;
 
             _controller = controller;
 
@@ -46,7 +47,7 @@ namespace MqttHome.Mqtt
             // Create TCP based options using the builder.
             _mqttOptions = new MqttClientOptionsBuilder()
                 .WithClientId("mqtt-logger")
-                .WithTcpServer(brokerIpAddress, brokerPort)
+                .WithTcpServer(broker.IpAddress, broker.Port)
                 //.WithCredentials("jimbo", "27Collins")
                 //.WithTls()
                 .WithCleanSession()
@@ -79,7 +80,7 @@ namespace MqttHome.Mqtt
 
         public void Start(string topicFilter = "#")
         {
-            _controller.MqttLog.Debug($"Connecting to MQTT broker on {BrokerIpAddress}:{BrokerPort}...");
+            _controller.MqttLog.Debug($"Connecting to MQTT broker {Broker.Name} on {Broker.IpAddress}:{Broker.Port}...");
 
             TopicFilter = topicFilter;
 
@@ -111,28 +112,32 @@ namespace MqttHome.Mqtt
         {
             if (_controller.MqttDeviceTopics.Contains(e.ApplicationMessage.Topic))
             {
-//                _controller.MqttLog.Debug($@"MqttClientReceivedMessageEvent
-//----------------------------------------
-//+ Topic = {e.ApplicationMessage.Topic}
-//+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}
-//+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}
-//+ Retain = {e.ApplicationMessage.Retain}
-//========================================
-//");
+                //                _controller.MqttLog.Debug($@"MqttClientReceivedMessageEvent
+                //----------------------------------------
+                //+ Topic = {e.ApplicationMessage.Topic}
+                //+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}
+                //+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}
+                //+ Retain = {e.ApplicationMessage.Retain}
+                //========================================
+                //");
 
                 try
                 {
                     // states
-                    foreach (var device in _controller.MqttDevices.Where(d => d.IsSubscribedToStateTopic(e.ApplicationMessage.Topic)))
-                        device.ParseStatePayload(e.ApplicationMessage);
+                    foreach (var device in _controller.MqttDevices.Where(d => d is IStatefulDevice && d.IsSubscribedToStateTopic(e.ApplicationMessage.Topic)))
+                        (device as IStatefulDevice).ParseStatePayload(e.ApplicationMessage);
 
                     // states
                     foreach (var device in _controller.MqttDevices.Where(d => d.IsSubscribedToCommandResponseTopic(e.ApplicationMessage.Topic)))
                         device.ParseCommandResponsePayload(e.ApplicationMessage);
 
                     // sensors
-                    foreach (var device in _controller.MqttDevices.Where(d => d.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic)))
-                        device.SensorData.Update(e.ApplicationMessage);
+                    if (e.ApplicationMessage.Topic.StartsWith("N/"))
+                        Console.WriteLine("Wait");
+
+                    var fuckdevices = _controller.MqttSensorDevices.Where(d => d.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic));
+                    foreach (var device in fuckdevices)
+                        device.ParseSensorPayload(e.ApplicationMessage);
                 }
                 catch (Exception err)
                 {
@@ -155,7 +160,7 @@ namespace MqttHome.Mqtt
             {
                 await _mqttClient.ConnectAsync(_mqttOptions, CancellationToken.None);
             }
-            catch(Exception err)
+            catch (Exception err)
             {
                 _controller.MqttLog.Error($"MqttClientDisconnectedEvent :: Reconnect failed. {err.Message}", err);
             }

@@ -6,6 +6,7 @@ namespace MqttHome.Mqtt
         SonoffTH,
         SonoffPowR2,
         SonoffS26,
-        ICC
+        ICC,
+        VictronCCGX
     }
 }

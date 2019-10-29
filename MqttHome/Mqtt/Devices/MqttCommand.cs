@@ -22,9 +22,17 @@ namespace MqttHome.Mqtt
         public string Topic { get; set; }
         public byte[] Payload { get; set; }
 
-        public void Execute()
+        public void Execute(MqttCommunicator communicator = null)
         {
-            _controller.MqttCommunicator.PublishCommand(this);
+            if (communicator != null)
+            {
+                communicator.PublishCommand(this);
+            }
+            else
+            {
+                // publish the command on all brokers
+                _controller.MqttCommunicators.ForEach(c => c.PublishCommand(this));
+            }
         }
     }
 }
