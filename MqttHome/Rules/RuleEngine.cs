@@ -6,6 +6,7 @@ using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using MqttHome.Mqtt;
+using MqttHome.Mqtt.Devices;
 
 namespace MqttHome
 {
@@ -30,7 +31,7 @@ namespace MqttHome
         private void ValidateRules()
         {
             // remove rules that dont apply to any switches
-            var switches = _controller.MqttDevices.Where(d => d.DeviceClass == MqttDeviceClass.Switch);
+            var switches = _controller.MqttDevices.Where(d => d is IStatefulDevice);
             var remove = Config.Rules.Where(r => !switches.Any(s => s.Id == r.Switch)).ToList();
 
             if (remove.Any())
@@ -45,7 +46,7 @@ namespace MqttHome
         {
             try
             {
-                var content = File.ReadAllText("rules.config");
+                var content = File.ReadAllText("rules.json");
                 Config = JsonConvert.DeserializeObject<RuleConfig>(content);
 
                 // append defaults and and/or conditions
@@ -67,7 +68,7 @@ namespace MqttHome
                         rule.FlipFlop = Config.Defaults.FlipFlop.Value;
                 }
 
-                _controller.RuleLog.Info($"LoadRules :: Loaded {Config.Rules.Count} rules from rules.config");
+                _controller.RuleLog.Info($"LoadRules :: Loaded {Config.Rules.Count} rules from rules.json");
 
             }
             catch (Exception err)
@@ -80,23 +81,25 @@ namespace MqttHome
         {
             while (true)
             {
+                var switches = _controller.MqttDevices.Where(d => d is IStatefulDevice).Select(d => d as IStatefulDevice);
+                var sensors = _controller.MqttDevices.Where(d => d is ISensorDevice).Select(d => d as ISensorDevice);
+
                 foreach (var rule in Config.Rules) {
                     try
                     {
-                        var switches = _controller.MqttDevices.Where(d => d.DeviceClass == MqttDeviceClass.Switch);
-                        var ons = switches.Where(rule.Condition);
-                        var offs = _controller.MqttDevices.Except(ons);
+                        // get the device
+                        var s = switches.First(sw => sw.Id == rule.Switch);
 
-                        // only switch of switches that are currently on
-                        foreach (var off in offs.Where(d => d.PowerOn))
-                        {
-                            off.SwitchOff($"RULE: {rule.Name}");
+                        // check the condition
+                        var on = sensors.Any(rule.Condition);
+
+                        if (on) {
+                            if (s.PowerOff)
+                                s.SwitchOn($"RULE: {rule.Name}", rule.FlipFlop);
                         }
-
-                        // only switch on switches that are currently off
-                        foreach (var on in ons.Where(d => !d.PowerOn))
-                        {
-                            on.SwitchOn($"RULE: {rule.Name}", rule.FlipFlop);
+                        else {
+                            if (s.PowerOn)
+                                s.SwitchOff($"RULE: {rule.Name}");
                         }
                     }
                     catch (Exception err) {

@@ -15,7 +15,10 @@ namespace MqttHome.Mqtt.Devices.Victron
             SerialNumber = serialNumber;
         }
 
-        public override List<string> SensorTopics => new List<string> { $"N/{SerialNumber}/system/0/Dc/Battery" };
+        public override List<string> SensorTopics => new List<string> { 
+            $"N/{SerialNumber}/system/0/Dc/Battery",
+            $"N/{SerialNumber}/system/0/Ac/Grid"
+        };
         public override string StateTopic => null;
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.VictronCCGX;
@@ -29,11 +32,6 @@ namespace MqttHome.Mqtt.Devices.Victron
         public void ParseSensorPayload(MqttApplicationMessage e)
         {
             SensorData.Update(e);
-        }
-
-        public Dictionary<string, object> SensorValues()
-        {
-            return SensorData.DSerialize();
         }
     }
 }

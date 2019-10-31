@@ -152,8 +152,7 @@ namespace MqttHome.Mqtt
 
     public abstract class MqttSensorDevice<TSensorData> : MqttDevice where TSensorData : SensorData, new()
     {
-        public delegate void StateChange(MqttDeviceState state);
-        public event StateChange StateChangeEvent;
+        public new event StateChange StateChangeEvent;
 
         public MqttSensorDevice(MqttHomeController controller, string id) : base(controller, id)
         {
@@ -180,7 +179,7 @@ namespace MqttHome.Mqtt
 
         public virtual Dictionary<string, object> SensorValues()
         {
-            return SensorData.DSerialize();
+            return SensorData.ToDictionary();
         }
 
         public virtual List<string> SensorTopics

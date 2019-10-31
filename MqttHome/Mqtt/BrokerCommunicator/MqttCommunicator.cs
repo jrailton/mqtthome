@@ -50,6 +50,7 @@ namespace MqttHome.Mqtt
                 .WithTcpServer(broker.IpAddress, broker.Port)
                 //.WithCredentials("jimbo", "27Collins")
                 //.WithTls()
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(30))
                 .WithCleanSession()
                 .Build();
 
@@ -110,7 +111,7 @@ namespace MqttHome.Mqtt
 
         private async Task MqttClientReceivedMessageEvent(MqttApplicationMessageReceivedEventArgs e)
         {
-            if (_controller.MqttDeviceTopics.Contains(e.ApplicationMessage.Topic))
+            if (_controller.MqttDeviceTopics.Any(t => e.ApplicationMessage.Topic.StartsWith(t)))
             {
                 //                _controller.MqttLog.Debug($@"MqttClientReceivedMessageEvent
                 //----------------------------------------
@@ -135,9 +136,15 @@ namespace MqttHome.Mqtt
                     if (e.ApplicationMessage.Topic.StartsWith("N/"))
                         Console.WriteLine("Wait");
 
-                    var fuckdevices = _controller.MqttSensorDevices.Where(d => d.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic));
-                    foreach (var device in fuckdevices)
-                        device.ParseSensorPayload(e.ApplicationMessage);
+                    var sensorDevices = _controller.MqttDevices
+                        .Where(d => d is ISensorDevice)
+                        .Select(d => d as ISensorDevice);
+
+                    foreach (var device in sensorDevices)
+                    {
+                        if (device.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic))
+                            device.ParseSensorPayload(e.ApplicationMessage);
+                    }
                 }
                 catch (Exception err)
                 {

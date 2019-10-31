@@ -16,7 +16,7 @@ namespace MqttHome.Mqtt
             UpdateValues(JsonConvert.DeserializeObject<SonoffTHSensorData>(Encoding.UTF8.GetString(message.Payload)));
         }
 
-        public override Dictionary<string, object> DSerialize() => new Dictionary<string, object>{
+        public override Dictionary<string, object> ToDictionary() => new Dictionary<string, object>{
             { "Humidity", AM2301.Humidity },
             { "Temperature", AM2301.Temperature }
         };

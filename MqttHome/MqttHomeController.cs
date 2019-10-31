@@ -17,19 +17,7 @@ namespace MqttHome
     {
         public List<MqttCommunicator> MqttCommunicators = new List<MqttCommunicator>();
         public IQueryable<MqttDevice> MqttDevices;
-        public List<ISensorDevice> MqttSensorDevices {
-            get
-            {
-                var output = new List<ISensorDevice>();
-                foreach (var device in MqttDevices)
-                {
-                    if (device is ISensorDevice)
-                        output.Add(device as ISensorDevice);
-                }
-                
-                return output;
-            }
-        }
+
         public InfluxCommunicator InfluxCommunicator;
         public List<string> MqttDeviceTopics;
         public RuleEngine RuleEngine;
@@ -111,7 +99,7 @@ namespace MqttHome
                     if (device is MqttSensorDevice<SensorData>)
                     {
                         var sensordevice = device as MqttSensorDevice<SensorData>;
-                        builder.AppendLine($@"{string.Join(Environment.NewLine, sensordevice.SensorData.DSerialize().Select(k => $"{k.Key}: {k.Value}"))}");
+                        builder.AppendLine($@"{string.Join(Environment.NewLine, sensordevice.SensorData.ToDictionary().Select(k => $"{k.Key}: {k.Value}"))}");
                     }
                 }
 

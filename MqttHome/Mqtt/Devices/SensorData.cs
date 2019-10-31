@@ -5,7 +5,7 @@ using MQTTnet;
 
 namespace MqttHome.Mqtt
 {
-    public class SensorData : DSerializable, IDSerializable
+    public class SensorData
     {
         public virtual void Update(MqttApplicationMessage message)
         {
@@ -21,22 +21,14 @@ namespace MqttHome.Mqtt
                     property.SetValue(this, newValue);
             }
         }
-    }
 
-    public interface IDSerializable
-    {
-        Dictionary<string, object> DSerialize();
-    }
-
-    public abstract class DSerializable
-    {
         /// <summary>
         /// Generic ToDictionary which simply converts sensors properties to a dictionary of values -- and removes values that are null or default 
         /// (because sensors like ICC will accept many topics, not all of which will create values for all properties, and always return a full list 
         /// of sensor data which means some null or default values could be being written to the db unnecessarily) 
         /// </summary>
         /// <returns></returns>
-        public virtual Dictionary<string, object> DSerialize()
+        public virtual Dictionary<string, object> ToDictionary()
         {
             return GetType()
                 .GetProperties()

@@ -25,6 +25,14 @@ namespace MqttHome.Mqtt.Devices
         //N/7c386655e76b/system/0/Dc/Battery/TimeToGo {"value": null}
         //N/7c386655e76b/system/0/Dc/Battery/Voltage {"value": 52.979999542236328}
 
+        // GRID
+        //N/7c386655e76b/system/0/Ac/Grid/DeviceType
+        //N/7c386655e76b/system/0/Ac/Grid/L1/Power
+        //N/7c386655e76b/system/0/Ac/Grid/L2/Power
+        //N/7c386655e76b/system/0/Ac/Grid/L3/Power
+        //N/7c386655e76b/system/0/Ac/Grid/NumberOfPhases
+        //N/7c386655e76b/system/0/Ac/Grid/ProductId
+
         public VenusGxSensorData()
         {
             // set default sensor state here -- could just remain blank
@@ -36,25 +44,38 @@ namespace MqttHome.Mqtt.Devices
 
             var topicArray = mqtt.Topic.Split('/');
 
-            switch (topicArray[5])
+            var value = JsonConvert.DeserializeObject<VictronMqttPayload>(message).value;
+
+            try
             {
-                case "Battery":
-                    // 0 loadwatts, 1 grid voltage, 2 pvwatts, 3 loadwatts, 4 loadpcnt, 5 invertertemp, 6 grid watts??, 7 batteryvolts, 8 batterysoc, 9 batteryamps, 10 inverterfreq, 11 grid freq, 12 batterywatts, 13 x, 14 x
+                switch (topicArray[5])
+                {
+                    case "Battery":
+                        ParseBatteryData(topicArray, value);
+                        break;
 
-                    UpdateBatteryValues(topicArray, message);
-
-                    break;
+                    case "Grid":
+                        ParseGridData(topicArray, value);
+                        break;
+                }
+            }
+            catch (Exception err)
+            {
+                Console.WriteLine(err.Message);
             }
         }
 
-        private void UpdateBatteryValues(string[] topicArray, string message)
+        public override void Update(MqttApplicationMessage message)
         {
-            var value = JsonConvert.DeserializeObject<VictronMqttPayload>(message).value;
+            UpdateValues(new VenusGxSensorData(message));
+        }
 
+        private void ParseBatteryData(string[] topicArray, string value)
+        {
             switch (topicArray[6])
             {
                 case "ConsumedAmphours":
-                    BatteryConsumedAmphours = decimal.Parse(value);
+                    BatteryConsumedAmphours = value == null ? 0 : decimal.Parse(value);
                     break;
 
                 case "Current":
@@ -78,7 +99,7 @@ namespace MqttHome.Mqtt.Devices
                     break;
 
                 case "TimeToGo":
-                    BatteryTimeToGo = decimal.Parse(value);
+                    BatteryTimeToGo = value == null ? (decimal?)null : decimal.Parse(value);
                     break;
 
                 case "Voltage":
@@ -87,10 +108,27 @@ namespace MqttHome.Mqtt.Devices
 
             }
         }
-
-        public override void Update(MqttApplicationMessage message)
+        private void ParseGridData(string[] topicArray, string value)
         {
-            UpdateValues(new VenusGxSensorData(message));
+            switch (string.Join("", topicArray.Skip(6).Take(2)))
+            {
+                case "L1Power":
+                    GridL1Power = value == null ? 0m : decimal.Parse(value);
+                    break;
+
+                case "L2Power":
+                    GridL2Power = value == null ? 0m : decimal.Parse(value);
+                    break;
+
+                case "L3Power":
+                    GridL3Power = value == null ? 0m : decimal.Parse(value);
+                    break;
+
+                case "NumberOfPhases":
+                    GridNumberOfPhases = value == null ? 0 : int.Parse(value);
+                    break;
+
+            }
         }
 
         // battery properties
@@ -101,8 +139,15 @@ namespace MqttHome.Mqtt.Devices
         public decimal BatterySoC { get; set; }
         public int BatteryState { get; set; }
         public decimal BatteryTemperature { get; set; }
-        public decimal BatteryTimeToGo { get; set; }
+        public decimal? BatteryTimeToGo { get; set; }
         public decimal BatteryVoltage { get; set; }
+
+        // grid properties
+
+        public decimal GridL1Power { get; set; }
+        public decimal GridL2Power { get; set; }
+        public decimal GridL3Power { get; set; }
+        public int GridNumberOfPhases { get; set; }
 
     }
 
