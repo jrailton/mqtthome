@@ -7,7 +7,7 @@ using MQTTnet;
 namespace MqttHome.Mqtt.Devices
 {
 
-    public class ICC : MqttSensorDevice<ICCSensorData>, ISensorDevice
+    public class ICC : MqttSensorDevice<ICCSensorData>
     {
         public ICC(MqttHomeController controller, string id) : base(controller, id)
         {
@@ -19,9 +19,9 @@ namespace MqttHome.Mqtt.Devices
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.ICC;
         public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Sensor;
 
-        public void ParseSensorPayload(MqttApplicationMessage e)
+        public override void ParseStatePayload(MqttApplicationMessage message)
         {
-            SensorData.Update(e);
+            throw new NotImplementedException();
         }
 
         // loadwatts, x, pvwatts, loadwatts, loadpcnt, invertertemp, x, batteryvolts, batterysoc, batteryamps, inverterfreq, batterywatts, x, x

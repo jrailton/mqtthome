@@ -19,7 +19,7 @@ namespace MqttHome.Mqtt
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.SonoffTH;
         public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Switch;
 
-        public void ParseStatePayload(MqttApplicationMessage message)
+        public override void ParseStatePayload(MqttApplicationMessage message)
         {
             var state = JsonConvert.DeserializeObject<SonoffGenericStateData>(Encoding.UTF8.GetString(message.Payload));
             PowerOn = state.POWER.Equals("ON", StringComparison.CurrentCultureIgnoreCase);

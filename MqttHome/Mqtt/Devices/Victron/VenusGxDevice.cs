@@ -29,9 +29,9 @@ namespace MqttHome.Mqtt.Devices.Victron
             return SensorTopics.Any(t => topic.StartsWith(t));
         }
 
-        public void ParseSensorPayload(MqttApplicationMessage e)
+        public override void ParseStatePayload(MqttApplicationMessage message)
         {
-            SensorData.Update(e);
+            throw new NotImplementedException();
         }
     }
 }

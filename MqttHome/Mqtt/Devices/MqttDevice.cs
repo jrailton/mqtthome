@@ -12,9 +12,9 @@ using MQTTnet;
 
 namespace MqttHome.Mqtt
 {
-    public abstract class MqttDevice
+    public abstract class MqttDevice : IStatefulDevice
     {
-        private MqttHomeController _controller;
+        protected MqttHomeController _controller;
 
         public delegate void StateChange(MqttDeviceState state);
         public event StateChange StateChangeEvent;
@@ -62,33 +62,6 @@ namespace MqttHome.Mqtt
 
         public abstract MqttDeviceType DeviceType { get; set; }
         public abstract MqttDeviceClass DeviceClass { get; set; }
-        public DateTime? PowerOffTime { get; private set; }
-
-        protected bool _powerOn;
-        public bool PowerOn
-        {
-            get => _powerOn;
-            protected set
-            {
-                _powerOn = value;
-
-                if (_powerOn)
-                {
-                    // clear power off time (used for flipflop prevention)
-                    PowerOffTime = null;
-                }
-                else {
-                    // maintain power off time if its already set
-                    PowerOffTime = PowerOffTime ?? DateTime.Now;
-                }
-
-                StateChangeEvent?.Invoke(new MqttDeviceState{
-                    Device = this,
-                    PowerOn = value,
-                    Type = eMqttDeviceStateChangeType.Power
-                });
-            }
-        }
 
         public bool IsSubscribedToStateTopic(string topic)
         {
@@ -123,6 +96,36 @@ namespace MqttHome.Mqtt
             }
         }
 
+        public DateTime? PowerOffTime { get; private set; }
+
+        protected bool _powerOn;
+        public bool PowerOn
+        {
+            get => _powerOn;
+            protected set
+            {
+                _powerOn = value;
+
+                if (_powerOn)
+                {
+                    // clear power off time (used for flipflop prevention)
+                    PowerOffTime = null;
+                }
+                else
+                {
+                    // maintain power off time if its already set
+                    PowerOffTime = PowerOffTime ?? DateTime.Now;
+                }
+
+                StateChangeEvent?.Invoke(new MqttDeviceState
+                {
+                    Device = this,
+                    PowerOn = value,
+                    Type = eMqttDeviceStateChangeType.Power
+                });
+            }
+        }
+
         public void SwitchOn(string reason, int? flipFlopSeconds)
         {
             // default to 15 seconds if null
@@ -148,9 +151,11 @@ namespace MqttHome.Mqtt
             _controller.DeviceLog.Info($"SwitchOff :: Reason - {reason}");
             SetPowerStateOff.Execute();
         }
+
+        public abstract void ParseStatePayload(MqttApplicationMessage message);
     }
 
-    public abstract class MqttSensorDevice<TSensorData> : MqttDevice where TSensorData : SensorData, new()
+    public abstract class MqttSensorDevice<TSensorData> : MqttDevice, ISensorDevice where TSensorData : SensorData, new()
     {
         public new event StateChange StateChangeEvent;
 
@@ -191,6 +196,10 @@ namespace MqttHome.Mqtt
         public virtual bool IsSubscribedToSensorTopic(string topic)
         {
             return (SensorTopics ?? new List<string>()).Contains(topic, StringComparer.CurrentCultureIgnoreCase);
+        }
+
+        public virtual void ParseSensorPayload(MqttApplicationMessage e) {
+            SensorData.Update(e);
         }
 
         public override List<string> AllTopics
