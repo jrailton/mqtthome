@@ -6,11 +6,11 @@ using MQTTnet;
 
 namespace MqttHome.Mqtt.Devices.Victron
 {
-    public class VenusGxDevice : MqttSensorDevice<VenusGxSensorData>, ISensorDevice
+    public class VenusGxDevice : MqttSensorDevice<VenusGxSensorData>, ISensorDevice<VenusGxSensorData>
     {
         public string SerialNumber;
 
-        public VenusGxDevice(MqttHomeController controller, string id, string serialNumber) : base(controller, id)
+        public VenusGxDevice(MqttHomeController controller, string id, string serialNumber) : base(controller, id, MqttDeviceType.VictronCCGX)
         {
             SerialNumber = serialNumber;
         }
@@ -19,7 +19,6 @@ namespace MqttHome.Mqtt.Devices.Victron
             $"N/{SerialNumber}/system/0/Dc/Battery",
             $"N/{SerialNumber}/system/0/Ac/Grid"
         };
-        public override string StateTopic => null;
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.VictronCCGX;
         public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Sensor;
@@ -27,11 +26,6 @@ namespace MqttHome.Mqtt.Devices.Victron
         public override bool IsSubscribedToSensorTopic(string topic)
         {
             return SensorTopics.Any(t => topic.StartsWith(t));
-        }
-
-        public override void ParseStatePayload(MqttApplicationMessage message)
-        {
-            throw new NotImplementedException();
         }
     }
 }

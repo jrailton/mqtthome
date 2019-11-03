@@ -84,29 +84,33 @@
                                 <label>MQTT Topics</label>
                                 @Html.Raw(string.Join("<br />", device.AllTopics))
                             </div>
-                            <div>
-                                <label>Power On</label>
-                                @device.PowerOn
-                            </div>
-                            @if (device is ISensorDevice)
+                            @if (device is IStatefulDevice)
                             {
-                                var sensor = device as ISensorDevice;
-                            <div>
-                                <label>Sensor Data</label>
-                                @foreach (var pair in sensor.SensorValues())
-                                {
-                                    <div>
-                                        <label>@pair.Key</label>
-                                        @pair.Value
-                                    </div>
-                                }
-                            </div>
+                                var stateful = device as IStatefulDevice;
+                                <div>
+                                    <label>Power On</label>
+                                    @stateful.PowerOn
+                                </div>
+                                <div>
+                                    <a href="/switch/off/@device.Id" class="btn btn-primary btn-sm">Switch Off</a>
+                                    <a href="/switch/on/@device.Id" class="btn btn-primary btn-sm">Switch On</a>
+                                </div>
+                            }
+                            @if (device is ISensorDevice<SensorData>)
+                            {
+                                var sensor = device as ISensorDevice<SensorData>;
+                                <div>
+                                    <label>Sensor Data</label>
+                                    @foreach (var pair in sensor.SensorValues())
+                                    {
+                                        <div>
+                                            <label>@pair.Key</label>
+                                            @pair.Value
+                                        </div>
+                                    }
+                                </div>
                             }
 
-                        </div>
-                        <div class="panel-footer">
-                            <a href="/switch/off/@device.Id" class="btn btn-primary btn-sm">Switch Off</a>
-                            <a href="/switch/on/@device.Id" class="btn btn-primary btn-sm">Switch On</a>
                         </div>
                     </div>
                 </div>

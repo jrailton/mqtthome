@@ -6,23 +6,16 @@ using MQTTnet;
 
 namespace MqttHome.Mqtt.Devices
 {
-
     public class ICC : MqttSensorDevice<ICCSensorData>
     {
-        public ICC(MqttHomeController controller, string id) : base(controller, id)
+        public ICC(MqttHomeController controller, string id) : base(controller, id, MqttDeviceType.ICC)
         {
         }
 
-        public override List<string> SensorTopics => new List<string>{ "Inverter/AllValues", "Inverter/AllValues2", "Pylontech/Cycles" , "Pylontech/Watts", "Pylontech/Temperature", "Pylontech/Remaining_AH", "Pylontech/TimeRemaining", "Pylontech/AH_Use", "Pylontech/AH_Remaining_Till_20SOC" };
-        public override string StateTopic => null;
+        public override List<string> SensorTopics => new List<string>{ "Inverter/AllValues", "Inverter/AllValues2", "Pylontech/#" };
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.ICC;
         public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Sensor;
-
-        public override void ParseStatePayload(MqttApplicationMessage message)
-        {
-            throw new NotImplementedException();
-        }
 
         // loadwatts, x, pvwatts, loadwatts, loadpcnt, invertertemp, x, batteryvolts, batterysoc, batteryamps, inverterfreq, batterywatts, x, x
         //Inverter/AllValues 158 0 1343 158.00 3 46.0 0 50.30 95.00 20.38 50.0 0.0 1025 0 0

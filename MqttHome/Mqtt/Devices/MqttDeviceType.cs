@@ -7,6 +7,8 @@ namespace MqttHome.Mqtt
         SonoffPowR2,
         SonoffS26,
         ICC,
-        VictronCCGX
+        VictronCCGX,
+        TimeSensor,
+        Accuweather
     }
 }

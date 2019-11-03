@@ -7,14 +7,13 @@ using Newtonsoft.Json;
 
 namespace MqttHome.Mqtt
 {
-    public class SonoffGenericSwitchDevice : MqttDevice
+    public class SonoffGenericSwitchDevice : MqttStatefulDevice
     {
+        private SwitchHelper _switchHelper;
         public SonoffGenericSwitchDevice(MqttHomeController controller, string id, MqttDeviceType type)
-            : base(controller, id)
+            : base(controller, id, type)
         {
-            DeviceType = type;
-            SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
-            SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");
+            _switchHelper = new SwitchHelper(this);
         }
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.Unknown;

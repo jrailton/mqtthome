@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using MqttHome.Mqtt.Devices;
 
 namespace MqttHomeWeb.Controllers
 {
@@ -12,7 +13,7 @@ namespace MqttHomeWeb.Controllers
         {
             try
             {
-                Program.MqttHomeController.MqttDevices.Single(d => d.Id == id).SwitchOff("UI Request");
+                ((IStatefulDevice)Program.MqttHomeController.MqttDevices.Single(d => d.Id == id)).SwitchOff("UI Request");
                 TempData["success"] = $"Switch {id} was sent a request to switch OFF";
             }
             catch (Exception err)
@@ -26,7 +27,7 @@ namespace MqttHomeWeb.Controllers
         {
             try
             {
-                Program.MqttHomeController.MqttDevices.Single(d => d.Id == id).SwitchOn("UI Request", null);
+                ((IStatefulDevice)Program.MqttHomeController.MqttDevices.Single(d => d.Id == id)).SwitchOn("UI Request", null);
                 TempData["success"] = $"Switch {id} was sent a request to switch ON";
             }
             catch (Exception err)

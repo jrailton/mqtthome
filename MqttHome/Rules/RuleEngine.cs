@@ -81,13 +81,13 @@ namespace MqttHome
         {
             while (true)
             {
-                var sensors = _controller.MqttDevices.Where(d => d is ISensorDevice).Select(d => d as ISensorDevice);
+                var sensors = _controller.MqttDevices.Where(d => d is ISensorDevice<SensorData>).Select(d => d as ISensorDevice<SensorData>);
 
                 foreach (var rule in Config.Rules) {
                     try
                     {
                         // get the device
-                        var s = _controller.MqttDevices.Where(d => d.Id == rule.Switch && d is IStatefulDevice).First();
+                        var s = _controller.MqttDevices.Where(d => d.Id == rule.Switch && d is IStatefulDevice).First() as IStatefulDevice;
 
                         // check the condition
                         var on = sensors.Any(rule.Condition);

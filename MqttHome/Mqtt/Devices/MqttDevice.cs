@@ -9,28 +9,75 @@ using log4net;
 using MqttHome.Influx;
 using MqttHome.Mqtt.Devices;
 using MQTTnet;
+using Newtonsoft.Json;
 
 namespace MqttHome.Mqtt
 {
-    public abstract class MqttDevice : IStatefulDevice
+    public abstract class MqttDevice
     {
-        protected MqttHomeController _controller;
-
-        public delegate void StateChange(MqttDeviceState state);
-        public event StateChange StateChangeEvent;
+        public MqttHomeController Controller { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="id">Id is the device ID that will be used as the topic and influx data tag</param>
-        public MqttDevice(MqttHomeController controller, string id)
+        public MqttDevice(MqttHomeController controller, string id, MqttDeviceType type)
         {
-            _controller = controller;
+            DeviceType = type;
+            Controller = controller;
             Id = id;
-            _controller.DeviceLog.Debug($"Adding {DeviceType} {DeviceClass} device {id}");
+            Controller.DeviceLog.Debug($"Adding {DeviceType} {DeviceClass} device {id}");
         }
 
-        public string Id;
+        public string Id { get; set; }
+
+        public virtual List<string> AllTopics {
+            get
+            {
+                var topics = new List<string>();
+
+                if (this is IStatefulDevice)
+                {
+                    var sd = this as IStatefulDevice;
+                    topics.Add(sd.CommandResponseTopic);
+                    topics.Add(sd.StateTopic);
+                }
+
+                if (this is ISensorDevice<SensorData>)
+                {
+                    var sd = this as ISensorDevice<SensorData>;
+                    topics.AddRange(sd.SensorTopics);
+                }
+
+                return topics.Where(s => !string.IsNullOrEmpty(s)).ToList();
+            }
+        }
+
+        // commands
+        public virtual MqttCommand RebootDevice
+        {
+            get { return new MqttCommand(Controller, Id, $"cmnd/{Id}/Restart", "1"); }
+            set { }
+        }
+
+        public abstract MqttDeviceType DeviceType { get; set; }
+        public abstract MqttDeviceClass DeviceClass { get; set; }
+
+    }
+
+    public abstract class MqttStatefulDevice : MqttDevice, IStatefulDevice
+    {
+        private SwitchHelper _switchHelper;
+
+        public MqttStatefulDevice(MqttHomeController controller, string id, MqttDeviceType type) : base(controller, id, type)
+        {
+            DeviceClass = MqttDeviceClass.Switch;
+            SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
+            SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");
+            _switchHelper = new SwitchHelper(this);
+        }
+
+
         public virtual string StateTopic
         {
             get => $"tele/{Id}/STATE";
@@ -43,25 +90,6 @@ namespace MqttHome.Mqtt
             set { }
         }
 
-        public virtual List<string> AllTopics {
-            get
-            {
-                var topics = new List<string> {StateTopic, CommandResponseTopic};
-                return topics.Where(s => !string.IsNullOrEmpty(s)).ToList();
-            }
-        }
-
-        // commands
-        protected virtual MqttCommand SetPowerStateOn { get; set; }
-        protected virtual MqttCommand SetPowerStateOff { get; set; }
-        public virtual MqttCommand RebootDevice
-        {
-            get { return new MqttCommand(_controller, Id, $"cmnd/{Id}/Restart", "1"); }
-            set { }
-        }
-
-        public abstract MqttDeviceType DeviceType { get; set; }
-        public abstract MqttDeviceClass DeviceClass { get; set; }
 
         public bool IsSubscribedToStateTopic(string topic)
         {
@@ -99,6 +127,9 @@ namespace MqttHome.Mqtt
         public DateTime? PowerOffTime { get; private set; }
 
         protected bool _powerOn;
+
+        public event EventHandler<StateChangedEventArgs> StateChanged;
+
         public bool PowerOn
         {
             get => _powerOn;
@@ -117,66 +148,50 @@ namespace MqttHome.Mqtt
                     PowerOffTime = PowerOffTime ?? DateTime.Now;
                 }
 
-                StateChangeEvent?.Invoke(new MqttDeviceState
+                StateChanged?.Invoke(this, new StateChangedEventArgs
                 {
-                    Device = this,
                     PowerOn = value,
-                    Type = eMqttDeviceStateChangeType.Power
                 });
             }
         }
 
-        public void SwitchOn(string reason, int? flipFlopSeconds)
-        {
-            // default to 15 seconds if null
-            flipFlopSeconds = flipFlopSeconds ?? 15;
+        public MqttCommand SetPowerStateOn { get; private set; }
 
-            _controller.DeviceLog.Info($"SwitchOn :: Reason - {reason}");
+        public MqttCommand SetPowerStateOff { get; private set; }
 
-            // prevent flipflop
-            if (PowerOffTime.HasValue && PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value) > DateTime.Now)
-            {
-                var error = $"Flipflop prevention. Need to wait until {PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value).ToString("HH:mm:ss")}";
-                _controller.DeviceLog.Warn($"SwitchOn :: Reason - {reason} :: Aborted - {error}");
-                throw new Exception(error);
-            }
-            else
-            {
-                SetPowerStateOn.Execute();
-            }
-        }
+        public abstract void ParseStatePayload(MqttApplicationMessage message);
 
         public void SwitchOff(string reason)
         {
-            _controller.DeviceLog.Info($"SwitchOff :: Reason - {reason}");
-            SetPowerStateOff.Execute();
+            _switchHelper.SwitchOff(reason);
         }
 
-        public abstract void ParseStatePayload(MqttApplicationMessage message);
+        public void SwitchOn(string reason, int? flipFlopSeconds)
+        {
+            _switchHelper.SwitchOn(reason, flipFlopSeconds);
+        }
     }
 
-    public abstract class MqttSensorDevice<TSensorData> : MqttDevice, ISensorDevice where TSensorData : SensorData, new()
+    public abstract class MqttSensorDevice<TSensorData> : MqttDevice, ISensorDevice<TSensorData> where TSensorData : SensorData, new()
     {
-        public new event StateChange StateChangeEvent;
-
-        public MqttSensorDevice(MqttHomeController controller, string id) : base(controller, id)
+        public MqttSensorDevice(MqttHomeController controller, string id, MqttDeviceType type) : base(controller, id, type)
         {
             _sensorData = new TSensorData();
             DeviceClass = MqttDeviceClass.Sensor;
         }
 
         protected TSensorData _sensorData;
+
+        public event EventHandler<SensorDataChangedEventArgs> SensorDataChanged;
+
         public TSensorData SensorData
         {
             get => _sensorData;
             set
             {
                 _sensorData = value;
-                StateChangeEvent?.Invoke(new MqttDeviceState
+                SensorDataChanged(this, new SensorDataChangedEventArgs
                 {
-                    Device = this,
-                    PowerOn = _powerOn,
-                    Type = eMqttDeviceStateChangeType.SensorData,
                     SensorData = _sensorData
                 });
             }
@@ -201,17 +216,117 @@ namespace MqttHome.Mqtt
         public virtual void ParseSensorPayload(MqttApplicationMessage e) {
             SensorData.Update(e);
         }
+    }
 
-        public override List<string> AllTopics
+    public abstract class MqttStatefulSensorDevice<TSensorData> : MqttSensorDevice<TSensorData>, ISensorDevice<TSensorData>, IStatefulDevice where TSensorData : SensorData, new()
+    {
+
+        private SwitchHelper _switchHelper;
+
+        public MqttStatefulSensorDevice(MqttHomeController controller, string id, MqttDeviceType type) : base(controller, id, type)
         {
-            get
+            DeviceClass = MqttDeviceClass.Combo;
+            SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
+            SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");
+            _switchHelper = new SwitchHelper(this);
+        }
+
+
+        public virtual string StateTopic
+        {
+            get => $"tele/{Id}/STATE";
+            set { }
+        }
+
+        public virtual string CommandResponseTopic
+        {
+            get => $"stat/{Id}/POWER";
+            set { }
+        }
+
+
+        public bool IsSubscribedToStateTopic(string topic)
+        {
+            return (StateTopic ?? "").Equals(topic, StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        public bool IsSubscribedToCommandResponseTopic(string topic)
+        {
+            return (CommandResponseTopic ?? "").Equals(topic, StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        /// <summary>
+        /// This works for Sonoff Tasmota devices -- will need to be overridden for others
+        /// </summary>
+        public virtual void ParseCommandResponsePayload(MqttApplicationMessage message)
+        {
+            var test = new Regex(@"^(?<topic>.+)\/(?<device>.+)\/(?<subject>.+)$");
+            var match = test.Match(message.Topic);
+            var payload = Encoding.UTF8.GetString(message.Payload);
+
+            if (match.Success)
             {
-                var topics = base.AllTopics;
+                switch (match.Groups["subject"].Value)
+                {
+                    case "POWER":
+                        PowerOn = payload.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
+                        break;
 
-                topics.AddRange(SensorTopics);
-
-                return topics.Where(s => !string.IsNullOrEmpty(s)).ToList();
+                    default:
+                        break;
+                }
             }
+        }
+
+        public DateTime? PowerOffTime { get; private set; }
+
+        protected bool _powerOn;
+
+        public event EventHandler<StateChangedEventArgs> StateChanged;
+
+        public bool PowerOn
+        {
+            get => _powerOn;
+            protected set
+            {
+                _powerOn = value;
+
+                if (_powerOn)
+                {
+                    // clear power off time (used for flipflop prevention)
+                    PowerOffTime = null;
+                }
+                else
+                {
+                    // maintain power off time if its already set
+                    PowerOffTime = PowerOffTime ?? DateTime.Now;
+                }
+
+                StateChanged?.Invoke(this, new StateChangedEventArgs
+                {
+                    PowerOn = value
+                });
+            }
+        }
+
+        public MqttCommand SetPowerStateOn { get; private set; }
+
+        public MqttCommand SetPowerStateOff { get; private set; }
+
+        public virtual void ParseStatePayload(MqttApplicationMessage message)
+        {
+            var state = JsonConvert.DeserializeObject<SonoffGenericStateData>(Encoding.UTF8.GetString(message.Payload));
+            PowerOn = state.POWER.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
+        }
+
+        public void SwitchOff(string reason)
+        {
+            _switchHelper.SwitchOff(reason);
+        }
+
+        public void SwitchOn(string reason, int? flipFlopSeconds)
+        {
+            _switchHelper.SwitchOn(reason, flipFlopSeconds);
         }
     }
 }

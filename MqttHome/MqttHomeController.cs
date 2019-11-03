@@ -85,40 +85,5 @@ namespace MqttHome
 
             RuleEngine.Start();
         }
-
-        private void UpdateUI()
-        {
-            var whitespace = string.Empty;
-            while (true)
-            {
-                var builder = new StringBuilder();
-
-                foreach (var device in MqttDevices)
-                {
-                    builder.AppendLine($@"Class: {device.DeviceClass}, Type: {device.DeviceType}, ID: {device.Id}, State: {(device.PowerOn ? "On" : $"Off ({device.PowerOffTime?.ToString("HH:mm:ss") ?? "n/a"})")}");
-                    if (device is MqttSensorDevice<SensorData>)
-                    {
-                        var sensordevice = device as MqttSensorDevice<SensorData>;
-                        builder.AppendLine($@"{string.Join(Environment.NewLine, sensordevice.SensorData.ToDictionary().Select(k => $"{k.Key}: {k.Value}"))}");
-                    }
-                }
-
-                builder.AppendLine(@"
-
-Press any key to exit...");
-
-                Console.SetCursorPosition(0, 0);
-                Console.Write(whitespace);
-
-                var buffer = builder.ToString();
-
-                Console.SetCursorPosition(0, 0);
-                Console.Write(buffer);
-
-                whitespace = Regex.Replace(buffer, @"[^\n]", " ");
-
-                Thread.Sleep(1000);
-            }
-        }
     }
 }

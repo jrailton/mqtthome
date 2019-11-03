@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
@@ -109,6 +110,25 @@ namespace MqttHome.Mqtt
             _controller.MqttLog.Debug($"MqttClientConnectedEvent :: SUBSCRIBED TO {topicFilter.Topic}");
         }
 
+        private bool DeviceSubscribedToTopic(string topic, string subscription)
+        {
+            return DeviceSubscribedToTopic(topic, new List<string> { subscription });
+        }
+        private bool DeviceSubscribedToTopic(string topic, List<string> subscription)
+        {
+            foreach (var s in subscription)
+            {
+                var sub = Regex.Escape(s);
+                sub = sub.Replace(@"#", @".*");
+                sub = sub.Replace(@"+", @"[^\/]");
+
+                if (Regex.IsMatch(sub, topic))
+                    return true;
+            }
+
+            return false;
+        }
+
         private async Task MqttClientReceivedMessageEvent(MqttApplicationMessageReceivedEventArgs e)
         {
             if (_controller.MqttDeviceTopics.Any(t => e.ApplicationMessage.Topic.StartsWith(t)))
@@ -124,27 +144,28 @@ namespace MqttHome.Mqtt
 
                 try
                 {
-                    // states
-                    foreach (var device in _controller.MqttDevices.Where(d => d is IStatefulDevice && d.IsSubscribedToStateTopic(e.ApplicationMessage.Topic)))
-                        (device as IStatefulDevice).ParseStatePayload(e.ApplicationMessage);
-
-                    // states
-                    foreach (var device in _controller.MqttDevices.Where(d => d.IsSubscribedToCommandResponseTopic(e.ApplicationMessage.Topic)))
-                        device.ParseCommandResponsePayload(e.ApplicationMessage);
-
-                    // sensors
-                    if (e.ApplicationMessage.Topic.StartsWith("N/"))
-                        Console.WriteLine("Wait");
-
-                    var sensorDevices = _controller.MqttDevices
-                        .Where(d => d is ISensorDevice)
-                        .Select(d => d as ISensorDevice);
-
-                    foreach (var device in sensorDevices)
+                    // stateful devices -- they require commandresponse and state topic routing
+                    foreach (IStatefulDevice device in _controller.MqttDevices.Where(d => d is IStatefulDevice))
                     {
-                        if (device.IsSubscribedToSensorTopic(e.ApplicationMessage.Topic))
+                        //if (e.ApplicationMessage.Topic == "tele/powr2_2/STATE")
+                        //    Console.WriteLine("");
+
+                        // state
+                        if (DeviceSubscribedToTopic(e.ApplicationMessage.Topic, device.StateTopic))
+                            device.ParseStatePayload(e.ApplicationMessage);
+
+                        // command response
+                        if (DeviceSubscribedToTopic(e.ApplicationMessage.Topic, device.CommandResponseTopic))
+                            device.ParseCommandResponsePayload(e.ApplicationMessage);
+                    }
+
+                    // sensor devices
+                    foreach (ISensorDevice<SensorData> device in _controller.MqttDevices.Where(d => d is ISensorDevice<SensorData>))
+                    {
+                        if (DeviceSubscribedToTopic(e.ApplicationMessage.Topic, device.SensorTopics))
                             device.ParseSensorPayload(e.ApplicationMessage);
                     }
+
                 }
                 catch (Exception err)
                 {
@@ -152,7 +173,6 @@ namespace MqttHome.Mqtt
                 }
 
             }
-            //Task.Run(() => _mqttClient.PublishAsync("hello/world"));
         }
 
         private async Task MqttClientDisconnectedEvent(MqttClientDisconnectedEventArgs mqttClientDisconnectedEventArgs)

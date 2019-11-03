@@ -7,14 +7,12 @@ namespace MqttHome.Mqtt.Devices
     public class MqttDeviceState
     {
         public MqttDevice Device;
-        public eMqttDeviceStateChangeType Type;
-        public SensorData SensorData;
         public bool PowerOn;
     }
 
-    public enum eMqttDeviceStateChangeType
+    public class MqttSensorState
     {
-        Power = 1,
-        SensorData = 2
+        public MqttDevice Device;
+        public SensorData SensorData;
     }
 }
