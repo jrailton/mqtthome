@@ -5,12 +5,9 @@ using MQTTnet;
 
 namespace MqttHome.Mqtt
 {
-    public class SensorData
+    public abstract class SensorData : ISensorData
     {
-        public virtual void Update(MqttApplicationMessage message)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract void Update(MqttApplicationMessage message);
 
         protected void UpdateValues(SensorData newValues)
         {

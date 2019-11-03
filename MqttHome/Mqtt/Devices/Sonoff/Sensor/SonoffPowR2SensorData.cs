@@ -21,13 +21,13 @@ namespace MqttHome.Mqtt
         public override Dictionary<string, object> ToDictionary()
         {
             return new Dictionary<string, object>{
-            { "Power", ENERGY.Power },
-            { "Factor", ENERGY.Factor },
-            { "Voltage", ENERGY.Voltage },
+            { "Power", ENERGY?.Power },
+            { "Factor", ENERGY?.Factor },
+            { "Voltage", ENERGY?.Voltage },
             //{ "ApparentPower", ENERGY.ApparentPower },
             //{ "ReactivePower", ENERGY.ReactivePower },
-            { "Current", ENERGY.Current },
-            { "Today", ENERGY.Today },
+            { "Current", ENERGY?.Current },
+            { "Today", ENERGY?.Today },
         };
         }
 

@@ -7,6 +7,8 @@ namespace MqttHome.Mqtt.Devices
 {
     public interface IStatefulDevice
     {
+        DateTime? LastMqttMessage { get; set; }
+
         MqttHomeController Controller { get; }
 
         event EventHandler<StateChangedEventArgs> StateChanged;

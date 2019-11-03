@@ -118,11 +118,14 @@ namespace MqttHome.Mqtt
         {
             foreach (var s in subscription)
             {
-                var sub = Regex.Escape(s);
+                //if (s.Contains("#") && topic.StartsWith("Pylontech"))
+                //    Console.WriteLine("");
+
+                var sub = s;
                 sub = sub.Replace(@"#", @".*");
                 sub = sub.Replace(@"+", @"[^\/]");
 
-                if (Regex.IsMatch(sub, topic))
+                if (Regex.IsMatch(topic, sub))
                     return true;
             }
 
@@ -131,39 +134,62 @@ namespace MqttHome.Mqtt
 
         private async Task MqttClientReceivedMessageEvent(MqttApplicationMessageReceivedEventArgs e)
         {
-            if (_controller.MqttDeviceTopics.Any(t => e.ApplicationMessage.Topic.StartsWith(t)))
-            {
-                //                _controller.MqttLog.Debug($@"MqttClientReceivedMessageEvent
-                //----------------------------------------
-                //+ Topic = {e.ApplicationMessage.Topic}
-                //+ Payload = {Encoding.UTF8.GetString(e.ApplicationMessage.Payload)}
-                //+ QoS = {e.ApplicationMessage.QualityOfServiceLevel}
-                //+ Retain = {e.ApplicationMessage.Retain}
-                //========================================
-                //");
+            //if (e.ApplicationMessage.Topic.StartsWith("N/7c386655e76b/system/0/Dc/Battery"))
+            //    Console.WriteLine("");
 
+            if (DeviceSubscribedToTopic(e.ApplicationMessage.Topic, _controller.MqttDeviceTopics))
+            {
                 try
                 {
                     // stateful devices -- they require commandresponse and state topic routing
                     foreach (IStatefulDevice device in _controller.MqttDevices.Where(d => d is IStatefulDevice))
                     {
-                        //if (e.ApplicationMessage.Topic == "tele/powr2_2/STATE")
-                        //    Console.WriteLine("");
-
                         // state
                         if (DeviceSubscribedToTopic(e.ApplicationMessage.Topic, device.StateTopic))
-                            device.ParseStatePayload(e.ApplicationMessage);
+                        {
+                            try
+                            {
+                                device.LastMqttMessage = DateTime.Now;
+                                device.ParseStatePayload(e.ApplicationMessage);
+                            }
+                            catch (Exception err)
+                            {
+                                _controller.DeviceLog.Error($"MqttClientReceivedMessageEvent :: Device: {device.Id} - Failed to ParseStatePayload. {err.Message}", err);
+                            }
+                        }
 
                         // command response
                         if (DeviceSubscribedToTopic(e.ApplicationMessage.Topic, device.CommandResponseTopic))
-                            device.ParseCommandResponsePayload(e.ApplicationMessage);
+                        {
+                            try
+                            {
+                                device.LastMqttMessage = DateTime.Now;
+                                device.ParseCommandResponsePayload(e.ApplicationMessage);
+                            }
+                            catch (Exception err)
+                            {
+                                _controller.DeviceLog.Error($"MqttClientReceivedMessageEvent :: Device: {device.Id} - Failed to ParseCommandResponsePayload. {err.Message}", err);
+                            }
+                        }
                     }
 
                     // sensor devices
-                    foreach (ISensorDevice<SensorData> device in _controller.MqttDevices.Where(d => d is ISensorDevice<SensorData>))
+                    foreach (ISensorDevice<ISensorData> device in _controller.MqttDevices.Where(d => d is ISensorDevice<ISensorData>))
                     {
                         if (DeviceSubscribedToTopic(e.ApplicationMessage.Topic, device.SensorTopics))
-                            device.ParseSensorPayload(e.ApplicationMessage);
+                        {
+                            try
+                            {
+                                if (device.Id == "icc")
+                                    Console.WriteLine("");
+
+                                device.LastMqttMessage = DateTime.Now;
+                                device.ParseSensorPayload(e.ApplicationMessage);
+                            }
+                            catch (Exception err) {
+                                _controller.DeviceLog.Error($"MqttClientReceivedMessageEvent :: Device: {device.Id} - Failed to ParseSensorPayload. {err.Message}", err);
+                            }
+                        }
                     }
 
                 }

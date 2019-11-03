@@ -17,8 +17,8 @@ namespace MqttHome.Mqtt
         }
 
         public override Dictionary<string, object> ToDictionary() => new Dictionary<string, object>{
-            { "Humidity", AM2301.Humidity },
-            { "Temperature", AM2301.Temperature }
+            { "Humidity", AM2301?.Humidity },
+            { "Temperature", AM2301?.Temperature }
         };
 
         public class AM2301Data

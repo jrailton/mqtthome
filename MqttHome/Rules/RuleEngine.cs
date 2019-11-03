@@ -81,7 +81,7 @@ namespace MqttHome
         {
             while (true)
             {
-                var sensors = _controller.MqttDevices.Where(d => d is ISensorDevice<SensorData>).Select(d => d as ISensorDevice<SensorData>);
+                var sensors = _controller.MqttDevices.Where(d => d is ISensorDevice<ISensorData>).Select(d => d as ISensorDevice<ISensorData>);
 
                 foreach (var rule in Config.Rules) {
                     try

@@ -5,22 +5,22 @@ using MQTTnet;
 
 namespace MqttHome.Mqtt.Devices
 {
-    public interface ISensorDevice<TSensorData>
+    public interface ISensorDevice<ISensorData>
     {
         event EventHandler<SensorDataChangedEventArgs> SensorDataChanged;
         void ParseSensorPayload(MqttApplicationMessage e);
 
-        bool IsSubscribedToSensorTopic(string topic);
+        DateTime? LastMqttMessage { get; set; }
 
-        Dictionary<string, object> SensorValues();
+        Dictionary<string, object> SensorValues { get; }
         List<string> SensorTopics { get; }
 
         string Id { get; }
 
-        TSensorData SensorData { get; }
+        ISensorData SensorData { get; }
     }
 
     public class SensorDataChangedEventArgs : EventArgs {
-        public SensorData SensorData;
+        public ISensorData SensorData;
     }
 }

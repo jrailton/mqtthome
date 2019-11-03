@@ -10,9 +10,8 @@ namespace MqttHome.Mqtt.Devices
     {
         public ICC(MqttHomeController controller, string id) : base(controller, id, MqttDeviceType.ICC)
         {
+            SensorTopics = new List<string> { "Inverter/AllValues", "Inverter/AllValues2", "Pylontech/#" };
         }
-
-        public override List<string> SensorTopics => new List<string>{ "Inverter/AllValues", "Inverter/AllValues2", "Pylontech/#" };
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.ICC;
         public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Sensor;

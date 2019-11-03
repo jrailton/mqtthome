@@ -83,7 +83,7 @@ namespace MqttHome.Mqtt.Devices
 
         public override void Update(MqttApplicationMessage message)
         {
-            UpdateValues(new VenusGxSensorData(message));
+            UpdateValues(new ICCSensorData(message));
         }
 
         /// <summary>

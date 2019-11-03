@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using InfluxDB.LineProtocol.Payload;
 using log4net;
 using MqttHome.Influx;
 using MqttHome.Mqtt;
@@ -57,6 +58,16 @@ namespace MqttHome
                     new SonoffGenericSwitchDevice(this, "s26_2", MqttDeviceType.SonoffS26),
                 }.AsQueryable();
 
+                foreach (IStatefulDevice device in MqttDevices.Where(d => d is IStatefulDevice))
+                {
+                    device.StateChanged += Device_StateChanged;
+                }
+
+                foreach (ISensorDevice<ISensorData> device in MqttDevices.Where(d => d is ISensorDevice<ISensorData>))
+                {
+                    device.SensorDataChanged += Device_SensorDataChanged;
+                }
+
                 deviceLog.Debug($"Added {MqttDevices.Count()} MQTT devices...");
 
                 // this is a hack which needs more thought
@@ -75,6 +86,34 @@ namespace MqttHome
             {
                 generalLog.Error($"Exception in MqttHomeController.ctor - {err.Message}", err);
             }
+        }
+
+        private void Device_StateChanged(object sender, StateChangedEventArgs e)
+        {
+            var lpp = new LineProtocolPoint("Switch",
+                new Dictionary<string, object>{
+                    { "On", (e.PowerOn ? "1" : "0") }
+                },
+                new Dictionary<string, string>
+                {
+                    {"device", ((MqttDevice)sender).Id}
+                });
+
+            InfluxCommunicator.Write(lpp);
+        }
+
+        private void Device_SensorDataChanged(object sender, SensorDataChangedEventArgs e)
+        {
+            var device = (MqttDevice)sender;
+
+            var lpp = new LineProtocolPoint(device.DeviceClass.ToString(),
+                e.SensorData.ToDictionary(),
+                new Dictionary<string, string>
+                {
+                    {"device", device.Id}
+                });
+
+            InfluxCommunicator.Write(lpp);
         }
 
         public void Start()

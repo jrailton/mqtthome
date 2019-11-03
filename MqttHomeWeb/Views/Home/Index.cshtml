@@ -74,7 +74,7 @@
             {
                 <div class="col-sm-3">
                     <div class="panel panel-info">
-                        <div class="panel-heading">@device.DeviceClass @device.Id</div>
+                        <div class="panel-heading">@device.DeviceClass @device.Id (Last Contact: @(device.LastMqttMessage.HasValue ? device.LastMqttMessage.Value.ToString("d MMM yy HH:mm:ss") : "(never)"))</div>
                         <div class="panel-body">
                             <div>
                                 <label>Type</label>
@@ -96,12 +96,14 @@
                                     <a href="/switch/on/@device.Id" class="btn btn-primary btn-sm">Switch On</a>
                                 </div>
                             }
-                            @if (device is ISensorDevice<SensorData>)
+                            @if (device is ISensorDevice<ISensorData>)
                             {
-                                var sensor = device as ISensorDevice<SensorData>;
+                                var sensor = device as ISensorDevice<ISensorData>;
+                                if (sensor.SensorValues != null)
+                                {
                                 <div>
                                     <label>Sensor Data</label>
-                                    @foreach (var pair in sensor.SensorValues())
+                                    @foreach (var pair in sensor.SensorValues)
                                     {
                                         <div>
                                             <label>@pair.Key</label>
@@ -109,6 +111,7 @@
                                         </div>
                                     }
                                 </div>
+                                }
                             }
 
                         </div>
