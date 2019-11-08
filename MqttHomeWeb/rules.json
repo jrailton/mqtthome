@@ -1,15 +1,13 @@
 {
-  "Defaults": {
-    "ConditionOr": "Id = \"icc\" AND SensorData.GridVoltage > 200",
-    "ConditionAnd": "",
-    "FlipFlop": 15
-  },
   "Rules": [
     {
       "Name": "Test Rule",
       "Description": "Just testing",
       "Switch": "th16_1",
-      "Condition": "Id = \"icc\" AND SensorData.BatterySoC > 95",
+      "ConditionsOr": [
+        "GridVoltage",
+        "SocGt95"
+      ],
       "FlipFlop": 15
     }
   ]

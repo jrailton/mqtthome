@@ -1,0 +1,24 @@
+﻿{
+  "Conditions": [
+    {
+      "Id": "SocGt95",
+      "Device": "icc",
+      "SensorValue": "BatterySoC > 95"
+    },
+    {
+      "Id": "SocGt85",
+      "Device": "icc",
+      "SensorValue": "BatterySoC > 85"
+    },
+    {
+      "Id": "SocGt75",
+      "Device": "icc",
+      "SensorValue": "BatterySoC > 75"
+    },
+    {
+      "Id": "GridPower",
+      "Device": "icc",
+      "SensorValue": "GridVoltage >= 200"
+    }
+  ]
+}

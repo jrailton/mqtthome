@@ -16,6 +16,10 @@ namespace MqttHomeWeb.Controllers
             return View(Program.MqttHomeController);
         }
 
+        public IActionResult IndexContent() {
+            return PartialView("_IndexContent", Program.MqttHomeController);
+        }
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {

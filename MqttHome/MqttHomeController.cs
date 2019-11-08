@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -10,12 +12,17 @@ using MqttHome.Influx;
 using MqttHome.Mqtt;
 using MqttHome.Mqtt.BrokerCommunicator;
 using MqttHome.Mqtt.Devices;
+using MqttHome.Mqtt.Devices.Sonoff;
 using MqttHome.Mqtt.Devices.Victron;
+using MqttHome.WebSockets;
+using Newtonsoft.Json;
 
 namespace MqttHome
 {
     public class MqttHomeController
     {
+        public WebsocketManager WebsocketManager;
+
         public List<MqttCommunicator> MqttCommunicators = new List<MqttCommunicator>();
         public IQueryable<MqttDevice> MqttDevices;
 
@@ -24,39 +31,29 @@ namespace MqttHome
         public RuleEngine RuleEngine;
         public bool Debug;
 
-        public ILog RuleLog;
-        public ILog DeviceLog;
-        public ILog GeneralLog;
-        public ILog InfluxLog;
-        public ILog MqttLog;
+        public MqttHomeLogger RuleLog;
+        public MqttHomeLogger DeviceLog;
+        public MqttHomeLogger GeneralLog;
+        public MqttHomeLogger InfluxLog;
+        public MqttHomeLogger MqttLog;
 
-        public MqttHomeController(bool debug, ILog ruleLog, ILog deviceLog, ILog generalLog, ILog influxLog, ILog mqttLog, List<MqttBroker> mqttBrokers, string influxUrl = "http://localhost:8086", string influxDatabase = "home_db")
+        public MqttHomeController(bool debug, ILog ruleLog, ILog deviceLog, ILog generalLog, ILog influxLog, ILog mqttLog, List<MqttBroker> mqttBrokers, string influxUrl = "http://localhost:8086", string influxDatabase = "home_db", WebsocketManager wsm = null)
         {
             try
             {
-                MqttLog = mqttLog;
-                RuleLog = ruleLog;
-                DeviceLog = deviceLog;
-                GeneralLog = generalLog;
-                InfluxLog = influxLog;
+                WebsocketManager = wsm;
+
+                MqttLog = new MqttHomeLogger(wsm, mqttLog);
+                RuleLog = new MqttHomeLogger(wsm, ruleLog);
+                DeviceLog = new MqttHomeLogger(wsm, deviceLog);
+                GeneralLog = new MqttHomeLogger(wsm, generalLog);
+                InfluxLog = new MqttHomeLogger(wsm, influxLog);
 
                 Debug = debug;
 
-                InfluxCommunicator = new InfluxCommunicator(influxLog, new Uri(influxUrl), influxDatabase);
+                InfluxCommunicator = new InfluxCommunicator(InfluxLog, new Uri(influxUrl), influxDatabase);
 
-                MqttDevices = new List<MqttDevice>
-                {
-                    new ICC(this, "icc"),
-                    new SonoffTHDevice(this, "th16_1"),
-                    new SonoffTHDevice(this, "th16_2"),
-                    new SonoffPowR2Device(this, "powr2_1"),
-                    new SonoffPowR2Device(this, "powr2_2"),
-                    new SonoffPowR2Device(this, "powr2_3"),
-                    new SonoffPowR2Device(this, "powr2_4"),
-                    new SonoffPowR2Device(this, "powr2_5"),
-                    new VenusGxDevice(this, "venusgx", "7c386655e76b"),
-                    new SonoffGenericSwitchDevice(this, "s26_2", MqttDeviceType.SonoffS26),
-                }.AsQueryable();
+                LoadDevices();
 
                 foreach (IStatefulDevice device in MqttDevices.Where(d => d is IStatefulDevice))
                 {
@@ -68,7 +65,7 @@ namespace MqttHome
                     device.SensorDataChanged += Device_SensorDataChanged;
                 }
 
-                deviceLog.Debug($"Added {MqttDevices.Count()} MQTT devices...");
+                DeviceLog.Debug($"Added {MqttDevices.Count()} MQTT devices...");
 
                 // this is a hack which needs more thought
                 MqttDeviceTopics = MqttDevices.SelectMany(d => d.AllTopics).Distinct().ToList();
@@ -78,28 +75,61 @@ namespace MqttHome
 
                 RuleEngine = new RuleEngine(this);
 
-                deviceLog.Debug($@"Started listening to {MqttDevices.Count()} MQTT devices. Topic list is:
+                DeviceLog.Debug($@"Started listening to {MqttDevices.Count()} MQTT devices. Topic list is:
 {string.Join(Environment.NewLine, MqttDeviceTopics)}");
 
             }
             catch (Exception err)
             {
-                generalLog.Error($"Exception in MqttHomeController.ctor - {err.Message}", err);
+                GeneralLog.Error($"Exception in MqttHomeController.ctor - {err.Message}", err);
             }
+        }
+
+        private void LoadDevices()
+        {
+
+            DeviceConfig deviceConfig;
+            var devices = new List<MqttDevice>();
+
+            try
+            {
+                var content = File.ReadAllText("devices.json");
+                deviceConfig = JsonConvert.DeserializeObject<DeviceConfig>(content);
+                var allMqttDeviceTypes = Assembly.GetExecutingAssembly().GetTypes();
+
+                foreach (var device in deviceConfig.Devices)
+                {
+                    var type = allMqttDeviceTypes.First(t => t.Name == device.Type);
+                    devices.Add((MqttDevice)Activator.CreateInstance(type, this, device.Id, device.FriendlyName));
+                }
+
+                DeviceLog.Info($"LoadDevices :: Loaded {deviceConfig.Devices.Count} devices from devices.json");
+
+            }
+            catch (Exception err)
+            {
+                DeviceLog.Error($"LoadDevices :: Failed to load devices. {err.Message}", err);
+            }
+
+            MqttDevices = devices.AsQueryable();
         }
 
         private void Device_StateChanged(object sender, StateChangedEventArgs e)
         {
+            var device = (MqttDevice)sender;
+
             var lpp = new LineProtocolPoint("Switch",
                 new Dictionary<string, object>{
                     { "On", (e.PowerOn ? "1" : "0") }
                 },
                 new Dictionary<string, string>
                 {
-                    {"device", ((MqttDevice)sender).Id}
+                    {"device", device.Id}
                 });
 
             InfluxCommunicator.Write(lpp);
+
+            RuleEngine.OnDeviceStateChanged(device, e);
         }
 
         private void Device_SensorDataChanged(object sender, SensorDataChangedEventArgs e)
@@ -107,13 +137,15 @@ namespace MqttHome
             var device = (MqttDevice)sender;
 
             var lpp = new LineProtocolPoint(device.DeviceClass.ToString(),
-                e.SensorData.ToDictionary(),
+                e.ChangedValues,
                 new Dictionary<string, string>
                 {
                     {"device", device.Id}
                 });
 
             InfluxCommunicator.Write(lpp);
+
+            RuleEngine.OnDeviceSensorDataChanged(device as ISensorDevice<ISensorData>, e.ChangedValues);
         }
 
         public void Start()
@@ -121,8 +153,6 @@ namespace MqttHome
             // start all mqttbroker connections
             foreach (var communicator in MqttCommunicators)
                 communicator.Start();
-
-            RuleEngine.Start();
         }
     }
 }

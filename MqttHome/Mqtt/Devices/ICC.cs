@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using MQTTnet;
+using System.Linq;
+using System.Linq.Dynamic.Core;
 
 namespace MqttHome.Mqtt.Devices
 {
     public class ICC : MqttSensorDevice<ICCSensorData>
     {
-        public ICC(MqttHomeController controller, string id) : base(controller, id, MqttDeviceType.ICC)
+        public ICC(MqttHomeController controller, string id, string friendlyName) : base(controller, id, friendlyName, MqttDeviceType.ICC)
         {
             SensorTopics = new List<string> { "Inverter/AllValues", "Inverter/AllValues2", "Pylontech/#" };
         }

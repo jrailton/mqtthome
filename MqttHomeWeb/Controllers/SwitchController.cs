@@ -20,7 +20,7 @@ namespace MqttHomeWeb.Controllers
             {
                 TempData["danger"] = err.Message;
             }
-            return RedirectToAction("Index", "Home");
+            return PartialView("_Messages");
         }
 
         public IActionResult On(string id)
@@ -34,7 +34,7 @@ namespace MqttHomeWeb.Controllers
             {
                 TempData["danger"] = err.Message;
             }
-            return RedirectToAction("Index", "Home");
+            return PartialView("_Messages");
         }
     }
 }

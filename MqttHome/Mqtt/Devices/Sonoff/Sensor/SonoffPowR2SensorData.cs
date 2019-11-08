@@ -13,9 +13,9 @@ namespace MqttHome.Mqtt
         public string Time { get; set; }
         public SonoffPowR2EnergyData ENERGY { get; set; }
 
-        public override void Update(MqttApplicationMessage message)
+        public override Dictionary<string, object> Update(MqttApplicationMessage message)
         {
-            UpdateValues(JsonConvert.DeserializeObject<SonoffPowR2SensorData>(Encoding.UTF8.GetString(message.Payload)));
+            return UpdateValues(JsonConvert.DeserializeObject<SonoffPowR2SensorData>(Encoding.UTF8.GetString(message.Payload)));
         }
 
         public override Dictionary<string, object> ToDictionary()

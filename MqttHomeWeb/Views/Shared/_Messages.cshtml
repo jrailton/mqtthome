@@ -5,7 +5,8 @@
 
 @foreach (var key in TempData.Keys.Where(k => keys.Contains(k)))
 {
-    <div class="alert alert-@key">
-        @TempData[key];
+    <div class="alert alert-@key alert-dismissable">
+        <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+        @TempData[key]
     </div>
 }

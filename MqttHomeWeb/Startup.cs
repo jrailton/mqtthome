@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MqttHome.WebSockets;
+using MqttHomeWeb.Models;
 
 namespace MqttHomeWeb
 {
@@ -24,6 +26,7 @@ namespace MqttHomeWeb
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
+            services.AddSingleton<WebsocketManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,6 +44,11 @@ namespace MqttHomeWeb
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthorization();
+            app.UseWebSockets(new WebSocketOptions {
+                KeepAliveInterval = TimeSpan.FromSeconds(120),
+                ReceiveBufferSize = 4096
+            });
+            app.UseMiddleware<WebsocketMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

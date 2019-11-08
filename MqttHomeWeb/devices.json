@@ -1,0 +1,49 @@
+﻿{
+  "Devices": [
+    {
+      "Type": "ICC",
+      "Id": "icc",
+      "FriendlyName": "Mecer Axpert MKSII 5kva"
+    },
+    {
+      "Type": "SonoffTHDevice",
+      "Id": "th16_1",
+      "FriendlyName": "Security Lights"
+    },
+    {
+      "Type": "SonoffTHDevice",
+      "Id": "th16_2",
+      "FriendlyName": "Non-Essentials Circuit"
+    },
+    {
+      "Type": "SonoffPowR2Device",
+      "Id": "powr2_1",
+      "FriendlyName": "Laundry Circuit"
+    },
+    {
+      "Type": "SonoffPowR2Device",
+      "Id": "powr2_2",
+      "FriendlyName": "Kitchen Circuit"
+    },
+    {
+      "Type": "SonoffPowR2Device",
+      "Id": "powr2_3",
+      "FriendlyName": "Essentials Circuit"
+    },
+    {
+      "Type": "SonoffPowR2Device",
+      "Id": "powr2_5",
+      "FriendlyName": "Workshop & Max's Room"
+    },
+    {
+      "Type": "SonoffS26Device",
+      "Id": "s26_2",
+      "FriendlyName": "Lounge Lamp"
+    },
+    {
+      "Type": "VenusGxDevice",
+      "Id": "7c386655e76b",
+      "FriendlyName": "Victron Venus GX"
+    }
+  ]
+}

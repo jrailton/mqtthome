@@ -12,7 +12,7 @@ namespace MqttHome.Mqtt
 
         private SwitchHelper _switchHelper;
 
-        public MqttStatefulDevice(MqttHomeController controller, string id, MqttDeviceType type) : base(controller, id, type)
+        public MqttStatefulDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
             DeviceClass = MqttDeviceClass.Switch;
             SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
@@ -60,16 +60,16 @@ namespace MqttHome.Mqtt
 
         public DateTime? PowerOffTime { get; private set; }
 
-        protected bool _powerOn;
+        protected bool? _powerOn;
 
-        public bool PowerOn
+        public bool? PowerOn
         {
             get => _powerOn;
             protected set
             {
                 _powerOn = value;
 
-                if (_powerOn)
+                if (_powerOn.Value)
                 {
                     // clear power off time (used for flipflop prevention)
                     PowerOffTime = null;
@@ -82,7 +82,7 @@ namespace MqttHome.Mqtt
 
                 StateChanged?.Invoke(this, new StateChangedEventArgs
                 {
-                    PowerOn = value,
+                    PowerOn = value.Value,
                 });
             }
         }

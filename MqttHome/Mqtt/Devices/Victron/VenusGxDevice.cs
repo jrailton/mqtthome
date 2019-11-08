@@ -10,18 +10,15 @@ namespace MqttHome.Mqtt.Devices.Victron
     {
         public string SerialNumber;
 
-        public VenusGxDevice(MqttHomeController controller, string id, string serialNumber) : base(controller, id, MqttDeviceType.VictronCCGX)
+        public VenusGxDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, MqttDeviceType.VictronCCGX)
         {
-            SerialNumber = serialNumber;
-
             SensorTopics = new List<string> {
-                $"N/{SerialNumber}/system/0/Dc/Battery/#",
-                $"N/{SerialNumber}/system/0/Ac/Grid/#"
+                $"N/{id}/system/0/Dc/Battery/#",
+                $"N/{id}/system/0/Ac/Grid/#"
             };
         }
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.VictronCCGX;
         public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Sensor;
-
     }
 }

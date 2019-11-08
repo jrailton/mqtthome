@@ -10,8 +10,7 @@ namespace MqttHome.Mqtt
     public class SonoffGenericSwitchDevice : MqttStatefulDevice
     {
         private SwitchHelper _switchHelper;
-        public SonoffGenericSwitchDevice(MqttHomeController controller, string id, MqttDeviceType type)
-            : base(controller, id, type)
+        public SonoffGenericSwitchDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type) : base(controller, id, friendlyName, type)
         {
             _switchHelper = new SwitchHelper(this);
         }
@@ -22,7 +21,10 @@ namespace MqttHome.Mqtt
         public override void ParseStatePayload(MqttApplicationMessage message)
         {
             var state = JsonConvert.DeserializeObject<SonoffGenericStateData>(Encoding.UTF8.GetString(message.Payload));
-            PowerOn = state.POWER.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
+
+            var newState = state.POWER.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
+            if (PowerOn != newState)
+                PowerOn = newState;
         }
     }
 }

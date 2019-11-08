@@ -7,15 +7,32 @@ namespace MqttHome.Mqtt
 {
     public abstract class SensorData : ISensorData
     {
-        public abstract void Update(MqttApplicationMessage message);
+        public abstract Dictionary<string, object> Update(MqttApplicationMessage message);
 
-        protected void UpdateValues(SensorData newValues)
+        protected Dictionary<string, object> UpdateValues(SensorData newValues)
         {
-            foreach (var property in GetType().GetProperties())
+            try
             {
-                var newValue = property.GetValue(newValues);
-                if (property.GetValue(this) != newValue && !IsNullOrDefault(newValue))
-                    property.SetValue(this, newValue);
+                var updated = new Dictionary<string, object>();
+
+                foreach (var property in GetType().GetProperties())
+                {
+                    if (property.Name == "LoadWatts")
+                        Console.Write("");
+
+                    var newValue = property.GetValue(newValues);
+                    if (!IsNullOrDefault(newValue) && !(property.GetValue(this)?.Equals(newValue) ?? false))
+                    {
+                        updated.Add(property.Name, newValue);
+                        property.SetValue(this, newValue);
+                    }
+                }
+
+                return updated;
+            }
+            catch (Exception err) {
+                Console.WriteLine(err);
+                return null;
             }
         }
 
@@ -37,21 +54,24 @@ namespace MqttHome.Mqtt
         protected bool IsNullOrDefault<T>(T argument)
         {
             // deal with normal scenarios
-            if (argument == null) return true;
+            if (argument == null) 
+                return true;
 
-            if (object.Equals(argument, default(T))) return true;
+            if (object.Equals(argument, default(T))) 
+                return true;
 
             // deal with non-null nullables
             Type methodType = typeof(T);
-            if (Nullable.GetUnderlyingType(methodType) != null) return false;
+            if (Nullable.GetUnderlyingType(methodType) != null) 
+                return false;
 
             // deal with boxed value types
-            Type argumentType = argument.GetType();
-            if (argumentType.IsValueType && argumentType != methodType)
-            {
-                object obj = Activator.CreateInstance(argument.GetType());
-                return obj.Equals(argument);
-            }
+            //Type argumentType = argument.GetType();
+            //if (argumentType.IsValueType && argumentType != methodType)
+            //{
+            //    object obj = Activator.CreateInstance(argument.GetType());
+            //    return obj.Equals(argument);
+            //}
 
             return false;
         }

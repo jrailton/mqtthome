@@ -17,13 +17,16 @@ namespace MqttHome.Mqtt
         /// Constructor
         /// </summary>
         /// <param name="id">Id is the device ID that will be used as the topic and influx data tag</param>
-        public MqttDevice(MqttHomeController controller, string id, MqttDeviceType type)
+        public MqttDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config)
         {
+            FriendlyName = friendlyName ?? id;
             DeviceType = type;
             Controller = controller;
             Id = id;
             Controller.DeviceLog.Debug($"Adding {DeviceType} {DeviceClass} device {id}");
         }
+
+        public string FriendlyName { get; protected set; }
 
         public string Id { get; set; }
 

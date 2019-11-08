@@ -40,9 +40,10 @@
 
 <div class="container body-content">
     
-    @Html.Partial("_Messages")
+    @{ await Html.RenderPartialAsync("_Messages"); }
 
     @RenderBody()
+
     <hr/>
     <footer>
         <p>&copy; 2019 - MqttHomeWeb</p>

@@ -12,7 +12,7 @@ namespace MqttHome.Mqtt
 
         private SwitchHelper _switchHelper;
 
-        public MqttStatefulSensorDevice(MqttHomeController controller, string id, MqttDeviceType type) : base(controller, id, type)
+        public MqttStatefulSensorDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
             DeviceClass = MqttDeviceClass.Combo;
             SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
@@ -53,18 +53,18 @@ namespace MqttHome.Mqtt
 
         public DateTime? PowerOffTime { get; private set; }
 
-        protected bool _powerOn;
+        protected bool? _powerOn;
 
         public event EventHandler<StateChangedEventArgs> StateChanged;
 
-        public bool PowerOn
+        public bool? PowerOn
         {
             get => _powerOn;
             protected set
             {
                 _powerOn = value;
 
-                if (_powerOn)
+                if (_powerOn.Value)
                 {
                     // clear power off time (used for flipflop prevention)
                     PowerOffTime = null;
@@ -77,7 +77,7 @@ namespace MqttHome.Mqtt
 
                 StateChanged?.Invoke(this, new StateChangedEventArgs
                 {
-                    PowerOn = value
+                    PowerOn = value.Value
                 });
             }
         }
@@ -89,7 +89,10 @@ namespace MqttHome.Mqtt
         public virtual void ParseStatePayload(MqttApplicationMessage message)
         {
             var state = JsonConvert.DeserializeObject<SonoffGenericStateData>(Encoding.UTF8.GetString(message.Payload));
-            PowerOn = state.POWER.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
+            
+            var newState = state.POWER.Equals("ON", StringComparison.CurrentCultureIgnoreCase);
+            if (PowerOn != newState)
+                PowerOn = newState;
         }
 
         public void SwitchOff(string reason)

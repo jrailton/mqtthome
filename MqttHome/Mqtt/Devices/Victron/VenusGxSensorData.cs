@@ -65,9 +65,9 @@ namespace MqttHome.Mqtt.Devices
             }
         }
 
-        public override void Update(MqttApplicationMessage message)
+        public override Dictionary<string, object> Update(MqttApplicationMessage message)
         {
-            UpdateValues(new VenusGxSensorData(message));
+            return UpdateValues(new VenusGxSensorData(message));
         }
 
         private void ParseBatteryData(string[] topicArray, string value)

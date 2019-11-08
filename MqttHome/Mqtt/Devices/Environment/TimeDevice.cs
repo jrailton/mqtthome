@@ -7,7 +7,7 @@ namespace MqttHome.Mqtt.Devices.Environment
 {
     class TimeDevice : MqttSensorDevice<TimeSensorData>
     {
-        public TimeDevice(MqttHomeController controller, string id) : base(controller, id, MqttDeviceType.TimeSensor) { }
+        public TimeDevice(MqttHomeController controller, string id, string friendlyName) : base(controller, id, friendlyName, MqttDeviceType.TimeSensor) { }
 
         public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.Unknown;
         public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Sensor;

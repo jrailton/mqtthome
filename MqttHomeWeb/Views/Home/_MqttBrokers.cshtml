@@ -1,0 +1,14 @@
+﻿@using MqttHome.Mqtt
+@using MqttHome.Mqtt.Devices
+@model MqttHome.MqttHomeController
+
+@foreach (var communicator in Model.MqttCommunicators)
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">MQTT Servers</div>
+        <div class="panel-body">
+            <label>@communicator.Broker.Name (@(communicator.Connected ? "Connected" : "Disconnected"))</label>
+            @communicator.Broker.IpAddress:@communicator.Broker.Port
+        </div>
+    </div>
+}

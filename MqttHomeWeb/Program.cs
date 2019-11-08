@@ -13,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MqttHome;
 using MqttHome.Mqtt.BrokerCommunicator;
+using MqttHome.WebSockets;
+using MqttHomeWeb.Models;
 using Newtonsoft.Json;
 
 namespace MqttHomeWeb
@@ -20,6 +22,7 @@ namespace MqttHomeWeb
     public class Program
     {
         public static MqttHomeController MqttHomeController;
+        public static WebsocketManager WebsocketManager;
 
         public static void Main(string[] args)
         {
@@ -27,9 +30,13 @@ namespace MqttHomeWeb
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 
+            var webHost = CreateWebHostBuilder(args).Build();
+
+            WebsocketManager = (WebsocketManager)webHost.Services.GetService(typeof(WebsocketManager));
+
             RestartMqttHomeController();
 
-            CreateWebHostBuilder(args).Build().Run();
+            webHost.Run();
         }
 
         public static void RestartMqttHomeController()
@@ -46,7 +53,8 @@ namespace MqttHomeWeb
                 LogManager.GetLogger(logRepository, "MqttLog"),
                 mqttBrokers,
                 MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbUrl"],
-                MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbDatabase"]
+                MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbDatabase"],
+                WebsocketManager
             );
 
             MqttHomeController.Start();

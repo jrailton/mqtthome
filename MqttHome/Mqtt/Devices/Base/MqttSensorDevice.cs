@@ -7,31 +7,18 @@ namespace MqttHome.Mqtt
 {
     public abstract class MqttSensorDevice<TSensorData> : MqttDevice, ISensorDevice<ISensorData> where TSensorData : SensorData, new()
     {
-        public MqttSensorDevice(MqttHomeController controller, string id, MqttDeviceType type) : base(controller, id, type)
+        public MqttSensorDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
-            _sensorData = new TSensorData();
+            SensorData = new TSensorData();
             DeviceClass = MqttDeviceClass.Sensor;
             SensorTopics = new List<string> {
                 $"tele/{id}/SENSOR"
             };
         }
 
-        protected ISensorData _sensorData;
-
         public event EventHandler<SensorDataChangedEventArgs> SensorDataChanged;
 
-        public ISensorData SensorData
-        {
-            get => _sensorData;
-            set
-            {
-                _sensorData = value;
-                SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
-                {
-                    SensorData = _sensorData
-                });
-            }
-        }
+        public ISensorData SensorData { get; protected set; }
 
         public virtual Dictionary<string, object> SensorValues => SensorData.ToDictionary();
 
@@ -39,7 +26,15 @@ namespace MqttHome.Mqtt
 
         public virtual void ParseSensorPayload(MqttApplicationMessage e) {
             LastMqttMessage = DateTime.Now;
-            SensorData.Update(e);
+            
+            var updated = SensorData.Update(e);
+
+            if ((updated?.Count ?? 0) > 0 && SensorDataChanged != null)
+                SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
+                {
+                    ChangedValues = updated
+                });
+
         }
     }
 }

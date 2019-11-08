@@ -1,0 +1,36 @@
+﻿@using MqttHome.Mqtt
+@using MqttHome.Mqtt.Devices
+@model MqttHome.MqttHomeController
+
+<div class="panel panel-default">
+    <div class="panel-heading">Conditions</div>
+    <div class="panel-body">
+        @foreach (var condition in Model.RuleEngine.ConditionConfig.Conditions)
+        {
+            <div class="col-sm-4 col-lg-3">
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">@condition.Id</div>
+                    <div class="panel-body">
+                        <div>
+                            <label>Device</label>
+                            @condition.Device
+                        </div>
+                        <div>
+                            <label>Condition</label>
+                            @condition.SensorValue
+                        </div>
+                        <div>
+                            <label>Result</label>
+                            @(condition.ConditionValue.HasValue ? condition.ConditionValue.Value.ToString() : "n/a")
+                        </div>
+                        <div>
+                            <label>Last Sensor Value</label>
+                            @condition.LastSensorValue
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

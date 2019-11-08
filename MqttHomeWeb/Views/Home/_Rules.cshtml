@@ -1,0 +1,73 @@
+﻿@model MqttHome.MqttHomeController
+
+<div class="panel panel-default">
+    <div class="panel-heading">Rules</div>
+    <div class="panel-body">
+        <div class="">
+            <label>Defaults</label>
+            <p>
+                <div>
+                    <label>Flip Flop</label>
+                    @Model.RuleEngine.RuleConfig.Defaults.FlipFlop
+                </div>
+
+                @if (Model.RuleEngine.RuleConfig.Defaults.ConditionsOr?.Any() ?? false)
+                {
+                    <div>
+                        <label>Condition OR</label>
+                        @Html.Raw(string.Join("<br />", Model.RuleEngine.RuleConfig.Defaults.ConditionsOr))
+                    </div>
+                }
+
+                @if (Model.RuleEngine.RuleConfig.Defaults.ConditionsAnd?.Any() ?? false)
+                {
+                    <div>
+                        <label>Condition AND</label>
+                        @Html.Raw(string.Join("<br />", Model.RuleEngine.RuleConfig.Defaults.ConditionsAnd))
+                    </div>
+                }
+
+            </p>
+        </div>
+
+        @foreach (var rule in Model.RuleEngine.RuleConfig.Rules)
+        {
+            <p>
+                <div>
+                    <label>@rule.Name</label>
+                </div>
+
+                <div>
+                    <label>Description</label>
+                    @rule.Description
+                </div>
+
+                <div>
+                    <label>Switch</label>
+                    @rule.Switch
+                </div>
+
+                @if (rule.ConditionsOr?.Any() ?? false)
+                {
+                    <div>
+                        <label>OR Condition(s)</label>
+                        @Html.Raw(string.Join("<br />", rule.ConditionsOr))
+                    </div>
+                }
+
+                @if (rule.ConditionsAnd?.Any() ?? false)
+                {
+                    <div>
+                        <label>AND Condition(s)</label>
+                        @Html.Raw(string.Join("<br />", rule.ConditionsAnd))
+                    </div>
+                }
+
+                <div>
+                    <label>Flip Flop</label>
+                    @rule.FlipFlop
+                </div>
+            </p>
+        }
+    </div>
+</div>

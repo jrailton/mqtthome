@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MQTTnet;
@@ -81,9 +82,9 @@ namespace MqttHome.Mqtt.Devices
             }
         }
 
-        public override void Update(MqttApplicationMessage message)
+        public override Dictionary<string, object> Update(MqttApplicationMessage message)
         {
-            UpdateValues(new ICCSensorData(message));
+            return UpdateValues(new ICCSensorData(message));
         }
 
         /// <summary>
@@ -104,29 +105,29 @@ namespace MqttHome.Mqtt.Devices
             return output;
         }
 
-        public int PylontechCycles { get; set; }
-        public decimal PylontechWatts { get; set; }
-        public decimal PylontechTemp { get; set; }
-        public decimal PylontechAhRemaining { get; set; }
-        public decimal PylontechAhRemainingTill20Soc { get; set; }
-        public int PylontechSecondsRemaining { get; set; }
-        public decimal PylontechAhUsed { get; set; }
+        public int? PylontechCycles { get; set; }
+        public decimal? PylontechWatts { get; set; }
+        public decimal? PylontechTemp { get; set; }
+        public decimal? PylontechAhRemaining { get; set; }
+        public decimal? PylontechAhRemainingTill20Soc { get; set; }
+        public int? PylontechSecondsRemaining { get; set; }
+        public decimal? PylontechAhUsed { get; set; }
 
-        public decimal LoadWatts { get; set; }
-        public decimal BatteryAmps { get; set; }
-        public decimal PvWatts { get; set; }
-        public decimal PvVolts { get; set; }
-        public decimal LoadPcnt { get; set; }
-        public decimal InverterTemp { get; set; }
-        public decimal InverterFreq { get; set; }
-        public decimal InverterVolts { get; set; }
+        public decimal? LoadWatts { get; set; }
+        public decimal? BatteryAmps { get; set; }
+        public decimal? PvWatts { get; set; }
+        public decimal? PvVolts { get; set; }
+        public decimal? LoadPcnt { get; set; }
+        public decimal? InverterTemp { get; set; }
+        public decimal? InverterFreq { get; set; }
+        public decimal? InverterVolts { get; set; }
         public string InverterMode { get; set; }
-        public decimal BatteryVoltage { get; set; }
-        public decimal BatterySoC { get; set; }
-        public decimal BatteryWatts { get; set; }
-        public decimal GridVoltage { get; set; }
-        public decimal GridWatts { get; set; }
-        public decimal GridFreq { get; set; }
-        public int IccUptimeSeconds { get; set; }
+        public decimal? BatteryVoltage { get; set; }
+        public decimal? BatterySoC { get; set; }
+        public decimal? BatteryWatts { get; set; }
+        public decimal? GridVoltage { get; set; }
+        public decimal? GridWatts { get; set; }
+        public decimal? GridFreq { get; set; }
+        public int? IccUptimeSeconds { get; set; }
     }
 }

@@ -1,0 +1,17 @@
+﻿@model MqttHome.MqttHomeController
+
+<div class="row">
+    @{await Html.RenderPartialAsync("_MqttBrokers");}
+</div>
+
+<div class="row">
+    @{await Html.RenderPartialAsync("_Conditions");}
+</div>
+
+<div class="row">
+    @{await Html.RenderPartialAsync("_Rules");}
+</div>
+
+<div class="row">
+    @{await Html.RenderPartialAsync("_Devices");}
+</div>

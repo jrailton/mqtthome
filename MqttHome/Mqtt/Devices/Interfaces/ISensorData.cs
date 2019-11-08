@@ -6,6 +6,6 @@ namespace MqttHome.Mqtt
     public interface ISensorData
     {
         Dictionary<string, object> ToDictionary();
-        void Update(MqttApplicationMessage message);
+        Dictionary<string, object> Update(MqttApplicationMessage message);
     }
 }

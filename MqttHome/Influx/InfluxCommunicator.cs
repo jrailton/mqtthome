@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using InfluxDB.LineProtocol.Client;
 using InfluxDB.LineProtocol.Payload;
 using log4net;
+using Newtonsoft.Json;
 
 namespace MqttHome.Influx
 {
@@ -32,6 +33,8 @@ namespace MqttHome.Influx
 
         public void Write(LineProtocolPoint point)
         {
+            _logger.Error(JsonConvert.SerializeObject(point));
+
             var payload = new LineProtocolPayload();
 
             payload.Add(point);

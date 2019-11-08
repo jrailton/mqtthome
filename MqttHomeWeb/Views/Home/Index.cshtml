@@ -1,127 +1,50 @@
-﻿@using MqttHome.Mqtt
-@using MqttHome.Mqtt.Devices
-@model MqttHome.MqttHomeController
+﻿@model MqttHome.MqttHomeController
 @{
     ViewData["Title"] = "MQTT Home";
 }
-<div class="row">
-    @foreach (var communicator in Model.MqttCommunicators)
-    {
-        <div class="panel panel-default">
-            <div class="panel-heading">MQTT Servers</div>
-            <div class="panel-body">
-                <label>@communicator.Broker.Name (@(communicator.Connected ? "Connected" : "Disconnected"))</label>
-                @communicator.Broker.IpAddress:@communicator.Broker.Port
-            </div>
-        </div>
+
+<script>
+    (function () {
+        "use strict";
+
+        // set websocket connection
+        var protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        var wsUri = protocol + "//" + window.location.host;
+        var socket = new WebSocket(wsUri);
+
+        socket.onmessage = function (e) {
+            $("#log-content").prepend('<strong>' + new Date().toLocaleString() + '</strong> ' + e.data + '<br />');
+        };
+
+        socket.onclose = function () {
+            socket = new WebSocket(wsUri);
+        }
+
+        // reload data timer
+        setInterval(function () { $("#index-content").load("/home/indexcontent"); }, 5000);
+    }());
+
+    function SwitchOff(id) {
+        $("#message-content").load("/switch/off/"+id);
     }
-</div>
 
-<div class="row">
-    <div class="panel panel-default">
-        <div class="panel-heading">Rules</div>
-        <div class="panel-body">
-            <div class="">
-                <label>Defaults</label>
-                <p>
-                    <div>
-                        <label>Flip Flop</label>
-                        @Model.RuleEngine.Config.Defaults.FlipFlop
-                    </div>
-                    <div>
-                        <label>Condition AND</label>
-                        @Model.RuleEngine.Config.Defaults.ConditionAnd
-                    </div>
-                    <div>
-                        <label>Condition OR</label>
-                        @Model.RuleEngine.Config.Defaults.ConditionOr
-                    </div>
-                </p>
-            </div>
-
-            @foreach (var rule in Model.RuleEngine.Config.Rules)
-            {
-                <p>
-                    <div><label>@rule.Name</label></div>
-                    <div>
-                        <label>Description</label>
-                        @rule.Description
-                    </div>
-                    <div>
-                        <label>Switch</label>
-                        @rule.Switch
-                    </div>
-                    <div>
-                        <label>Condition</label>
-                        @rule.Condition
-                    </div>
-                    <div>
-                        <label>Flip Flop</label>
-                        @rule.FlipFlop
-                    </div>
-                </p>
-            }
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <div class="panel panel-default">
-        <div class="panel-heading">Devices</div>
-        <div class="panel-body">
-
-            @foreach (var device in Model.MqttDevices)
-            {
-                <div class="col-sm-3">
-                    <div class="panel panel-info">
-                        <div class="panel-heading">@device.DeviceClass @device.Id (Last Contact: @(device.LastMqttMessage.HasValue ? device.LastMqttMessage.Value.ToString("d MMM yy HH:mm:ss") : "(never)"))</div>
-                        <div class="panel-body">
-                            <div>
-                                <label>Type</label>
-                                @device.DeviceType
-                            </div>
-                            <div>
-                                <label>MQTT Topics</label>
-                                @Html.Raw(string.Join("<br />", device.AllTopics))
-                            </div>
-                            @if (device is IStatefulDevice)
-                            {
-                                var stateful = device as IStatefulDevice;
-                                <div>
-                                    <label>Power On</label>
-                                    @stateful.PowerOn
-                                </div>
-                                <div>
-                                    <a href="/switch/off/@device.Id" class="btn btn-primary btn-sm">Switch Off</a>
-                                    <a href="/switch/on/@device.Id" class="btn btn-primary btn-sm">Switch On</a>
-                                </div>
-                            }
-                            @if (device is ISensorDevice<ISensorData>)
-                            {
-                                var sensor = device as ISensorDevice<ISensorData>;
-                                if (sensor.SensorValues != null)
-                                {
-                                <div>
-                                    <label>Sensor Data</label>
-                                    @foreach (var pair in sensor.SensorValues)
-                                    {
-                                        <div>
-                                            <label>@pair.Key</label>
-                                            @pair.Value
-                                        </div>
-                                    }
-                                </div>
-                                }
-                            }
-
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</div>
-
-<script type="text/javascript">
-    setTimeout(function () { location.reload(); }, 5000)
+    function SwitchOn(id) {
+        $("#message-content").load("/switch/on/"+id);
+    }
 </script>
+
+<div id="message-content" style="position: fixed; top: 51px; left: 50%; transform: translate(-50%); z-index: 99999;"></div>
+
+<div id="index-content">
+    @{await Html.RenderPartialAsync("_IndexContent"); }
+</div>
+
+<div class="panel panel-danger">
+    <div class="panel-heading">
+        Error Logs
+        <button class="btn btn-xs btn-danger pull-right" onclick="$('#log-content').html('');">Clear Logs</button>
+    </div>
+    <div class="panel-body">
+        <pre id="log-content" style="background-color: #FFF; overflow: auto; height: 100vh;"></pre>
+    </div>
+</div>

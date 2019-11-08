@@ -21,6 +21,6 @@ namespace MqttHome.Mqtt.Devices
     }
 
     public class SensorDataChangedEventArgs : EventArgs {
-        public ISensorData SensorData;
+        public Dictionary<string, object> ChangedValues;
     }
 }

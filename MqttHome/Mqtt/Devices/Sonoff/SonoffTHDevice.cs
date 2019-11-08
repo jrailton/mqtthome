@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Text;
 using InfluxDB.LineProtocol.Payload;
 using MqttHome.Mqtt.Devices;
@@ -9,8 +12,7 @@ namespace MqttHome.Mqtt
 {
     public class SonoffTHDevice : MqttStatefulSensorDevice<SonoffTHSensorData>
     {
-        public SonoffTHDevice(MqttHomeController controller, string id)
-            : base(controller, id, MqttDeviceType.SonoffTH)
+        public SonoffTHDevice(MqttHomeController controller, string id, string friendlyName) : base(controller, id, friendlyName, MqttDeviceType.SonoffTH)
         {
         }
 

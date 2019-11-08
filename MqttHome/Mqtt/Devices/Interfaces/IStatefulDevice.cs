@@ -22,7 +22,7 @@ namespace MqttHome.Mqtt.Devices
 
         DateTime? PowerOffTime { get; }
 
-        bool PowerOn { get; }
+        bool? PowerOn { get; }
 
         string Id { get; }
 
