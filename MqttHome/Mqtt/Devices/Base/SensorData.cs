@@ -15,12 +15,13 @@ namespace MqttHome.Mqtt
             {
                 var updated = new Dictionary<string, object>();
 
+                // look through all properties on this sensor
                 foreach (var property in GetType().GetProperties())
                 {
-                    if (property.Name == "LoadWatts")
-                        Console.Write("");
-
+                    // get the updated sensor value
                     var newValue = property.GetValue(newValues);
+
+                    // check if the new value is null, default or the same as the old value -- if not, update it
                     if (!IsNullOrDefault(newValue) && !(property.GetValue(this)?.Equals(newValue) ?? false))
                     {
                         updated.Add(property.Name, newValue);
@@ -31,8 +32,7 @@ namespace MqttHome.Mqtt
                 return updated;
             }
             catch (Exception err) {
-                Console.WriteLine(err);
-                return null;
+                throw;
             }
         }
 

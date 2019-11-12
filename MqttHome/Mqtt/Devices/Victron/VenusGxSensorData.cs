@@ -61,7 +61,7 @@ namespace MqttHome.Mqtt.Devices
             }
             catch (Exception err)
             {
-                Console.WriteLine(err.Message);
+                throw;
             }
         }
 
@@ -133,21 +133,21 @@ namespace MqttHome.Mqtt.Devices
 
         // battery properties
 
-        public decimal BatteryConsumedAmphours { get; set; }
-        public decimal BatteryCurrent { get; set; }
-        public decimal BatteryPower { get; set; }
-        public decimal BatterySoC { get; set; }
-        public int BatteryState { get; set; }
-        public decimal BatteryTemperature { get; set; }
+        public decimal? BatteryConsumedAmphours { get; set; }
+        public decimal? BatteryCurrent { get; set; }
+        public decimal? BatteryPower { get; set; }
+        public decimal? BatterySoC { get; set; }
+        public int? BatteryState { get; set; }
+        public decimal? BatteryTemperature { get; set; }
         public decimal? BatteryTimeToGo { get; set; }
-        public decimal BatteryVoltage { get; set; }
+        public decimal? BatteryVoltage { get; set; }
 
         // grid properties
 
-        public decimal GridL1Power { get; set; }
-        public decimal GridL2Power { get; set; }
-        public decimal GridL3Power { get; set; }
-        public int GridNumberOfPhases { get; set; }
+        public decimal? GridL1Power { get; set; }
+        public decimal? GridL2Power { get; set; }
+        public decimal? GridL3Power { get; set; }
+        public int? GridNumberOfPhases { get; set; }
 
     }
 

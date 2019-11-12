@@ -105,13 +105,13 @@ namespace MqttHome
 
         public void Fatal(object message)
         {
-            wsm.SendMessageToAllAsync(message.ToString()).RunSynchronously();
+            wsm.SendMessageToAllAsync(message.ToString());
             logger.Fatal(message);
         }
 
         public void Fatal(object message, Exception exception)
         {
-            wsm.SendMessageToAllAsync(message.ToString()).RunSynchronously();
+            wsm.SendMessageToAllAsync(message.ToString());
             logger.Fatal(message, exception);
         }
 

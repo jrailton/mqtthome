@@ -4,32 +4,56 @@
 }
 
 <script>
+    var socket = null;
+
     (function () {
         "use strict";
-
-        // set websocket connection
-        var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-        var wsUri = protocol + "//" + window.location.host;
-        var socket = new WebSocket(wsUri);
-
-        socket.onmessage = function (e) {
-            $("#log-content").prepend('<strong>' + new Date().toLocaleString() + '</strong> ' + e.data + '<br />');
-        };
-
-        socket.onclose = function () {
-            socket = new WebSocket(wsUri);
-        }
 
         // reload data timer
         setInterval(function () { $("#index-content").load("/home/indexcontent"); }, 5000);
     }());
 
+    function ToggleLogging() {
+        if (socket) {
+            // close websocket connection
+            socket.close();
+            socket = null;
+
+            Log("Log streaming stopped.");
+        } else {
+            // set websocket connection
+            var protocol = location.protocol === "https:" ? "wss:" : "ws:";
+            var wsUri = protocol + "//" + window.location.host;
+            socket = new WebSocket(wsUri);
+
+            Log("Log streaming started.");
+
+            socket.onmessage = function (e) {
+                Log(e.data);
+            };
+
+            socket.onclose = function (e) {
+
+                // if it wasnt a clean close, re-open the connection
+                if (!e.wasClean) {
+                    Log("Log stream interrupted, reconnecting...");
+                    socket = null;
+                    ToggleLogging();
+                }
+            }
+        }
+    }
+
+    function Log(message) {
+        $("#log-content").prepend('<strong>' + new Date().toLocaleString() + '</strong> ' + message + '<br />');
+    }
+
     function SwitchOff(id) {
-        $("#message-content").load("/switch/off/"+id);
+        $("#message-content").load("/switch/off/" + id);
     }
 
     function SwitchOn(id) {
-        $("#message-content").load("/switch/on/"+id);
+        $("#message-content").load("/switch/on/" + id);
     }
 </script>
 
@@ -41,10 +65,14 @@
 
 <div class="panel panel-danger">
     <div class="panel-heading">
-        Error Logs
-        <button class="btn btn-xs btn-danger pull-right" onclick="$('#log-content').html('');">Clear Logs</button>
+        <a data-toggle="collapse" href="#collapse-logs">Error Logs</a>
+        <button class="btn btn-xs btn-default pull-right" onclick="ToggleLogging(); ">Toggle Logging</button>
+        <button class="btn btn-xs btn-danger pull-right" onclick="$('#log-content').html('');" style="margin-right: 5px;">Clear Logs</button>
     </div>
-    <div class="panel-body">
-        <pre id="log-content" style="background-color: #FFF; overflow: auto; height: 100vh;"></pre>
+    <div id="collapse-logs" class="panel-collapse collapse">
+
+        <div class="panel-body">
+            <pre id="log-content" style="background-color: #FFF; overflow: auto; height: 70vh;"></pre>
+        </div>
     </div>
-</div>
+    </div>

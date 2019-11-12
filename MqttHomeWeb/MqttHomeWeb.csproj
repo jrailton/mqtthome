@@ -9,9 +9,13 @@
 
   <ItemGroup>
     <Compile Remove="logs\**" />
+    <Compile Remove="publish\**" />
     <Content Remove="logs\**" />
+    <Content Remove="publish\**" />
     <EmbeddedResource Remove="logs\**" />
+    <EmbeddedResource Remove="publish\**" />
     <None Remove="logs\**" />
+    <None Remove="publish\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,7 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="rules.json" />
+    <None Include="rules.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +41,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MqttHome\MqttHome.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="conditions.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="devices.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

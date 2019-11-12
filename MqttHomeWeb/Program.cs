@@ -23,9 +23,12 @@ namespace MqttHomeWeb
     {
         public static MqttHomeController MqttHomeController;
         public static WebsocketManager WebsocketManager;
+        public static DateTime StartupTime;
 
         public static void Main(string[] args)
         {
+            StartupTime = DateTime.Now;
+
             // configure log4net
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
@@ -45,7 +48,7 @@ namespace MqttHomeWeb
 
             var mqttBrokers = Helpers.ConfigurationManager.AppSetting.GetSection("MqttBrokers").Get<List<MqttBroker>>();
 
-            MqttHomeController = new MqttHomeController(false,
+            MqttHomeController = new MqttHomeController(Helpers.ConfigurationManager.AppSetting,
                 LogManager.GetLogger(logRepository, "RuleLog"),
                 LogManager.GetLogger(logRepository, "DeviceLog"),
                 LogManager.GetLogger(logRepository, "GeneralLog"),

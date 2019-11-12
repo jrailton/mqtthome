@@ -19,6 +19,17 @@
       "Id": "GridPower",
       "Device": "icc",
       "SensorValue": "GridVoltage >= 200"
+    },
+    {
+      "Id": "AfterSunset",
+      "Device": "time",
+      "SensorValue": "Sundown == true"
+    },
+    {
+      "Id": "BeforeMidnight",
+      "Device": "time",
+      "SensorValue": "Hour > 17"
     }
+
   ]
 }

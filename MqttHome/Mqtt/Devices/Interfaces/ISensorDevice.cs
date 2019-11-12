@@ -11,6 +11,7 @@ namespace MqttHome.Mqtt.Devices
         void ParseSensorPayload(MqttApplicationMessage e);
 
         DateTime? LastMqttMessage { get; set; }
+        bool SaveSensorValuesToDatabase { get; }
 
         Dictionary<string, object> SensorValues { get; }
         List<string> SensorTopics { get; }

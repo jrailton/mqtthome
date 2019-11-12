@@ -10,7 +10,7 @@ namespace MqttHome.Mqtt
     public class SonoffGenericSwitchDevice : MqttStatefulDevice
     {
         private SwitchHelper _switchHelper;
-        public SonoffGenericSwitchDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type) : base(controller, id, friendlyName, type)
+        public SonoffGenericSwitchDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
             _switchHelper = new SwitchHelper(this);
         }

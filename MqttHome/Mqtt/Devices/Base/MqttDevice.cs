@@ -69,6 +69,5 @@ namespace MqttHome.Mqtt
 
         public abstract MqttDeviceType DeviceType { get; set; }
         public abstract MqttDeviceClass DeviceClass { get; set; }
-
     }
 }

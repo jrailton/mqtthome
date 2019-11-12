@@ -13,7 +13,7 @@
     {
       "Type": "SonoffTHDevice",
       "Id": "th16_2",
-      "FriendlyName": "Non-Essentials Circuit"
+      "FriendlyName": "Workshop & Max's Room"
     },
     {
       "Type": "SonoffPowR2Device",
@@ -33,7 +33,7 @@
     {
       "Type": "SonoffPowR2Device",
       "Id": "powr2_5",
-      "FriendlyName": "Workshop & Max's Room"
+      "FriendlyName": "Garden Lights"
     },
     {
       "Type": "SonoffS26Device",
@@ -41,9 +41,15 @@
       "FriendlyName": "Lounge Lamp"
     },
     {
+      "Type": "SonoffBasicDevice",
+      "Id": "mini_1",
+      "FriendlyName": "Veranda Lights"
+    },
+    {
       "Type": "VenusGxDevice",
       "Id": "7c386655e76b",
-      "FriendlyName": "Victron Venus GX"
+      "FriendlyName": "Victron Venus GX",
+      "Parameters": [ "10.0.0.59", "1883" ]
     }
   ]
 }

@@ -10,7 +10,6 @@ namespace MqttHome.Mqtt
         public MqttSensorDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
             SensorData = new TSensorData();
-            DeviceClass = MqttDeviceClass.Sensor;
             SensorTopics = new List<string> {
                 $"tele/{id}/SENSOR"
             };
@@ -20,21 +19,29 @@ namespace MqttHome.Mqtt
 
         public ISensorData SensorData { get; protected set; }
 
+        public virtual bool SaveSensorValuesToDatabase => true;
+
         public virtual Dictionary<string, object> SensorValues => SensorData.ToDictionary();
 
         public virtual List<string> SensorTopics { get; set; }
 
-        public virtual void ParseSensorPayload(MqttApplicationMessage e) {
-            LastMqttMessage = DateTime.Now;
-            
+        public virtual void ParseSensorPayload(MqttApplicationMessage e) {            
             var updated = SensorData.Update(e);
 
-            if ((updated?.Count ?? 0) > 0 && SensorDataChanged != null)
+            if (Controller.SaveAllSensorValuesToDatabaseEveryTime)
+            {
+                SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
+                {
+                    ChangedValues = SensorData.ToDictionary()
+                });
+            }
+            else if ((updated?.Count ?? 0) > 0 && SensorDataChanged != null)
+            {
                 SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
                 {
                     ChangedValues = updated
                 });
-
+            }
         }
     }
 }

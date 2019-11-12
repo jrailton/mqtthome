@@ -28,13 +28,14 @@ namespace MqttHome.Influx
         {
             var result = await _client.WriteAsync(payload);
             if (!result.Success)
+            {
+                _logger.Error($"Failed to write to InfluxDB: {result.ErrorMessage}");
                 throw new Exception($"Failed to write to InfluxDB: {result.ErrorMessage}");
+            }
         }
 
         public void Write(LineProtocolPoint point)
         {
-            _logger.Error(JsonConvert.SerializeObject(point));
-
             var payload = new LineProtocolPayload();
 
             payload.Add(point);

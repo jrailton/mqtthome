@@ -1,14 +1,42 @@
 {
   "Rules": [
     {
-      "Name": "Test Rule",
-      "Description": "Just testing",
-      "Switch": "th16_1",
+      "Name": "Garden Lights Soc",
+      "Description": "Garden Lights will be on from sunset to midnight",
+      "Switch": "powr2_5",
       "ConditionsOr": [
-        "GridVoltage",
+        "GridPower",
         "SocGt95"
       ],
+      "ConditionsAnd": [
+        "AfterSunset",
+        "BeforeMidnight"
+      ],
       "FlipFlop": 15
+    },
+    {
+      "Name": "Laundry Soc",
+      "Description": "",
+      "Switch": "powr2_1",
+      "ConditionsOr": [
+        "GridPower",
+        "SocGt85",
+        "Before7am",
+        "After5pm"
+      ],
+      "FlipFlop": 600
+    },
+    {
+      "Name": "Kitchen Soc",
+      "Description": "",
+      "Switch": "powr2_2",
+      "ConditionsOr": [
+        "GridPower",
+        "SocGt85",
+        "Before7am",
+        "After5pm"
+      ],
+      "FlipFlop": 600
     }
   ]
 }

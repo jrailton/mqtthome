@@ -12,7 +12,7 @@ namespace MqttHome.Mqtt
 {
     public class SonoffTHDevice : MqttStatefulSensorDevice<SonoffTHSensorData>
     {
-        public SonoffTHDevice(MqttHomeController controller, string id, string friendlyName) : base(controller, id, friendlyName, MqttDeviceType.SonoffTH)
+        public SonoffTHDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, MqttDeviceType.SonoffTH, config)
         {
         }
 

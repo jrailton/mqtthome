@@ -14,7 +14,6 @@ namespace MqttHome.Mqtt
 
         public MqttStatefulSensorDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
-            DeviceClass = MqttDeviceClass.Combo;
             SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
             SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");
             StateTopic = $"tele/{Id}/STATE";

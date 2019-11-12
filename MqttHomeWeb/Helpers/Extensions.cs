@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Html;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +11,13 @@ namespace System
         public static string GetPrettyDate(this DateTime d)
         {
             return GetPrettyDate((DateTime?)d);
+        }
+
+        public static HtmlString GetPrettyDateHtml(this DateTime? d) {
+            if (!d.HasValue)
+                return new HtmlString("(never)");
+
+            return new HtmlString($"<a title='{d.Value.ToString("d MMM yy HH:mm:ss.fff")}'>{d.Value.GetPrettyDate()}</a>");
         }
 
         public static string GetPrettyDate(this DateTime? d)

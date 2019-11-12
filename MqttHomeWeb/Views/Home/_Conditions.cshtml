@@ -1,36 +1,44 @@
-﻿@using MqttHome.Mqtt
-@using MqttHome.Mqtt.Devices
-@model MqttHome.MqttHomeController
+﻿@model MqttHome.MqttHomeController
 
 <div class="panel panel-default">
-    <div class="panel-heading">Conditions</div>
-    <div class="panel-body">
-        @foreach (var condition in Model.RuleEngine.ConditionConfig.Conditions)
-        {
-            <div class="col-sm-4 col-lg-3">
+    <div class="panel-heading">
+        <a role="button" data-toggle="collapse" href="#collapse-conditions" aria-expanded="true" aria-controls="collapse-conditions">
+            Conditions
+        </a>
+    </div>
+    <div id="collapse-conditions" class="panel-collapse collapse in">
+        <div class="panel-body">
+            @foreach (var condition in Model.RuleEngine.ConditionConfig.Conditions)
+            {
+                <div class="col-sm-4 col-lg-3">
 
-                <div class="panel panel-info">
-                    <div class="panel-heading">@condition.Id</div>
-                    <div class="panel-body">
-                        <div>
-                            <label>Device</label>
-                            @condition.Device
-                        </div>
-                        <div>
-                            <label>Condition</label>
-                            @condition.SensorValue
-                        </div>
-                        <div>
-                            <label>Result</label>
-                            @(condition.ConditionValue.HasValue ? condition.ConditionValue.Value.ToString() : "n/a")
-                        </div>
-                        <div>
-                            <label>Last Sensor Value</label>
-                            @condition.LastSensorValue
+                    <div class="panel panel-info">
+                        <div class="panel-heading">@condition.Id</div>
+                        <div class="panel-body">
+                            <div>
+                                <label>Device</label>
+                                @condition.Device
+                            </div>
+                            <div>
+                                <label>Condition</label>
+                                @condition.SensorValue
+                            </div>
+                            <div>
+                                <label>Condition Value</label>
+                                <span class="label label-@(condition.ConditionValue.HasValue ? (condition.ConditionValue.Value ? "success" : "danger") : "default")">@(condition.ConditionValue.HasValue ? condition.ConditionValue.Value.ToString() : "n/a")</span>
+                            </div>
+                            <div>
+                                <label>Condition Value Updated</label>
+                                @condition.ConditionValueUpdated.GetPrettyDateHtml()
+                            </div>
+                            <div>
+                                <label>Last Sensor Value</label>
+                                @condition.LastSensorValue
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
     </div>
 </div>

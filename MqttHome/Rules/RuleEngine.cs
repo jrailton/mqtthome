@@ -37,9 +37,28 @@ namespace MqttHome
             if (remove.Any())
             {
                 // log it
-                _controller.RuleLog.Warn($"Removing {remove.Count} rules that refer to non-existent SWITCH devices: {string.Join(", ", remove.Select(r => r.Name))}");
+                _controller.RuleLog.Warn($"ValidateRules :: Removing {remove.Count} rules that refer to non-existent SWITCH devices: {string.Join(", ", remove.Select(r => r.Name))}");
                 RuleConfig.Rules.RemoveAll(r => !switches.Any(s => s.Id == r.Switch));
             }
+
+            // remove rules that refer to non-existent conditions or have no conditions
+            remove = RuleConfig.Rules.Where(r =>
+                (!r.ConditionsAnd.Any() && !r.ConditionsOr.Any()) ||
+                r.ConditionsAnd.Any(ca => !ConditionConfig.Conditions.Any(c => c.Id == ca)) ||
+                r.ConditionsOr.Any(co => !ConditionConfig.Conditions.Any(c => c.Id == co))
+            ).ToList();
+
+            if (remove.Any())
+            {
+                // log it
+                _controller.RuleLog.Warn($"ValidateRules :: Removing {remove.Count} rules that refer to non-existent conditions OR have no conditions specified: {string.Join(", ", remove.Select(r => r.Name))}");
+                RuleConfig.Rules.RemoveAll(r =>
+                    (!r.ConditionsAnd.Any() && !r.ConditionsOr.Any()) ||
+                    r.ConditionsAnd.Any(ca => !ConditionConfig.Conditions.Any(c => c.Id == ca)) ||
+                    r.ConditionsOr.Any(co => !ConditionConfig.Conditions.Any(c => c.Id == co))
+                );
+            }
+
         }
 
         private void LoadRules()
@@ -81,9 +100,22 @@ namespace MqttHome
                 var content = File.ReadAllText("conditions.json");
                 ConditionConfig = JsonConvert.DeserializeObject<ConditionConfig>(content);
 
+                // validate each rule and attach event to each
                 foreach (var condition in ConditionConfig.Conditions) {
-                    condition.ConditionValueChanged += OnConditionValueChanged;
+
+                    var problems = condition.CheckProblems();
+                    if (problems.Any())
+                    {
+                        _controller.RuleLog.Error($"LoadConditions :: Condition ID {condition.Id} has problems: {string.Join(Environment.NewLine, problems)}");
+                    }
+                    else
+                    {
+                        condition.ConditionValueChanged += OnConditionValueChanged;
+                    }
                 }
+
+                // remove dodgy conditions
+                ConditionConfig.Conditions.RemoveAll(c => c.CheckProblems().Any());
 
                 _controller.RuleLog.Info($"LoadConditions :: Loaded {ConditionConfig.Conditions.Count} conditions from conditions.json");
 
@@ -98,73 +130,55 @@ namespace MqttHome
         {
             var condition = (Condition)sender;
 
+            string logIdentity = $"OnConditionValueChanged :: Condition ID {condition.Id}";
+
             foreach (var rule in RuleConfig.Rules.Where(r => r.DependsOnCondition(condition.Id)))
             {
-                var statefulDevice = _controller.MqttDevices.OfType<IStatefulDevice>().FirstOrDefault(d => d.Id == rule.Switch);
+                logIdentity += $" :: Rule {rule.Name}";
 
-                if (rule.Test(ConditionConfig.Conditions))
+                try
                 {
-                    // only switch device ON if its currently OFF (presume its OFF if no power state set yet)
-                    if (!(statefulDevice.PowerOn ?? false))
-                        statefulDevice.SwitchOn($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})", rule.FlipFlop);
+                    logIdentity += $" :: Find SWITCH device {rule.Switch}";
+
+                    var statefulDevice = _controller.MqttDevices.OfType<IStatefulDevice>().FirstOrDefault(d => d.Id == rule.Switch);
+
+                    logIdentity += $" :: Test Conditions";
+
+                    var ruleState = rule.Test(ConditionConfig.Conditions);
+
+                    if (rule.State != ruleState)
+                    {
+                        logIdentity += $" :: Rule state changed to {ruleState}";
+                        rule.State = ruleState;
+                        rule.StateChanged = DateTime.Now;
+                    }
+
+                    if (ruleState)
+                    {
+                        // only switch device ON if its currently OFF (presume its OFF if no power state set yet)
+                        if (!(statefulDevice.PowerOn ?? false))
+                        {
+                            logIdentity += $" :: Device ID {statefulDevice.Id} is OFF. Turning it ON";
+
+                            statefulDevice.SwitchOn($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})", rule.FlipFlop);
+                        }
+                    }
+                    else
+                    {
+                        // only switch device OFF if its currently ON (presume its ON if no power state set yet)
+                        if (statefulDevice.PowerOn ?? true)
+                        {
+                            logIdentity += $" :: Device ID {statefulDevice.Id} is ON. Turning it OFF";
+
+                            statefulDevice.SwitchOff($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})");
+                        }
+                    }
                 }
-                else
-                {
-                    // only switch device OFF if its currently ON (presume its ON if no power state set yet)
-                    if (statefulDevice.PowerOn ?? true)
-                        statefulDevice.SwitchOff($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})");
+                catch (Exception err) {
+                    _controller.RuleLog.Error($"{logIdentity} :: Failed - {err.Message}", err);
                 }
             }
         }
-
-        //private void RuleRunner()
-        //{
-        //    while (true)
-        //    {
-        //        var sensors = _controller.MqttDevices.Where(d => d is ISensorDevice<ISensorData>).Select(d => d as ISensorDevice<ISensorData>);
-
-        //        foreach (var rule in RuleConfig.Rules)
-        //        {
-
-        //            // get the device
-        //            //var s = _controller.MqttDevices.Where(d => d.Id == rule.Switch && d is IStatefulDevice).First() as IStatefulDevice;
-
-        //            //var on = false;
-
-        //            //try
-        //            //{
-        //            //    on = sensors.Any(s => s.TestCondition(rule.Condition));
-        //            //}
-        //            //catch (Exception err)
-        //            //{
-        //            //    Console.WriteLine(err.Message);
-        //            //}
-
-        //            //if (on)
-        //            //{
-        //            //    if (!s.PowerOn)
-        //            //        s.SwitchOn($"RULE: {rule.Name}", rule.FlipFlop);
-        //            //}
-        //            //else
-        //            //{
-        //            //    if (s.PowerOn)
-        //            //        s.SwitchOff($"RULE: {rule.Name}");
-        //            //}
-
-
-        //            //try
-        //            //{
-
-        //            //}
-        //            //catch (Exception err) {
-        //            //    _controller.RuleLog.Error($"RuleRunner :: Error in rule {rule.Name} - {err.Message}", err);
-        //            //}
-        //        }
-
-        //        // wait 5 seconds before next loop - this will give the switches time to change state and report back -- needs to be monitored and refined
-        //        Thread.Sleep(5000);
-        //    }
-        //}
 
         public void OnDeviceStateChanged(MqttDevice device, StateChangedEventArgs e)
         {
@@ -173,7 +187,15 @@ namespace MqttHome
         public void OnDeviceSensorDataChanged(ISensorDevice<ISensorData> device, Dictionary<string, object> allSensorValues)
         {
             foreach (var condition in ConditionConfig.Conditions.Where(c => c.Device == device.Id))
-                condition.CheckCondition(device, allSensorValues);
+            {
+                try
+                {
+                    condition.CheckCondition(device, allSensorValues);
+                }
+                catch (Exception err) {
+                    _controller.RuleLog.Error($"OnDeviceSensorDataChanged :: CheckCondition :: Condition: {condition.Id}, Device: {device.Id} - Failed. {err.Message}", err);
+                }
+            }
         }
     }
 }

@@ -1,6 +1,16 @@
 ﻿@model MqttHome.MqttHomeController
 
 <div class="row">
+    <p>
+        <div>
+            <label>Web Application Uptime</label>
+            @(DateTime.Now.Subtract(Program.StartupTime).ToString("h'h 'm'm 's's'"))
+        </div>
+        <div>
+            <label>MQTT Home Controller Uptime</label>
+            @(DateTime.Now.Subtract(Model.StartupTime).ToString("h'h 'm'm 's's'"))
+        </div>
+    </p>
     @{await Html.RenderPartialAsync("_MqttBrokers");}
 </div>
 

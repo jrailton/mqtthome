@@ -65,7 +65,15 @@ namespace MqttHome.Mqtt
                 if (Connected)
                 {
                     _controller.MqttLog.Debug($"PublishCommand :: Publishing - Device: {command.DeviceId}, Topic: {command.Topic}, Payload: {Encoding.UTF8.GetString(command.Payload)}");
-                    var x = _mqttClient.PublishAsync(command.Topic, command.Payload);
+
+                    // cater for possible empty payload
+                    if (command.Payload != null && command.Payload.Length > 0)
+                    {
+                        await _mqttClient.PublishAsync(command.Topic, command.Payload);
+                    }
+                    else {
+                        await _mqttClient.PublishAsync(command.Topic);
+                    }
                 }
                 else
                 {
@@ -118,9 +126,6 @@ namespace MqttHome.Mqtt
         {
             foreach (var s in subscription)
             {
-                //if (s.Contains("#") && topic.StartsWith("Pylontech"))
-                //    Console.WriteLine("");
-
                 var sub = s;
                 sub = sub.Replace(@"#", @".*");
                 sub = sub.Replace(@"+", @"[^\/]");
@@ -134,9 +139,6 @@ namespace MqttHome.Mqtt
 
         private async Task MqttClientReceivedMessageEvent(MqttApplicationMessageReceivedEventArgs e)
         {
-            //if (e.ApplicationMessage.Topic.StartsWith("N/7c386655e76b/system/0/Dc/Battery"))
-            //    Console.WriteLine("");
-
             if (DeviceSubscribedToTopic(e.ApplicationMessage.Topic, _controller.MqttDeviceTopics))
             {
                 try
@@ -180,9 +182,6 @@ namespace MqttHome.Mqtt
                         {
                             try
                             {
-                                if (device.Id == "icc")
-                                    Console.WriteLine("");
-
                                 device.LastMqttMessage = DateTime.Now;
                                 device.ParseSensorPayload(e.ApplicationMessage);
                             }

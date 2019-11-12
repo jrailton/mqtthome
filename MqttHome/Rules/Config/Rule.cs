@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace MqttHome
@@ -8,16 +9,19 @@ namespace MqttHome
         public string Name { get; set; }
         public string Description { get; set; }
         public string Switch { get; set; }
-        
+
+        public DateTime? StateChanged { get; set; }
+        public bool? State { get; set; }
+
         /// <summary>
         /// Any of these conditions can be matched to return true
         /// </summary>
-        public List<string> ConditionsOr { get; set; }
+        public List<string> ConditionsOr { get; set; } = new List<string>();
 
         /// <summary>
         /// All of these conditions must be matched to return true
         /// </summary>
-        public List<string> ConditionsAnd { get; set; }
+        public List<string> ConditionsAnd { get; set; } = new List<string>();
 
         public int? FlipFlop { get; set; }
 
@@ -40,6 +44,7 @@ namespace MqttHome
                 // exit early if false
                 if (!result)
                     return false;
+
             }
 
             foreach (var conditionId in ConditionsOr) {
