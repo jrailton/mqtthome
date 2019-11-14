@@ -37,37 +37,44 @@ namespace MqttHome.Mqtt.Devices.Victron
         }
 
         private void PublishKeepAlive() {
-            // Create a new MQTT client.
-            var factory = new MqttFactory();
-            var client = factory.CreateMqttClient();
-
-            var options = new MqttClientOptionsBuilder()
-                .WithClientId($"venusgx-deviceid-{Id}")
-                .WithTcpServer(_venusGxMqttServerAddress, _venusGxMqttServerPort)
-                //.WithCredentials("jimbo", "27Collins")
-                //.WithTls()
-                .WithKeepAlivePeriod(TimeSpan.FromSeconds(30))
-                .WithCleanSession()
-                .Build();
-
-            // connect
-            var connectResult = client.ConnectAsync(options, CancellationToken.None).Result;
-
-            if (connectResult.ResultCode != MQTTnet.Client.Connecting.MqttClientConnectResultCode.Success)
+            try
             {
-                Controller.DeviceLog.Error($"Device ID {Id} ({FriendlyName}) :: Failed to connect to Venus GX MQTT - {connectResult.ResultCode}");
-            }
-            else {
-                var publishResult = client.PublishAsync($"R/{Id}/system/0/Serial").Result;
+                // Create a new MQTT client.
+                var factory = new MqttFactory();
+                var client = factory.CreateMqttClient();
 
-                if (publishResult.ReasonCode != MqttClientPublishReasonCode.Success)
+                var options = new MqttClientOptionsBuilder()
+                    .WithClientId($"venusgx-deviceid-{Id}")
+                    .WithTcpServer(_venusGxMqttServerAddress, _venusGxMqttServerPort)
+                    //.WithCredentials("jimbo", "27Collins")
+                    //.WithTls()
+                    .WithKeepAlivePeriod(TimeSpan.FromSeconds(30))
+                    .WithCleanSession()
+                    .Build();
+
+                // connect
+                var connectResult = client.ConnectAsync(options, CancellationToken.None).Result;
+
+                if (connectResult.ResultCode != MQTTnet.Client.Connecting.MqttClientConnectResultCode.Success)
                 {
-                    Controller.DeviceLog.Error($"Device ID {Id} ({FriendlyName}) :: Failed to publish to Venus GX MQTT - {connectResult.ResultCode}");
+                    Controller.DeviceLog.Error($"Device ID {Id} ({FriendlyName}) :: Failed to connect to Venus GX MQTT - {connectResult.ResultCode}");
                 }
                 else
                 {
-                    Controller.DeviceLog.Debug($"Device ID {Id} ({FriendlyName}) :: Published keepalive command for {Id}");
+                    var publishResult = client.PublishAsync($"R/{Id}/system/0/Serial").Result;
+
+                    if (publishResult.ReasonCode != MqttClientPublishReasonCode.Success)
+                    {
+                        Controller.DeviceLog.Error($"Device ID {Id} ({FriendlyName}) :: Failed to publish to Venus GX MQTT - {connectResult.ResultCode}");
+                    }
+                    else
+                    {
+                        Controller.DeviceLog.Debug($"Device ID {Id} ({FriendlyName}) :: Published keepalive command for {Id}");
+                    }
                 }
+            }
+            catch (Exception err) {
+                Controller.DeviceLog.Error($"Device ID {Id} ({FriendlyName}) :: Keepalive command for {Id} failed. {err.Message}", err);
             }
         }
 

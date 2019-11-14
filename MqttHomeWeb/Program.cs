@@ -24,6 +24,7 @@ namespace MqttHomeWeb
         public static MqttHomeController MqttHomeController;
         public static WebsocketManager WebsocketManager;
         public static DateTime StartupTime;
+        public static string RootFolderPath;
 
         public static void Main(string[] args)
         {
@@ -55,8 +56,6 @@ namespace MqttHomeWeb
                 LogManager.GetLogger(logRepository, "InfluxLog"),
                 LogManager.GetLogger(logRepository, "MqttLog"),
                 mqttBrokers,
-                MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbUrl"],
-                MqttHomeWeb.Helpers.ConfigurationManager.AppSetting["InfluxDbDatabase"],
                 WebsocketManager
             );
 

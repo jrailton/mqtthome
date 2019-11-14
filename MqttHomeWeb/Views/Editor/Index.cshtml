@@ -1,0 +1,56 @@
+﻿
+@{
+    ViewData["Title"] = "JSON Editor";
+
+    if (!string.IsNullOrEmpty(ViewBag.Filename))
+        ViewData["Title"] += " - " + ViewBag.Filename;
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="well">
+    Files:
+    @foreach (var filename in System.IO.Directory.GetFiles(Program.RootFolderPath, "*.json"))
+    {
+        <a class="btn btn-xs btn-default" href="/editor/index/@System.IO.Path.GetFileName(filename)">@System.IO.Path.GetFileName(filename)</a>
+    }
+</div>
+
+@if (!string.IsNullOrEmpty(ViewBag.Filename))
+{
+    <form method="post" onsubmit="return confirm('Are you sure you want to save the changes?');">
+        <div id="jsoneditor" style="width: 100%; height: 70vh;"></div>
+        <button type="submit">Save Changes</button>
+        <input type="hidden" name="newcontent" id="newcontent" value="" />
+    </form>
+
+    <script>
+    window.onload = function () {
+        // create the editor
+        const container = document.getElementById("jsoneditor");
+        const options = {
+            mode: 'code',
+            modes: ['code', 'form', 'text', 'tree', 'view'], // allowed modes
+            onChangeText: function (jsonString) {
+                $("#newcontent").val(jsonString);
+            }
+        };
+        const editor = new JSONEditor(container, options);
+
+        @{
+            if (!string.IsNullOrEmpty(ViewBag.FileContent))
+            {
+                <text>
+                editor.set(@Html.Raw(ViewBag.FileContent))
+                </text>
+            }
+        }
+    };
+    </script>
+
+}
+
+@section Scripts{
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/7.0.4/jsoneditor.min.css" rel="stylesheet" type="text/css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/7.0.4/jsoneditor.min.js"></script>
+}

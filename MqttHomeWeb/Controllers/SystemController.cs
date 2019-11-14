@@ -9,7 +9,7 @@ using MqttHomeWeb.Models;
 
 namespace MqttHomeWeb.Controllers
 {
-    public class HomeController : Controller
+    public class SystemController : Controller
     {
         public IActionResult Index()
         {

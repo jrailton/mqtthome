@@ -30,7 +30,7 @@ namespace MqttHome
         public List<MqttCommunicator> MqttCommunicators = new List<MqttCommunicator>();
         public IQueryable<MqttDevice> MqttDevices;
 
-        public InfluxCommunicator InfluxCommunicator;
+        public InfluxCommunicator InfluxCommunicator = null;
         public List<string> MqttDeviceTopics;
         public RuleEngine RuleEngine;
 
@@ -48,7 +48,7 @@ namespace MqttHome
         public MqttHomeLogger InfluxLog;
         public MqttHomeLogger MqttLog;
 
-        public MqttHomeController(IConfiguration config, ILog ruleLog, ILog deviceLog, ILog generalLog, ILog influxLog, ILog mqttLog, List<MqttBroker> mqttBrokers, string influxUrl = "http://localhost:8086", string influxDatabase = "home_db", WebsocketManager wsm = null)
+        public MqttHomeController(IConfiguration config, ILog ruleLog, ILog deviceLog, ILog generalLog, ILog influxLog, ILog mqttLog, List<MqttBroker> mqttBrokers, WebsocketManager wsm = null)
         {
             try
             {
@@ -69,7 +69,12 @@ namespace MqttHome
 
                 Debug = false;
 
-                InfluxCommunicator = new InfluxCommunicator(InfluxLog, new Uri(influxUrl), influxDatabase);
+                // string influxUrl = "http://localhost:8086", string influxDatabase = "home_db"
+                string influxUrl = config["InfluxDbUrl"];
+                string influxDatabase = config["InfluxDbDatabase"];
+
+                if (!string.IsNullOrEmpty(influxUrl) && !string.IsNullOrEmpty(influxDatabase))
+                    InfluxCommunicator = new InfluxCommunicator(InfluxLog, new Uri(influxUrl), influxDatabase);
 
                 LoadDevices();
 
@@ -148,7 +153,7 @@ namespace MqttHome
                     {"device", device.Id}
                 });
 
-            InfluxCommunicator.Write(lpp);
+            InfluxCommunicator?.Write(lpp);
 
             RuleEngine.OnDeviceStateChanged(device, e);
         }
@@ -170,7 +175,7 @@ namespace MqttHome
                     {"device", device.Id}
                     });
 
-                    InfluxCommunicator.Write(lpp);
+                    InfluxCommunicator?.Write(lpp);
                 }
 
                 RuleEngine.OnDeviceSensorDataChanged(sensorDevice, e.ChangedValues);

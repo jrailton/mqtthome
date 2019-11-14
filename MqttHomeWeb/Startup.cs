@@ -25,8 +25,12 @@ namespace MqttHomeWeb
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllersWithViews();
+            var mvc = services.AddControllersWithViews();
             services.AddSingleton<WebsocketManager>();
+
+            #if (DEBUG)
+            mvc.AddRazorRuntimeCompilation();
+            #endif
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,10 +45,13 @@ namespace MqttHomeWeb
                 app.UseExceptionHandler("/Home/Error");
             }
 
+            Program.RootFolderPath = env.ContentRootPath;
+
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAuthorization();
-            app.UseWebSockets(new WebSocketOptions {
+            app.UseWebSockets(new WebSocketOptions
+            {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
                 ReceiveBufferSize = 4096
             });
@@ -53,7 +60,7 @@ namespace MqttHomeWeb
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=System}/{action=Index}/{id?}");
             });
         }
     }

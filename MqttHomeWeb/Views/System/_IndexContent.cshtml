@@ -9,6 +9,7 @@
         <div>
             <label>MQTT Home Controller Uptime</label>
             @(DateTime.Now.Subtract(Model.StartupTime).ToString("h'h 'm'm 's's'"))
+            <a class="btn btn-xs btn-danger" href="/system/restart">Restart</a>
         </div>
     </p>
     @{await Html.RenderPartialAsync("_MqttBrokers");}
