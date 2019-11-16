@@ -17,7 +17,7 @@ namespace System
             if (!d.HasValue)
                 return new HtmlString("(never)");
 
-            return new HtmlString($"<a title='{d.Value.ToString("d MMM yy HH:mm:ss.fff")}'>{d.Value.GetPrettyDate()}</a>");
+            return new HtmlString($"<a data-toggle='popover' title='{d.Value.ToString("d MMM yy HH:mm:ss.fff")}'>{d.Value.GetPrettyDate()}</a>");
         }
 
         public static string GetPrettyDate(this DateTime? d)

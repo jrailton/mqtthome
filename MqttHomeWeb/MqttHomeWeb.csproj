@@ -19,10 +19,26 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="appsettings.json" />
+    <Content Remove="conditions.json" />
+    <Content Remove="devices.json" />
+    <Content Remove="log4net.config" />
     <Content Remove="rules.json" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="appsettings.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Include="conditions.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Include="devices.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Include="log4net.config">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
     <None Include="rules.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
@@ -42,21 +58,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MqttHome\MqttHome.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
-    <Content Update="conditions.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
-    <Content Update="devices.json">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
-    <Content Update="log4net.config">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>

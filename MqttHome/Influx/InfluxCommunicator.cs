@@ -15,32 +15,50 @@ namespace MqttHome.Influx
         private LineProtocolClient _client;
         private ILog _logger;
 
-        public InfluxCommunicator(ILog logger, Uri uri, string databaseName, string username = null, string password = null)
+        public InfluxCommunicator(ILog logger, string influxUrl, string databaseName, string username = null, string password = null)
         {
             _logger = logger;
 
-            _logger.Debug($"Connecting to Influx on '{uri.OriginalString}' using database '{databaseName}'...");
+            try
+            {
+                var uri = new Uri(influxUrl);
 
-            _client = new LineProtocolClient(uri, databaseName, username, password);
+                _logger.Debug($"InfluxCommunicator.ctor :: Connecting to Influx on '{uri.OriginalString}' using database '{databaseName}'...");
+
+                _client = new LineProtocolClient(uri, databaseName, username, password);
+            }
+            catch (Exception err) {
+                _logger.Error($"InfluxCommunicator.ctor :: Failed to start - {err.Message}", err);
+                throw new Exception("Failed to start InfluxCommunicator - see InfluxLog for details");
+            }
         }
 
         public async void Write(LineProtocolPayload payload)
         {
-            var result = await _client.WriteAsync(payload);
-            if (!result.Success)
+            try
             {
-                _logger.Error($"Failed to write to InfluxDB: {result.ErrorMessage}");
-                throw new Exception($"Failed to write to InfluxDB: {result.ErrorMessage}");
+                var result = await _client.WriteAsync(payload);
+                if (!result.Success)
+                    throw new Exception($"Failed to write to InfluxDB: {result.ErrorMessage}");
+            }
+            catch (Exception err) {
+                _logger.Error($"Write :: Failed to write to InfluxDB: {err.Message}");
             }
         }
 
         public void Write(LineProtocolPoint point)
         {
-            var payload = new LineProtocolPayload();
+            try
+            {
+                var payload = new LineProtocolPayload();
 
-            payload.Add(point);
-            
-            Write(payload);
+                payload.Add(point);
+
+                Write(payload);
+            }
+            catch (Exception err) {
+                _logger.Error($"Write :: Failed to write to InfluxDB: {err.Message}");
+            }
         }
     }
 }

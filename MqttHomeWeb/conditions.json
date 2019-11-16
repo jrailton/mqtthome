@@ -1,4 +1,4 @@
-﻿{
+{
   "Conditions": [
     {
       "Id": "SocGt95",
@@ -29,7 +29,16 @@
       "Id": "BeforeMidnight",
       "Device": "time",
       "SensorValue": "Hour > 17"
+    },
+    {
+      "Id": "Before7am",
+      "Device": "time",
+      "SensorValue": "Hour < 7"
+    },
+    {
+      "Id": "After5pm",
+      "Device": "time",
+      "SensorValue": "Hour >= 17"
     }
-
   ]
 }

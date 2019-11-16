@@ -2,11 +2,11 @@
   "Rules": [
     {
       "Name": "Garden Lights Soc",
-      "Description": "Garden Lights will be on from sunset to midnight",
+      "Description": "Garden Lights will be on from sunset to sunrise so long as grid power is on or SoC greater than 85%",
       "Switch": "powr2_5",
       "ConditionsOr": [
         "GridPower",
-        "SocGt95"
+        "SocGt85"
       ],
       "ConditionsAnd": [
         "AfterSunset",
@@ -16,11 +16,11 @@
     },
     {
       "Name": "Laundry Soc",
-      "Description": "",
+      "Description": "Kitchen sockets/fridge will be off between 7am and 5pm unless grid power is on OR SoC greater than 85%",
       "Switch": "powr2_1",
       "ConditionsOr": [
         "GridPower",
-        "SocGt85",
+        "SocGt95",
         "Before7am",
         "After5pm"
       ],
@@ -28,11 +28,11 @@
     },
     {
       "Name": "Kitchen Soc",
-      "Description": "",
+      "Description": "Kitchen sockets/fridge will be off between 7am and 5pm unless grid power is on OR SoC greater than 85%",
       "Switch": "powr2_2",
       "ConditionsOr": [
         "GridPower",
-        "SocGt85",
+        "SocGt95",
         "Before7am",
         "After5pm"
       ],

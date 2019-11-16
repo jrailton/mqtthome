@@ -1,14 +1,11 @@
-﻿@using MqttHome.Mqtt
-@using MqttHome.Mqtt.Devices
-@model MqttHome.MqttHomeController
+﻿@model MqttHome.MqttHomeController
 
 @foreach (var communicator in Model.MqttCommunicators)
 {
     <div class="panel panel-default">
         <div class="panel-heading">
-            <a role="button" data-toggle="collapse" href="#collapse-mqttservers" aria-expanded="true" aria-controls="collapse-mqttservers">
-                MQTT Servers
-            </a>
+            MQTT Servers
+            <a class="btn btn-xs btn-default" href="/editor/index/appsettings.json">Edit MQTT Servers</a>
         </div>
         <div id="collapse-mqttservers" class="panel-collapse collapse in">
 

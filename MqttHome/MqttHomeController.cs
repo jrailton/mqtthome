@@ -74,7 +74,7 @@ namespace MqttHome
                 string influxDatabase = config["InfluxDbDatabase"];
 
                 if (!string.IsNullOrEmpty(influxUrl) && !string.IsNullOrEmpty(influxDatabase))
-                    InfluxCommunicator = new InfluxCommunicator(InfluxLog, new Uri(influxUrl), influxDatabase);
+                    InfluxCommunicator = new InfluxCommunicator(InfluxLog, influxUrl, influxDatabase);
 
                 LoadDevices();
 

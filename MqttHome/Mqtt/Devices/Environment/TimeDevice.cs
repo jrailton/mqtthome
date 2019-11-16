@@ -17,7 +17,7 @@ namespace MqttHome.Mqtt.Devices.Environment
             // trigger a new update of values every 30 seconds
             _updateValues = new Timer((state) => {
                 base.ParseSensorPayload(null);
-            }, null, 0, 30000);
+            }, null, 5000, 30000);
 
         }
 
