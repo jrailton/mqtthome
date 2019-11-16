@@ -39,7 +39,7 @@ namespace MqttHome.Mqtt.Devices.Environment
         public int Year => DateTime.Now.Year;
         public int Month => DateTime.Now.Month;
         public int WeekOfYear => CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(DateTime.Now, CalendarWeekRule.FirstFourDayWeek, System.DayOfWeek.Monday);
-        public bool Sundown => DateTime.Now >= Sunset && DateTime.Now <= Sunrise;
+        public bool Sundown => DateTime.Now >= Sunset && DateTime.Now <= Sunrise.AddDays(1); // after todays sunset and before tomorrow's sunrise
         public DateTime Sunset { get; set; }
         public DateTime Sunrise { get; set; }
     }
