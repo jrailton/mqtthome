@@ -36,7 +36,7 @@ namespace MqttHome
 
         public bool Debug;
 
-        // allows sensor values to NOT get saved e.g. time sensor
+        // if false, will only save updated values to influx -- this has the advantage of less writes/data but Grafana queries will need to cater for "missing" values i.e. use "previous"
         public bool SaveAllSensorValuesToDatabaseEveryTime = true;
         
         public double Longitude;
@@ -47,6 +47,9 @@ namespace MqttHome
         public MqttHomeLogger GeneralLog;
         public MqttHomeLogger InfluxLog;
         public MqttHomeLogger MqttLog;
+
+        public bool InfluxDbEnabled = true;
+        public bool RuleEngineEnabled = true;
 
         public MqttHomeController(IConfiguration config, ILog ruleLog, ILog deviceLog, ILog generalLog, ILog influxLog, ILog mqttLog, List<MqttBroker> mqttBrokers, WebsocketManager wsm = null)
         {
@@ -72,8 +75,9 @@ namespace MqttHome
                 // string influxUrl = "http://localhost:8086", string influxDatabase = "home_db"
                 string influxUrl = config["InfluxDbUrl"];
                 string influxDatabase = config["InfluxDbDatabase"];
+                InfluxDbEnabled = !(config["InfluxDbEnabled"]?.Contains("False") ?? false); // presumes TRUE
 
-                if (!string.IsNullOrEmpty(influxUrl) && !string.IsNullOrEmpty(influxDatabase))
+                if (InfluxDbEnabled && !string.IsNullOrEmpty(influxUrl) && !string.IsNullOrEmpty(influxDatabase))
                     InfluxCommunicator = new InfluxCommunicator(InfluxLog, influxUrl, influxDatabase);
 
                 LoadDevices();
@@ -95,6 +99,8 @@ namespace MqttHome
 
                 foreach (var broker in mqttBrokers)
                     MqttCommunicators.Add(new MqttCommunicator(this, broker));
+
+                RuleEngineEnabled = !(config["RuleEngineEnabled"]?.Contains("False") ?? false); // presumes TRUE
 
                 RuleEngine = new RuleEngine(this);
 
@@ -155,7 +161,7 @@ namespace MqttHome
 
             InfluxCommunicator?.Write(lpp);
 
-            RuleEngine.OnDeviceStateChanged(device, e);
+            RuleEngine?.OnDeviceStateChanged(device, e);
         }
 
         private void Device_SensorDataChanged(object sender, SensorDataChangedEventArgs e)
@@ -178,7 +184,7 @@ namespace MqttHome
                     InfluxCommunicator?.Write(lpp);
                 }
 
-                RuleEngine.OnDeviceSensorDataChanged(sensorDevice, e.ChangedValues);
+                RuleEngine?.OnDeviceSensorDataChanged(sensorDevice, e.ChangedValues);
             }
         }
 

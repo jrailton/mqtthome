@@ -1,17 +1,17 @@
 ﻿@model MqttHome.MqttHomeController
-
+<br />
 <div class="row">
-    <p>
+    <div class="well">
         <div>
             <label>Web Application Uptime</label>
-            @(DateTime.Now.Subtract(Program.StartupTime).ToString("h'h 'm'm 's's'"))
+            <a href="#" data-toggle="popover" title="@Program.StartupTime.ToString("d MMM yyyy HH:mm:ss")">@(DateTime.Now.Subtract(Program.StartupTime).ToString("d'd 'h'h 'm'm 's's'"))</a>
         </div>
         <div>
             <label>MQTT Home Controller Uptime</label>
-            @(DateTime.Now.Subtract(Model.StartupTime).ToString("h'h 'm'm 's's'"))
-            <a class="btn btn-xs btn-danger" href="/system/restart">Restart</a>
+            <a href="#" data-toggle="popover" title="@Model.StartupTime.ToString("d MMM yyyy HH:mm:ss")">@(DateTime.Now.Subtract(Model.StartupTime).ToString("d'd 'h'h 'm'm 's's'"))</a>
+            <a class="btn btn-xs btn-danger" onclick="return confirm('This will restart the controller and clear all live values. Are you sure?');" href="/system/restart">Restart</a>
         </div>
-    </p>
+    </div>
     @{await Html.RenderPartialAsync("_MqttBrokers");}
 </div>
 
@@ -26,3 +26,9 @@
 <div class="row">
     @{await Html.RenderPartialAsync("_Devices");}
 </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('[data-toggle="popover"]').popover();
+    });
+</script>

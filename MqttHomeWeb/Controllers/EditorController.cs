@@ -8,6 +8,16 @@ namespace MqttHomeWeb.Controllers
 {
     public class EditorController : Controller
     {
+        public static string GetAutocompleteList() {
+            var items = new List<string>();
+
+            items.AddRange(Program.MqttHomeController.RuleEngine.ConditionConfig.Conditions.Select(c => c.Id));
+            items.AddRange(Program.MqttHomeController.RuleEngine.RuleConfig.Rules.Select(c => c.Name));
+            items.AddRange(Program.MqttHomeController.MqttDevices.Select(c => c.Id));
+
+            return string.Join(",", items.Select(i => $"'{i}'"));
+        }
+
         [HttpGet]
         public IActionResult Index(string id)
         {
@@ -33,6 +43,19 @@ namespace MqttHomeWeb.Controllers
             }
 
             return RedirectToAction("Index", new { id = id });
+        }
+
+        public IActionResult Delete(string id) {
+
+            try {
+                System.IO.File.Delete(System.IO.Path.Combine(Program.RootFolderPath, id));
+                TempData["success"] = $"{id} was deleted";
+            }
+            catch (Exception err) {
+                TempData["danger"] = $"Failed to delete {id} - {err.Message}";
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

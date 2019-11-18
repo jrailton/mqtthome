@@ -21,14 +21,9 @@
       "SensorValue": "GridVoltage >= 200"
     },
     {
-      "Id": "AfterSunset",
+      "Id": "NightTime",
       "Device": "time",
       "SensorValue": "Sundown == true"
-    },
-    {
-      "Id": "BeforeMidnight",
-      "Device": "time",
-      "SensorValue": "Hour > 17"
     },
     {
       "Id": "Before7am",

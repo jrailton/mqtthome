@@ -1,41 +1,38 @@
 ﻿
 @{
-    ViewData["Title"] = "JSON Editor";
+    ViewData["Title"] = "Logs";
 
     if (!string.IsNullOrEmpty(ViewBag.Filename))
         ViewData["Title"] += " - " + ViewBag.Filename;
 }
 <br />
 <div class="well">
-    Files:
-    @foreach (var filename in System.IO.Directory.GetFiles(Program.RootFolderPath, "*.json"))
+    Logs:
+    @foreach (var filename in System.IO.Directory.GetFiles(Program.RootFolderPath, "*.log"))
     {
         <div class="btn-group">
-            <a class="btn btn-xs btn-default" title="Edit this file" href="/editor/index/@System.IO.Path.GetFileName(filename)">@System.IO.Path.GetFileName(filename)</a>
-            <a class="btn btn-xs btn-danger" title="Delete this file" onclick="return confirm('Are you sure you want to delete @System.IO.Path.GetFileName(filename)?');" href="/editor/delete/@System.IO.Path.GetFileName(filename)">×</a>
+            <a class="btn btn-xs btn-default" title="View this file" href="/system/logs/@System.IO.Path.GetFileName(filename)">@System.IO.Path.GetFileName(filename)</a>
+            <a class="btn btn-xs btn-danger" title="Delete this file" onclick="return confirm('Are you sure you want to delete @System.IO.Path.GetFileName(filename)?');" href="/system/deletelog/@System.IO.Path.GetFileName(filename)">×</a>
         </div>
     }
 </div>
 
 @if (!string.IsNullOrEmpty(ViewBag.Filename))
 {
-    <div class="alert alert-info">Currently editing <strong>@ViewBag.Filename</strong></div>
+    <div class="alert alert-info">Currently viewing <strong>@ViewBag.Filename</strong></div>
 }
 else
 {
-    <div class="alert alert-info">Choose one of the files above to edit</div>
+    <div class="alert alert-info">Choose one of the files above to view</div>
 }
 
 @if (!string.IsNullOrEmpty(ViewBag.Filename))
 {
-    <form method="post" onsubmit="return confirm('Are you sure you want to save the changes?');">
-        <div id="jsoneditor" style="width: 100%; height: 70vh;"></div>
-        <br />
-        <button class="btn btn-primary" type="submit">Save Changes</button>
-        <input type="hidden" name="newcontent" id="newcontent" value="" />
-    </form>
+        <pre id="viewer" style="width: 100%; height: 70vh;">
+            @ViewBag.FileContent
+        </pre>
 
-    <script>
+    @*<script>
     window.onload = function () {
         // create the editor
         const container = document.getElementById("jsoneditor");
@@ -62,11 +59,11 @@ else
             }
         }
     };
-    </script>
+    </script>*@
 
 }
 
-@section Scripts{
+@*@section Scripts{
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/7.0.4/jsoneditor.min.css" rel="stylesheet" type="text/css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsoneditor/7.0.4/jsoneditor.min.js"></script>
-}
+}*@

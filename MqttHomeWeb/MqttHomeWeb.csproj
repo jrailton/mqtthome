@@ -5,6 +5,9 @@
     <ApplicationIcon />
     <OutputType>Exe</OutputType>
     <StartupObject />
+    <ExcludeFilesFromDeployment>appsettings.json;rules.json;conditions.json;devices.json;log4net.config</ExcludeFilesFromDeployment> 
+    <ExcludeFilesFromDeployment>**\.svn\**\*.*</ExcludeFilesFromDeployment>
+    <ExcludeFoldersFromDeployment></ExcludeFoldersFromDeployment> 
   </PropertyGroup>
 
   <ItemGroup>

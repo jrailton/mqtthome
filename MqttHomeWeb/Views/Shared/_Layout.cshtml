@@ -36,6 +36,15 @@
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
+
+    <script type="text/javascript">
+        $(document).ajaxStart(function () {
+            $("#ajax-spinner").show();
+        });
+        $(document).ajaxComplete(function () {
+            $("#ajax-spinner").hide();
+        });
+    </script>
 </head>
 <body>
     <nav class="navbar navbar-default navbar-fixed-top">
@@ -52,25 +61,33 @@
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li><a asp-area="" asp-controller="System" asp-action="Index">System</a></li>
+                    <li><a asp-area="" asp-controller="System" asp-action="Sensors">Sensors</a></li>
+                    <li><a asp-area="" asp-controller="System" asp-action="Switches">Switches</a></li>
+                    <li><a asp-area="" asp-controller="System" asp-action="Rules">Rules</a></li>
+                    <li><a asp-area="" asp-controller="System" asp-action="Conditions">Conditions</a></li>
+                    <li><a asp-area="" asp-controller="System" asp-action="Devices">Devices</a></li>
                     <li><a asp-area="" asp-controller="Editor" asp-action="Index">Editor</a></li>
+                    <li><a asp-area="" asp-controller="System" asp-action="Logs">Logs</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-<div class="container body-content">
-    
-    @{ await Html.RenderPartialAsync("_Messages"); }
+    <div class="container body-content">
 
-    @RenderBody()
+        @{ await Html.RenderPartialAsync("_Messages"); }
 
-    <hr/>
-    <footer>
-        <p>&copy; James Railton 2019 - MqttHome</p>
-    </footer>
-</div>
+        @RenderBody()
 
+        <hr />
+        <footer>
+            <p>&copy; James Railton 2019 - MqttHome</p>
+        </footer>
+    </div>
 
+    <div id="ajax-spinner" style="display: none; position: fixed; bottom: 0; right: 0; background-color: #EEE; border: 1px solid #DDD; padding: 15px; border-width: 1px 0 0 1px;">
+        <img alt="Loading" title="Server communication in progress..." src="~/images/spinner.gif" />
+    </div>
 
     @RenderSection("Scripts", required: false)
 </body>

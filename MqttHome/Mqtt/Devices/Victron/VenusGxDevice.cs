@@ -64,13 +64,7 @@ namespace MqttHome.Mqtt.Devices.Victron
                     var publishResult = client.PublishAsync($"R/{Id}/system/0/Serial").Result;
 
                     if (publishResult.ReasonCode != MqttClientPublishReasonCode.Success)
-                    {
                         Controller.DeviceLog.Error($"Device ID {Id} ({FriendlyName}) :: Failed to publish to Venus GX MQTT - {connectResult.ResultCode}");
-                    }
-                    else
-                    {
-                        Controller.DeviceLog.Debug($"Device ID {Id} ({FriendlyName}) :: Published keepalive command for {Id}");
-                    }
                 }
             }
             catch (Exception err) {

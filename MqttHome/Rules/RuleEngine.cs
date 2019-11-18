@@ -76,8 +76,8 @@ namespace MqttHome
                         rule.ConditionsAnd.AddRange(RuleConfig.Defaults.ConditionsAnd);
 
                     // OR conditions
-                    if (RuleConfig.Defaults.ConditionsAnd?.Any() ?? false)
-                        rule.ConditionsAnd.AddRange(RuleConfig.Defaults.ConditionsAnd);
+                    if (RuleConfig.Defaults.ConditionsOr?.Any() ?? false)
+                        rule.ConditionsOr.AddRange(RuleConfig.Defaults.ConditionsOr);
 
                     // flip flop defaults
                     if (!rule.FlipFlop.HasValue && RuleConfig.Defaults.FlipFlop.HasValue)
@@ -101,7 +101,8 @@ namespace MqttHome
                 ConditionConfig = JsonConvert.DeserializeObject<ConditionConfig>(content);
 
                 // validate each rule and attach event to each
-                foreach (var condition in ConditionConfig.Conditions) {
+                foreach (var condition in ConditionConfig.Conditions)
+                {
 
                     var problems = condition.CheckProblems();
                     if (problems.Any())
@@ -153,28 +154,36 @@ namespace MqttHome
                         rule.StateChanged = DateTime.Now;
                     }
 
-                    if (ruleState)
+                    // dont attach the event if rule engine disabled
+                    if (_controller.RuleEngineEnabled)
                     {
-                        // only switch device ON if its currently OFF (presume its OFF if no power state set yet)
-                        if (!(statefulDevice.PowerOn ?? false))
+                        if (ruleState)
                         {
-                            logIdentity += $" :: Device ID {statefulDevice.Id} is OFF. Turning it ON";
+                            // only switch device ON if its currently OFF (presume its OFF if no power state set yet)
+                            if (!(statefulDevice.PowerOn ?? false))
+                            {
+                                logIdentity += $" :: Device ID {statefulDevice.Id} is OFF. Turning it ON";
 
-                            statefulDevice.SwitchOn($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})", rule.FlipFlop);
+                                statefulDevice.SwitchOn($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})", rule.FlipFlop);
+                            }
+                        }
+                        else
+                        {
+                            // only switch device OFF if its currently ON (presume its ON if no power state set yet)
+                            if (statefulDevice.PowerOn ?? true)
+                            {
+                                logIdentity += $" :: Device ID {statefulDevice.Id} is ON. Turning it OFF";
+
+                                statefulDevice.SwitchOff($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})");
+                            }
                         }
                     }
-                    else
-                    {
-                        // only switch device OFF if its currently ON (presume its ON if no power state set yet)
-                        if (statefulDevice.PowerOn ?? true)
-                        {
-                            logIdentity += $" :: Device ID {statefulDevice.Id} is ON. Turning it OFF";
-
-                            statefulDevice.SwitchOff($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})");
-                        }
+                    else {
+                        _controller.RuleLog.Warn($"{logIdentity} - Cancelling, rule engine disabled by appsettings.json");
                     }
                 }
-                catch (Exception err) {
+                catch (Exception err)
+                {
                     _controller.RuleLog.Error($"{logIdentity} :: Failed - {err.Message}", err);
                 }
             }
@@ -192,7 +201,8 @@ namespace MqttHome
                 {
                     condition.CheckCondition(device, allSensorValues);
                 }
-                catch (Exception err) {
+                catch (Exception err)
+                {
                     _controller.RuleLog.Error($"OnDeviceSensorDataChanged :: CheckCondition :: Condition: {condition.Id}, Device: {device.Id} - Failed. {err.Message}", err);
                 }
             }

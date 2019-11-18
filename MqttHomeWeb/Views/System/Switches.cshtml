@@ -1,0 +1,16 @@
+﻿@model MqttHomeController
+@{
+    ViewData["Title"] = "Switches";
+}
+<br />
+
+<div id="switch-content">
+    @{await Html.RenderPartialAsync("_Switches"); }
+</div>
+
+<script type="text/javascript">
+    (function () {
+        // reload data timer
+        setInterval(function () { $("#switch-content").load("/system/switchcontent"); }, 2000);
+    }());
+</script>

@@ -5,39 +5,42 @@
         Conditions
         <a class="btn btn-xs btn-default" href="/editor/index/conditions.json">Edit Conditions</a>
     </div>
-    <div id="collapse-conditions" class="panel-collapse collapse in">
-        <div class="panel-body">
-            @foreach (var condition in Model.RuleEngine.ConditionConfig.Conditions)
-            {
-                <div class="col-sm-4 col-lg-3">
+    <div class="panel-body">
+        @if (!Model.RuleEngineEnabled)
+        {
+        <div class="alert alert-warning">The rule engine is DISABLED in appsettings.json</div>
+        }
 
-                    <div class="panel panel-info">
-                        <div class="panel-heading">@condition.Id</div>
-                        <div class="panel-body">
-                            <div>
-                                <label>Device</label>
-                                @condition.Device
-                            </div>
-                            <div>
-                                <label>Condition</label>
-                                @condition.SensorValue
-                            </div>
-                            <div>
-                                <label>Condition Value</label>
-                                <span class="label label-@(condition.ConditionValue.HasValue ? (condition.ConditionValue.Value ? "success" : "danger") : "default")">@(condition.ConditionValue.HasValue ? condition.ConditionValue.Value.ToString() : "n/a")</span>
-                            </div>
-                            <div>
-                                <label>Condition Value Updated</label>
-                                @condition.ConditionValueUpdated.GetPrettyDateHtml()
-                            </div>
-                            <div>
-                                <label>Last Sensor Value</label>
-                                @condition.LastSensorValue
-                            </div>
+        @foreach (var condition in Model.RuleEngine.ConditionConfig.Conditions)
+        {
+            <div class="col-sm-4 col-lg-3">
+
+                <div class="panel panel-info">
+                    <div class="panel-heading">@condition.Id</div>
+                    <div class="panel-body">
+                        <div>
+                            <label>Device</label>
+                            @condition.Device
+                        </div>
+                        <div>
+                            <label>Condition</label>
+                            @condition.SensorValue
+                        </div>
+                        <div>
+                            <label>Condition Value</label>
+                            <span class="label label-@(condition.ConditionValue.HasValue ? (condition.ConditionValue.Value ? "success" : "danger") : "default")">@(condition.ConditionValue.HasValue ? condition.ConditionValue.Value.ToString() : "n/a")</span>
+                        </div>
+                        <div>
+                            <label>Condition Value Updated</label>
+                            @condition.ConditionValueUpdated.GetPrettyDateHtml()
+                        </div>
+                        <div>
+                            <label>Last Sensor Value</label>
+                            @condition.LastSensorValue
                         </div>
                     </div>
                 </div>
-            }
-        </div>
+            </div>
+        }
     </div>
 </div>

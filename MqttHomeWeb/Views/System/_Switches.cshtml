@@ -1,0 +1,64 @@
+﻿@using MqttHome.Mqtt
+@using MqttHome.Mqtt.Devices
+@model MqttHome.MqttHomeController
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Switch Devices
+        <a class="btn btn-xs btn-default" href="/editor/index/devices.json">Edit Devices</a>
+    </div>
+    <div id="collapse-devices" class="panel-collapse collapse in">
+        <div class="panel-body">
+
+            @foreach (var device in Model.MqttDevices.Where(d => d is IStatefulDevice))
+            {
+                <div class="col-sm-4 col-lg-3">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">@device.FriendlyName</div>
+                        <div class="panel-body">
+                            <div>
+                                <label>Last Contact</label>
+                                @device.LastMqttMessage.GetPrettyDateHtml()
+                            </div>
+                            <div>
+                                <label>Class</label>
+                                @device.DeviceClass
+                            </div>
+                            <div>
+                                <label>Type</label>
+                                @device.DeviceType
+                            </div>
+                            <div>
+                                <label>ID</label>
+                                @device.Id
+                            </div>
+                            <div>
+                                <label>MQTT Topics</label>
+                                @Html.Raw(string.Join("<br />", device.AllTopics))
+                            </div>
+
+                            @if (device.LastMqttMessage.HasValue)
+                            {
+                                var stateful = device as IStatefulDevice;
+                                <div>
+                                    <label>Power On</label>
+                                    @stateful.PowerOn
+                                </div>
+                                <div>
+                                    @if (stateful.PowerOn ?? true)
+                                    {
+                                        <button class="btn btn-primary btn-xs btn-success" onclick="SwitchOff('@device.Id')">Switch Off</button>
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-primary btn-xs btn-danger" onclick="SwitchOn('@device.Id')">Switch On</button>
+                                    }
+                                </div>
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
