@@ -13,6 +13,14 @@ namespace MqttHomeWeb.Controllers
     {
         public IActionResult Index()
         {
+            var huawei = new MqttHome.Presence.Huawei.HuaweiHG8245();
+
+            huawei.Login();
+
+            var devices = huawei.GetDevices();
+
+            Console.WriteLine(devices);
+
             return View(Program.MqttHomeController);
         }
 
