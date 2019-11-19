@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Sign In";
+}
+
+<div class="row">
+    <div class="col-lg-6 col-lg-offset-3">
+        <div class="frame">
+            <div class="alert alert-info">
+                You are required to sign in to access the requested content
+            </div>
+            <div class="text-center">
+                <a aria-label="Sign In With Google" href="/account/oauth?returnurl=@ViewBag.ReturnUrl">
+                    <img alt="Sign In With Google" src="~/images/google.png" />
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,5 +1,4 @@
-﻿@using MqttHome.Mqtt
-@using MqttHome.Mqtt.Devices
+﻿@using MqttHome.Mqtt.Devices
 @model MqttHome.MqttHomeController
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -19,19 +18,19 @@
                                 <label>Last Contact</label>
                                 @device.LastMqttMessage.GetPrettyDateHtml()
                             </div>
-                            <div>
+                            <div class="technical">
                                 <label>Class</label>
                                 @device.DeviceClass
                             </div>
-                            <div>
+                            <div class="technical">
                                 <label>Type</label>
                                 @device.DeviceType
                             </div>
-                            <div>
+                            <div class="technical">
                                 <label>ID</label>
                                 @device.Id
                             </div>
-                            <div>
+                            <div class="technical">
                                 <label>MQTT Topics</label>
                                 @Html.Raw(string.Join("<br />", device.AllTopics))
                             </div>

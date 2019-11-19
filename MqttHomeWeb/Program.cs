@@ -26,6 +26,8 @@ namespace MqttHomeWeb
         public static DateTime StartupTime;
         public static string RootFolderPath;
 
+        public static IConfiguration Config;
+
         public static void Main(string[] args)
         {
             StartupTime = DateTime.Now;
@@ -38,6 +40,8 @@ namespace MqttHomeWeb
 
             WebsocketManager = (WebsocketManager)webHost.Services.GetService(typeof(WebsocketManager));
 
+            Config = Helpers.ConfigurationManager.AppSetting;
+
             RestartMqttHomeController();
 
             webHost.Run();
@@ -47,9 +51,9 @@ namespace MqttHomeWeb
         {
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()).Name;
 
-            var mqttBrokers = Helpers.ConfigurationManager.AppSetting.GetSection("MqttBrokers").Get<List<MqttBroker>>();
+            var mqttBrokers = Program.Config.GetSection("MqttBrokers").Get<List<MqttBroker>>();
 
-            MqttHomeController = new MqttHomeController(Helpers.ConfigurationManager.AppSetting,
+            MqttHomeController = new MqttHomeController(Program.Config,
                 LogManager.GetLogger(logRepository, "RuleLog"),
                 LogManager.GetLogger(logRepository, "DeviceLog"),
                 LogManager.GetLogger(logRepository, "GeneralLog"),

@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - MqttHome</title>
 
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="MqttHome" />
+    <meta name="apple-mobile-web-app-title" content="MqttHome" />
+    <meta name="theme-color" content="#FFFFFF" />
+    <meta name="msapplication-navbutton-color" content="#FFFFFF" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="msapplication-starturl" content="/" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/mqtthome-180x180.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/mqtthome-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="~/images/mqtthome-16x16.png" />
+    <link rel="manifest" href="~/manifest.json" />
+    <link rel="mask-icon" href="~/images/safari-pinned-tab.svg" color="#185FF9" />
+    <link rel="shortcut icon" href="~/images/favicon.ico" />
+    <meta name="msapplication-config" content="~/images/browserconfig.xml" />
+    <meta name="theme-color" content="#185FF9" />
+
+
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
@@ -15,6 +34,8 @@
               asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
+
+    <script src="~/js/sw-utils.js"></script>
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
@@ -47,31 +68,36 @@
     </script>
 </head>
 <body>
-    <nav class="navbar navbar-default navbar-fixed-top">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a asp-area="" asp-controller="System" asp-action="Index" class="navbar-brand">MqttHome</a>
+    @if (User.Identity.IsAuthenticated)
+    {
+
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a asp-area="" asp-controller="System" asp-action="Index" class="navbar-brand">MqttHome</a>
+                </div>
+                <div class="navbar-collapse collapse">
+                    <ul class="nav navbar-nav">
+                        <li><a asp-area="" asp-controller="System" asp-action="Index">System</a></li>
+                        <li><a asp-area="" asp-controller="System" asp-action="Sensors">Sensors</a></li>
+                        <li><a asp-area="" asp-controller="System" asp-action="Switches">Switches</a></li>
+                        <li><a asp-area="" asp-controller="System" asp-action="Rules">Rules</a></li>
+                        <li><a asp-area="" asp-controller="System" asp-action="Conditions">Conditions</a></li>
+                        <li><a asp-area="" asp-controller="System" asp-action="Devices">Devices</a></li>
+                        <li><a asp-area="" asp-controller="Editor" asp-action="Index">Editor</a></li>
+                        <li><a asp-area="" asp-controller="System" asp-action="Logs">Logs</a></li>
+                        <li><a asp-area="" asp-controller="Account" asp-action="Logout">Sign Out</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="navbar-collapse collapse">
-                <ul class="nav navbar-nav">
-                    <li><a asp-area="" asp-controller="System" asp-action="Index">System</a></li>
-                    <li><a asp-area="" asp-controller="System" asp-action="Sensors">Sensors</a></li>
-                    <li><a asp-area="" asp-controller="System" asp-action="Switches">Switches</a></li>
-                    <li><a asp-area="" asp-controller="System" asp-action="Rules">Rules</a></li>
-                    <li><a asp-area="" asp-controller="System" asp-action="Conditions">Conditions</a></li>
-                    <li><a asp-area="" asp-controller="System" asp-action="Devices">Devices</a></li>
-                    <li><a asp-area="" asp-controller="Editor" asp-action="Index">Editor</a></li>
-                    <li><a asp-area="" asp-controller="System" asp-action="Logs">Logs</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+        </nav>
+    }
 
     <div class="container body-content">
 

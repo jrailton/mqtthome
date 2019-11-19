@@ -1,0 +1,17 @@
+{
+  "name": "MqttHome",
+  "short_name": "MqttHome",
+  "theme_color": "#2196f3",
+  "background_color": "#2196f3",
+  "lang": "en-US",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "/images/mqtthome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

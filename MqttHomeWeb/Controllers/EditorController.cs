@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MqttHomeWeb.Controllers
 {
+    [Authorize]
     public class EditorController : Controller
     {
         public static string GetAutocompleteList() {

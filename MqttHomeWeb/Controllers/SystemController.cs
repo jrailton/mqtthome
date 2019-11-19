@@ -3,24 +3,18 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MqttHome;
 using MqttHomeWeb.Models;
 
 namespace MqttHomeWeb.Controllers
 {
+    [Authorize]
     public class SystemController : Controller
     {
         public IActionResult Index()
         {
-            var huawei = new MqttHome.Presence.Huawei.HuaweiHG8245();
-
-            huawei.Login();
-
-            var devices = huawei.GetDevices();
-
-            Console.WriteLine(devices);
-
             return View(Program.MqttHomeController);
         }
 

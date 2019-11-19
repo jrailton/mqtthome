@@ -12,6 +12,8 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using MqttHome.WebSockets;
 using MqttHomeWeb.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace MqttHomeWeb
 {
@@ -30,9 +32,14 @@ namespace MqttHomeWeb
             var mvc = services.AddControllersWithViews();
             services.AddSingleton<WebsocketManager>();
 
-            #if (DEBUG)
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                    .AddCookie(options => { 
+                    
+                    });
+
+#if (DEBUG)
             mvc.AddRazorRuntimeCompilation();
-            #endif
+#endif
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -64,18 +71,27 @@ namespace MqttHomeWeb
             });
 
             app.UseRouting();
+
+            app.UseAuthentication();
             app.UseAuthorization();
+
             app.UseWebSockets(new WebSocketOptions
             {
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
                 ReceiveBufferSize = 4096
             });
+
             app.UseMiddleware<WebsocketMiddleware>();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=System}/{action=Index}/{id?}");
+            });
+
+            app.UseCookiePolicy(new CookiePolicyOptions {
+                MinimumSameSitePolicy = SameSiteMode.None
             });
         }
     }

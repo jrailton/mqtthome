@@ -3,12 +3,18 @@
     ViewData["Title"] = "MQTT Home";
 }
 
+<style type="text/css">
+    .technical {
+        display: block;
+    }
+</style>
+
 <script>
     var socket = null;
 
     (function () {
         // reload data timer
-        setInterval(function () { $("#index-content").load("/system/indexcontent"); }, 2000);
+        setInterval(function () { $("#index-content").load("/system/indexcontent"); }, 10000);
     }());
 
     function ToggleLogging() {
@@ -73,4 +79,4 @@
             <pre id="log-content" style="background-color: #FFF; overflow: auto; height: 70vh;"></pre>
         </div>
     </div>
-    </div>
+</div>
