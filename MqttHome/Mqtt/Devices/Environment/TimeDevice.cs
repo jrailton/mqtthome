@@ -10,7 +10,7 @@ namespace MqttHome.Mqtt.Devices.Environment
     {
         private Timer _updateValues;
 
-        public TimeDevice(MqttHomeController controller, string id, string friendlyName) : base(controller, id, friendlyName, MqttDeviceType.TimeSensor) {
+        public TimeDevice(MqttHomeController controller, string id, string friendlyName) : base(controller, id, friendlyName, DeviceType.TimeSensor) {
             SensorData = new TimeSensorData(controller.Longitude, controller.Latitude);
             LastMqttMessage = DateTime.Now;
 
@@ -21,8 +21,6 @@ namespace MqttHome.Mqtt.Devices.Environment
 
         }
 
-        public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.TimeSensor;
-        public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Sensor;
         public override List<string> SensorTopics { get => new List<string>(); set { } }
         public override bool SaveSensorValuesToDatabase => false;
     }

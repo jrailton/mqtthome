@@ -1,7 +1,6 @@
-﻿using MqttHome.Devices.Config;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace MqttHome
+namespace MqttHome.Config
 {
     public class DeviceConfig
     {

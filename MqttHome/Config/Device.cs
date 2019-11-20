@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MqttHome.Devices.Config
+namespace MqttHome.Config
 {
     public class Device
     {

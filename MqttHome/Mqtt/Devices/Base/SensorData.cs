@@ -31,7 +31,7 @@ namespace MqttHome.Mqtt
 
                 return updated;
             }
-            catch (Exception err) {
+            catch{
                 throw;
             }
         }

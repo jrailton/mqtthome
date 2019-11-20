@@ -12,7 +12,7 @@ namespace MqttHome.Mqtt
 
         private SwitchHelper _switchHelper;
 
-        public MqttStatefulSensorDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
+        public MqttStatefulSensorDevice(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
             SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
             SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");

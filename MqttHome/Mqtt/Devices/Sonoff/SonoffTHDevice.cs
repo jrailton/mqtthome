@@ -12,11 +12,11 @@ namespace MqttHome.Mqtt
 {
     public class SonoffTHDevice : MqttStatefulSensorDevice<SonoffTHSensorData>
     {
-        public SonoffTHDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, MqttDeviceType.SonoffTH, config)
+        public SonoffTHDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, DeviceType.SonoffTH, config)
         {
         }
 
-        public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.SonoffTH;
-        public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Switch;
+        public override DeviceType DeviceType => DeviceType.SonoffTH;
+        public override DeviceClass DeviceClass => DeviceClass.Switch;
     }
 }

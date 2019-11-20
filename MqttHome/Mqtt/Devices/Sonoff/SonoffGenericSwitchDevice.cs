@@ -10,13 +10,13 @@ namespace MqttHome.Mqtt
     public class SonoffGenericSwitchDevice : MqttStatefulDevice
     {
         private SwitchHelper _switchHelper;
-        public SonoffGenericSwitchDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
+        public SonoffGenericSwitchDevice(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
             _switchHelper = new SwitchHelper(this);
         }
 
-        public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.Unknown;
-        public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Switch;
+        public override DeviceType DeviceType => DeviceType.Unknown;
+        public override DeviceClass DeviceClass => DeviceClass.Switch;
 
         public override void ParseStatePayload(MqttApplicationMessage message)
         {

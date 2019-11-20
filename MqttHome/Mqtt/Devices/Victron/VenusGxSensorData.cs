@@ -59,7 +59,7 @@ namespace MqttHome.Mqtt.Devices
                         break;
                 }
             }
-            catch (Exception err)
+            catch
             {
                 throw;
             }

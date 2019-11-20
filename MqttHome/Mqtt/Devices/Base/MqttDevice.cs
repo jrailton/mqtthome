@@ -9,30 +9,22 @@ using MqttHome.Mqtt.Devices;
 
 namespace MqttHome.Mqtt
 {
-    public abstract class MqttDevice
+    public abstract class MqttDevice : Device, IMqttDevice
     {
-        public MqttHomeController Controller { get; private set; }
-
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="id">Id is the device ID that will be used as the topic and influx data tag</param>
-        public MqttDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config)
+        public MqttDevice(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName)
         {
-            FriendlyName = friendlyName ?? id;
             DeviceType = type;
-            Controller = controller;
-            Id = id;
             Controller.DeviceLog.Debug($"Adding {DeviceType} {DeviceClass} device {id}");
         }
 
-        public string FriendlyName { get; protected set; }
-
-        public string Id { get; set; }
-
         public DateTime? LastMqttMessage { get; set; }
 
-        public virtual List<string> AllTopics {
+        public virtual List<string> AllTopics
+        {
             get
             {
                 try
@@ -54,20 +46,19 @@ namespace MqttHome.Mqtt
 
                     return topics.Where(s => !string.IsNullOrEmpty(s)).ToList();
                 }
-                catch (Exception err) {
+                catch
+                {
                     throw;
                 }
             }
         }
 
         // commands
-        public virtual MqttCommand RebootDevice
+        public virtual MqttCommand RebootCommand
         {
             get { return new MqttCommand(Controller, Id, $"cmnd/{Id}/Restart", "1"); }
             set { }
         }
 
-        public abstract MqttDeviceType DeviceType { get; set; }
-        public abstract MqttDeviceClass DeviceClass { get; set; }
     }
 }

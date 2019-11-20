@@ -9,6 +9,7 @@ using System.Threading;
 using InfluxDB.LineProtocol.Payload;
 using log4net;
 using Microsoft.Extensions.Configuration;
+using MqttHome.Config;
 using MqttHome.Influx;
 using MqttHome.Mqtt;
 using MqttHome.Mqtt.BrokerCommunicator;

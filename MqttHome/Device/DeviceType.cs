@@ -1,6 +1,6 @@
-namespace MqttHome.Mqtt
+namespace MqttHome
 {
-    public enum MqttDeviceType
+    public enum DeviceType
     {
         Unknown,
         SonoffTH,
@@ -10,6 +10,7 @@ namespace MqttHome.Mqtt
         VictronCCGX,
         TimeSensor,
         Accuweather,
-        SonoffBasic
+        SonoffBasic,
+        HuaweiHGRouter
     }
 }

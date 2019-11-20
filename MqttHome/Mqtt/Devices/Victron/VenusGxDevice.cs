@@ -16,7 +16,7 @@ namespace MqttHome.Mqtt.Devices.Victron
         private int _venusGxMqttServerPort;
         private Timer _timer;
 
-        public VenusGxDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, MqttDeviceType.VictronCCGX, config)
+        public VenusGxDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, DeviceType.VictronCCGX, config)
         {
             SensorTopics = new List<string> {
                 $"N/{id}/system/0/Dc/Battery/#",
@@ -72,7 +72,7 @@ namespace MqttHome.Mqtt.Devices.Victron
             }
         }
 
-        public override MqttDeviceType DeviceType { get; set; } = MqttDeviceType.VictronCCGX;
-        public override MqttDeviceClass DeviceClass { get; set; } = MqttDeviceClass.Sensor;
+        public override DeviceType DeviceType => DeviceType.VictronCCGX;
+        public override DeviceClass DeviceClass => DeviceClass.Sensor;
     }
 }

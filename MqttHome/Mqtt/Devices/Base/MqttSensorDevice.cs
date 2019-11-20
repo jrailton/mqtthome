@@ -7,8 +7,10 @@ namespace MqttHome.Mqtt
 {
     public abstract class MqttSensorDevice<TSensorData> : MqttDevice, ISensorDevice<ISensorData> where TSensorData : SensorData, new()
     {
-        public MqttSensorDevice(MqttHomeController controller, string id, string friendlyName, MqttDeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
+        public MqttSensorDevice(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
+            DeviceClass = DeviceClass.Sensor;
+
             SensorData = new TSensorData();
             SensorTopics = new List<string> {
                 $"tele/{id}/SENSOR"
