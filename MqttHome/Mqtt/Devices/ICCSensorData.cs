@@ -92,17 +92,23 @@ namespace MqttHome.Mqtt.Devices
         /// </summary>
         private int DeriveSeconds(string timespan)
         {
-            if (timespan == " --- ")
+            try
+            {
+                if (timespan == " --- ")
+                    return 0;
+
+                int output = 0;
+                var array = timespan.Split(':');
+                var multipliers = new[] { 3600, 60, 1 };
+
+                for (int i = array.Length - 1; i >= 0; i--)
+                    output += (int.Parse(array[i]) * multipliers[i]);
+
+                return output;
+            }
+            catch (Exception err) {
                 return 0;
-
-            int output = 0;
-            var array = timespan.Split(':');
-            var multipliers = new[] { 3600, 60, 1 };
-
-            for (int i = array.Length - 1; i >= 0; i--)
-                output += (int.Parse(array[i]) * multipliers[i]);
-
-            return output;
+            }
         }
 
         public int? PylontechCycles { get; set; }

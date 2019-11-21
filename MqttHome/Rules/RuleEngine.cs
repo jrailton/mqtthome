@@ -145,7 +145,7 @@ namespace MqttHome
 
                     logIdentity += $" :: Test Conditions";
 
-                    var ruleState = rule.Test(ConditionConfig.Conditions);
+                    var ruleState = rule.Test(ConditionConfig.Conditions, _controller.RuleLog);
 
                     if (rule.State != ruleState)
                     {

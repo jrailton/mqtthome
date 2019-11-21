@@ -19,12 +19,12 @@ namespace MqttHome.Mqtt.Devices
             var logIdentity = $"{_device.Id} :: SwitchOff";
             try
             {
-                _device.Controller.DeviceLog.Info($"{logIdentity} :: Reason - {reason}");
+                _device.Controller.RuleLog.Info($"{logIdentity} :: Reason - {reason}");
                 _device.SetPowerStateOff.Execute();
             }
             catch (Exception err)
             {
-                _device.Controller.DeviceLog.Error($"{logIdentity} - Failed.", err);
+                _device.Controller.RuleLog.Error($"{logIdentity} - Failed.", err);
             }
         }
 
@@ -37,13 +37,13 @@ namespace MqttHome.Mqtt.Devices
                 // default to 15 seconds if null
                 flipFlopSeconds = flipFlopSeconds ?? 15;
 
-                _device.Controller.DeviceLog.Info($"{logIdentity} :: Reason - {reason}");
+                _device.Controller.RuleLog.Info($"{logIdentity} :: Reason - {reason}");
 
                 // prevent flipflop
                 if (_device.PowerOffTime.HasValue && _device.PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value) > DateTime.Now)
                 {
                     var error = $"Flipflop prevention. Need to wait until {_device.PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value).ToString("HH:mm:ss")}";
-                    _device.Controller.DeviceLog.Warn($"{logIdentity} :: Reason - {reason} :: Aborted - {error}");
+                    _device.Controller.RuleLog.Warn($"{logIdentity} :: Reason - {reason} :: Aborted - {error}");
                 }
                 else
                 {
@@ -52,7 +52,7 @@ namespace MqttHome.Mqtt.Devices
             }
             catch (Exception err)
             {
-                _device.Controller.DeviceLog.Error($"{logIdentity} - Failed.", err);
+                _device.Controller.RuleLog.Error($"{logIdentity} - Failed.", err);
             }
 
         }

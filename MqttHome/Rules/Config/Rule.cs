@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,29 +33,48 @@ namespace MqttHome
         /// <summary>
         /// Will return true if conditions are matched. Errs on the side of caution, if a condition value is null its presumed to be FALSE
         /// </summary>
-        public bool Test(List<Condition> c) {
+        public bool Test(List<Condition> c, ILog logger) {
             bool result;
 
             var conditions = c.ToDictionary(o => o.Id, o => o.ConditionValue);
 
+            string logIdentity = $"Test :: Rule: {Name}, Switch: {Switch}";
+
+            logger.Debug($@"{logIdentity}
+{string.Join(Environment.NewLine, c.Select(s => $"Condition {s.Id}: {s.ConditionValue}"))}");
+
             foreach (var conditionId in ConditionsAnd)
             {
-                result = conditions[conditionId] ?? false;
+                var temp = conditions[conditionId];
+
+                logger.Debug($"{logIdentity} :: AND :: {conditionId} = {temp}{(temp.HasValue ? "" : " (will default to FALSE and exit early)")}");
+
+                result = temp ?? false;
 
                 // exit early if false
                 if (!result)
+                {
+                    logger.Debug($"{logIdentity} :: AND :: Returning early, result FALSE");
                     return false;
-
+                }
             }
 
             foreach (var conditionId in ConditionsOr) {
-                result = conditions[conditionId] ?? false;
+                var temp = conditions[conditionId];
+
+                logger.Debug($"{logIdentity} :: OR :: {conditionId} = {temp}{(temp.HasValue ? "" : " (will default to FALSE and continue checking)")}");
+
+                result = temp ?? false;
 
                 // exit early if true
                 if (result)
+                {
+                    logger.Debug($"{logIdentity} :: AND :: Returning early, result TRUE");
                     return true;
+                }
             }
 
+            logger.Debug($"{logIdentity} :: BOTH :: Returning result FALSE");
             return false;
         }
     }
