@@ -23,6 +23,11 @@ namespace MqttHomeWeb.Controllers
             return View(Program.MqttHomeController);
         }
 
+        public IActionResult Details()
+        {
+            return View(Program.MqttHomeController);
+        }
+
         public IActionResult Conditions()
         {
             return View(Program.MqttHomeController);
@@ -68,9 +73,9 @@ namespace MqttHomeWeb.Controllers
             return RedirectToAction("Logs");
         }
 
-        public IActionResult IndexContent()
+        public IActionResult DetailsContent()
         {
-            return PartialView("_IndexContent", Program.MqttHomeController);
+            return PartialView("_DetailsContent", Program.MqttHomeController);
         }
 
         public IActionResult SwitchContent()

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using MqttHome.Mqtt.Devices;
@@ -11,6 +13,7 @@ namespace MqttHome.Mqtt
         public event EventHandler<StateChangedEventArgs> StateChanged;
 
         private SwitchHelper _switchHelper;
+        private MqttHomeController _controller;
 
         public MqttStatefulDevice(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
         {
@@ -18,6 +21,7 @@ namespace MqttHome.Mqtt
             SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
             SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");
             _switchHelper = new SwitchHelper(this);
+            _controller = controller;
         }
 
 
@@ -80,6 +84,8 @@ namespace MqttHome.Mqtt
                     PowerOffTime = PowerOffTime ?? DateTime.Now;
                 }
 
+                _switchHelper.AddStateHistory($"State changed to {(value.Value ? "ON" : "OFF")}");
+
                 StateChanged?.Invoke(this, new StateChangedEventArgs
                 {
                     PowerOn = value.Value,
@@ -90,6 +96,10 @@ namespace MqttHome.Mqtt
         public MqttCommand SetPowerStateOn { get; private set; }
 
         public MqttCommand SetPowerStateOff { get; private set; }
+
+        public Dictionary<DateTime, string> StateHistory => _switchHelper.StateHistory;
+
+        public string StateQuery => _switchHelper.StateQuery;
 
         public abstract void ParseStatePayload(MqttApplicationMessage message);
 

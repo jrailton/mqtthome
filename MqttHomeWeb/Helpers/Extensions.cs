@@ -87,5 +87,9 @@ namespace System
 
             return $"{Math.Ceiling((double)dayDiff / 7).ToString("N0")} weeks ago";
         }
+
+        public static string UrlReady(this string input) {
+            return input.Replace(" ", "-").ToLower();
+        }
     }
 }
