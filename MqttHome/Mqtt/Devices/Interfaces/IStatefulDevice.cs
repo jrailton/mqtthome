@@ -33,6 +33,9 @@ namespace MqttHome.Mqtt.Devices
         MqttCommand SetPowerStateOn { get; }
         MqttCommand SetPowerStateOff { get; }
 
+        public Dictionary<DateTime, string> StateHistory { get; }
+
+        public string StateQuery { get; }
     }
     public class StateChangedEventArgs : EventArgs
     {

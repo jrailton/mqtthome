@@ -1,82 +1,16 @@
-﻿@model MqttHome.MqttHomeController
+﻿@model MqttHomeController
 @{
-    ViewData["Title"] = "MQTT Home";
+    ViewData["Title"] = "Switches";
 }
+<br />
 
-<style type="text/css">
-    .technical {
-        display: block;
-    }
-</style>
+<div id="switch-content">
+    @{await Html.RenderPartialAsync("_Switches"); }
+</div>
 
-<script>
-    var socket = null;
-
+<script type="text/javascript">
     (function () {
         // reload data timer
-        setInterval(function () { $("#index-content").load("/system/indexcontent"); }, 10000);
+        setInterval(function () { $("#switch-content").load("/system/switchcontent"); }, 10000);
     }());
-
-    function ToggleLogging() {
-        if (socket) {
-            // close websocket connection
-            socket.close();
-            socket = null;
-
-            Log("Log streaming stopped.");
-        } else {
-            // set websocket connection
-            var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-            var wsUri = protocol + "//" + window.location.host;
-            socket = new WebSocket(wsUri);
-
-            Log("Log streaming started.");
-
-            socket.onmessage = function (e) {
-                Log(e.data);
-            };
-
-            socket.onclose = function (e) {
-
-                // if it wasnt a clean close, re-open the connection
-                if (!e.wasClean) {
-                    Log("Log stream interrupted, reconnecting...");
-                    socket = null;
-                    ToggleLogging();
-                }
-            }
-        }
-    }
-
-    function Log(message) {
-        $("#log-content").prepend('<strong>' + new Date().toLocaleString() + '</strong> ' + message + '<br />');
-    }
-
-    function SwitchOff(id) {
-        $("#message-content").load("/switch/off/" + id);
-    }
-
-    function SwitchOn(id) {
-        $("#message-content").load("/switch/on/" + id);
-    }
 </script>
-
-<div id="message-content" style="position: fixed; top: 51px; left: 50%; transform: translate(-50%); z-index: 99999;"></div>
-
-<div id="index-content">
-    @{await Html.RenderPartialAsync("_IndexContent"); }
-</div>
-
-<div class="panel panel-danger">
-    <div class="panel-heading">
-        <a data-toggle="collapse" href="#collapse-logs">Error Logs</a>
-        <button class="btn btn-xs btn-default pull-right" onclick="ToggleLogging(); ">Toggle Logging</button>
-        <button class="btn btn-xs btn-danger pull-right" onclick="$('#log-content').html('');" style="margin-right: 5px;">Clear Logs</button>
-    </div>
-    <div id="collapse-logs" class="panel-collapse collapse">
-
-        <div class="panel-body">
-            <pre id="log-content" style="background-color: #FFF; overflow: auto; height: 70vh;"></pre>
-        </div>
-    </div>
-</div>
