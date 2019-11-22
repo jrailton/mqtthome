@@ -1,4 +1,4 @@
-﻿const CACHE_VERSION = "0.1";
+﻿const CACHE_VERSION = "0.1.1";
 const CACHE_NAME = "mqtthome-v" + CACHE_VERSION;
 const CACHE_FILES = [
     "/"

@@ -1,0 +1,51 @@
+[
+  {
+    "inputFiles": [
+      "wwwroot/css/**/*.css",
+      "!*.bundle.css",
+      "!*.min.css"
+    ],
+    "outputFileName": "wwwroot/css/site.bundle.css",
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    }
+  },
+  {
+    "inputFiles": [
+      "wwwroot/js/**/*.js",
+      "!*.bundle.js",
+      "!*.min.js",
+      "!wwwroot/js/sw-cachehandlers.js",
+      "!wwwroot/js/sw-toolbox.js",
+      "!wwwroot/js/sw-utils.js"
+    ],
+    "outputFileName": "wwwroot/js/site.bundle.js",
+    "minify": {
+      "enabled": false,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  },
+  {
+    "inputFiles": [
+      "wwwroot/css/site.bundle.css"
+    ],
+    "outputFileName": "wwwroot/css/site.bundle.min.css",
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    }
+  },
+  {
+    "inputFiles": [
+      "wwwroot/js/site.bundle.js"
+    ],
+    "outputFileName": "wwwroot/js/site.bundle.min.js",
+    "minify": {
+      "enabled": true,
+      "renameLocals": true
+    },
+    "sourceMap": false
+  }
+]
