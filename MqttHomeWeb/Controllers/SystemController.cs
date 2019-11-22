@@ -15,7 +15,7 @@ namespace MqttHomeWeb.Controllers
     {
         public IActionResult Index()
         {
-            return View(Program.MqttHomeController);
+            return View("Switches", Program.MqttHomeController);
         }
 
         public IActionResult Rules()

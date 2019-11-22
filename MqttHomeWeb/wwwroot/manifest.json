@@ -1,8 +1,8 @@
 {
   "name": "MqttHome",
   "short_name": "MqttHome",
-  "theme_color": "#2196f3",
-  "background_color": "#2196f3",
+  "theme_color": "#2469DB",
+  "background_color": "#FFFFFF",
   "lang": "en-US",
   "display": "standalone",
   "scope": "/",

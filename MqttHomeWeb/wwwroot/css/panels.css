@@ -1,0 +1,19 @@
+﻿.panel .panel-heading a {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: absolute;
+  max-width: 65%;
+}
+.panel .panel-heading .btn.pull-right {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+.panel .panel-heading .btn.pull-right.btn-xs {
+  margin: -11px;
+  margin-right: -16px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
