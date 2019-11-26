@@ -6,23 +6,56 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace MqttHome.Presence.Huawei
 {
     public class HuaweiHG8245 : PresenceDevice
     {
-        private string _host = "10.0.0.1";
-        private string _username = "telecomadmin";
-        private string _password = "lt16sXtu";
+        private string _host;
+        private string _username;
+        private string _password;
         private IEnumerable<string> _cookies;
-
-        public override List<Person> People => throw new NotImplementedException();
+        private Timer _timer;
+        private List<RouterDevice> _devices;
 
         public HuaweiHG8245(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, config)
         {
             _host = config[0];
             _username = config[1];
             _password = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(config[2]));
+
+            //check every 20 seconds, starting immediately
+            _timer = new Timer((state) =>
+            {
+                UpdatePeople();
+            }, null, 0, 20000);
+        }
+
+        private void UpdatePeople() 
+        {
+            // get list of attached devices
+            _devices = GetDevices();
+
+            // check list of People
+            foreach (var person in Controller.People) {
+                var device = _devices.SingleOrDefault(d => d.MacAddress == person.MacAddress);
+                
+                // default to not-present
+                var present = false;
+
+                // if device is found and online, then they are present
+                present = device?.Status.Equals("Online") ?? false;
+
+                // if presence changed, raise event
+                if (person.Present != present) {
+                    
+                    person.Present = present;
+                    person.PresenceChanged = DateTime.Now;
+
+                    Woft(this, person);
+                }
+            }
         }
 
         private class PostResponse

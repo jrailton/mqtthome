@@ -34,6 +34,11 @@
       "Id": "After5pm",
       "Device": "time",
       "SensorValue": "Hour >= 17"
+    },
+    {
+      "Id": "SomeoneHome",
+      "Device": "people",
+      "PeoplePresent": "jim,tracey"
     }
   ]
 }

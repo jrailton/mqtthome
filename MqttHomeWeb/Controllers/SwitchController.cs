@@ -8,7 +8,7 @@ using MqttHome.Mqtt.Devices;
 
 namespace MqttHomeWeb.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Operator")]
     public class SwitchController : Controller
     {
         public IActionResult Off(string id)

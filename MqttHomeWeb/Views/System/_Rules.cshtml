@@ -3,7 +3,7 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         Rules
-        <a class="btn btn-xs btn-default" href="/editor/index/rules.json">Edit Rules</a>
+        <a class="btn btn-xs btn-default pull-right" href="/editor/index/rules.json">Edit Rules</a>
     </div>
     <div class="panel-body">
         @if (!Model.RuleEngineEnabled)
@@ -11,36 +11,41 @@
             <div class="alert alert-warning">The rule engine is DISABLED in appsettings.json</div>
         }
 
+        @foreach(var note in Model.RuleEngine.RuleValidationNotifications)
+        {
+            <div class="alert alert-@note.Class">@note.Message</div>
+        }
+
         @if (Model.RuleEngine.RuleConfig.Defaults.Any())
         {
-        <div class="panel panel-default">
-            <div class="panel-heading">Defaults</div>
-            <div class="panel-body">
-                @if (Model.RuleEngine.RuleConfig.Defaults.FlipFlop.HasValue)
-                {
-                    <div>
-                        <label>Flip Flop</label>
-                        @Model.RuleEngine.RuleConfig.Defaults.FlipFlop
-                    </div>
-                }
+            <div class="panel panel-default">
+                <div class="panel-heading">Defaults</div>
+                <div class="panel-body">
+                    @if (Model.RuleEngine.RuleConfig.Defaults.FlipFlop.HasValue)
+                    {
+                        <div>
+                            <label>Flip Flop</label>
+                            @Model.RuleEngine.RuleConfig.Defaults.FlipFlop
+                        </div>
+                    }
 
-                @if (Model.RuleEngine.RuleConfig.Defaults.ConditionsOr?.Any() ?? false)
-                {
-                    <div>
-                        <label>Condition OR</label>
-                        @Html.Raw(string.Join("<br />", Model.RuleEngine.RuleConfig.Defaults.ConditionsOr))
-                    </div>
-                }
+                    @if (Model.RuleEngine.RuleConfig.Defaults.ConditionsOr?.Any() ?? false)
+                    {
+                        <div>
+                            <label>Condition OR</label>
+                            @Html.Raw(string.Join("<br />", Model.RuleEngine.RuleConfig.Defaults.ConditionsOr))
+                        </div>
+                    }
 
-                @if (Model.RuleEngine.RuleConfig.Defaults.ConditionsAnd?.Any() ?? false)
-                {
-                    <div>
-                        <label>Condition AND</label>
-                        @Html.Raw(string.Join("<br />", Model.RuleEngine.RuleConfig.Defaults.ConditionsAnd))
-                    </div>
-                }
+                    @if (Model.RuleEngine.RuleConfig.Defaults.ConditionsAnd?.Any() ?? false)
+                    {
+                        <div>
+                            <label>Condition AND</label>
+                            @Html.Raw(string.Join("<br />", Model.RuleEngine.RuleConfig.Defaults.ConditionsAnd))
+                        </div>
+                    }
+                </div>
             </div>
-        </div>
         }
 
         @foreach (var rule in Model.RuleEngine.RuleConfig.Rules)

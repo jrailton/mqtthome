@@ -50,6 +50,12 @@
       "Id": "7c386655e76b",
       "FriendlyName": "Victron Venus GX",
       "Parameters": [ "10.0.0.59", "1883" ]
+    },
+    {
+      "Type": "HuaweiHG8245",
+      "Id": "HuaweiHG8245",
+      "FriendlyName": "Home Router",
+      "Parameters": [ "10.0.0.1", "telecomadmin", "lt16sXtu" ]
     }
   ]
 }

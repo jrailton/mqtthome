@@ -23,6 +23,11 @@ namespace MqttHomeWeb.Controllers
             return View(Program.MqttHomeController);
         }
 
+        public IActionResult People()
+        {
+            return View(Program.MqttHomeController);
+        }
+
         public IActionResult Details()
         {
             return View(Program.MqttHomeController);
@@ -58,6 +63,7 @@ namespace MqttHomeWeb.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult DeleteLog(string id)
         {
             try
@@ -94,13 +100,28 @@ namespace MqttHomeWeb.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Restart()
         {
             Program.RestartMqttHomeController();
 
+            Program.GeneralLog.Warn($"{Request.HttpContext.User.Identity.Name} restarted the MqttHomeController");
+
             TempData["success"] = "MqttHomeController was restarted";
 
             return RedirectToAction("Index");
+        }
+
+        [Authorize(Roles = "Admin,Manager")]
+        public string Kill()
+        {
+            Program.StopMqttHomeController();
+
+            Program.GeneralLog.Warn($"{Request.HttpContext.User.Identity.Name} killed the MqttHomeController");
+
+            TempData["success"] = "MqttHomeController was killed";
+
+            return $"{Request.HttpContext.User.Identity.Name} killed the MqttHomeController. You will need to manually restart the service from the Web Server";
         }
     }
 }

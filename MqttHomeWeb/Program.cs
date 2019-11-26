@@ -25,6 +25,7 @@ namespace MqttHomeWeb
         public static WebsocketManager WebsocketManager;
         public static DateTime StartupTime;
         public static string RootFolderPath;
+        public static ILog GeneralLog;
 
         public static IConfiguration Config;
 
@@ -35,6 +36,9 @@ namespace MqttHomeWeb
             // configure log4net
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+
+            // setup general logger
+            GeneralLog = LogManager.GetLogger(logRepository.Name, "GeneralLog");
 
             var webHost = CreateWebHostBuilder(args).Build();
 
@@ -56,7 +60,7 @@ namespace MqttHomeWeb
             MqttHomeController = new MqttHomeController(Program.Config,
                 LogManager.GetLogger(logRepository, "RuleLog"),
                 LogManager.GetLogger(logRepository, "DeviceLog"),
-                LogManager.GetLogger(logRepository, "GeneralLog"),
+                GeneralLog,
                 LogManager.GetLogger(logRepository, "InfluxLog"),
                 LogManager.GetLogger(logRepository, "MqttLog"),
                 mqttBrokers,
@@ -64,6 +68,10 @@ namespace MqttHomeWeb
             );
 
             MqttHomeController.Start();
+        }
+
+        public static void StopMqttHomeController() {
+            MqttHomeController = null;
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>

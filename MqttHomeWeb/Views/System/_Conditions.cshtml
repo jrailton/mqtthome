@@ -3,12 +3,17 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         Conditions
-        <a class="btn btn-xs btn-default" href="/editor/index/conditions.json">Edit Conditions</a>
+        <a class="btn btn-xs btn-default pull-right" href="/editor/index/conditions.json">Edit Conditions</a>
     </div>
     <div class="panel-body">
         @if (!Model.RuleEngineEnabled)
         {
-        <div class="alert alert-warning">The rule engine is DISABLED in appsettings.json</div>
+            <div class="alert alert-warning">The rule engine is DISABLED in appsettings.json</div>
+        }
+
+        @foreach (var note in Model.RuleEngine.RuleValidationNotifications)
+        {
+            <div class="alert alert-@note.Class">@note.Message</div>
         }
 
         @foreach (var condition in Model.RuleEngine.ConditionConfig.Conditions)

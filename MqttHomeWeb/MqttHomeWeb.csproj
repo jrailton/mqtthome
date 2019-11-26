@@ -28,6 +28,7 @@
     <Content Remove="conditions.json" />
     <Content Remove="devices.json" />
     <Content Remove="log4net.config" />
+    <Content Remove="people.json" />
     <Content Remove="rules.json" />
   </ItemGroup>
 
@@ -37,6 +38,9 @@
     </None>
     <None Include="compilerconfig.json" />
     <None Include="conditions.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
+    <None Include="people.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
     <None Include="devices.json">

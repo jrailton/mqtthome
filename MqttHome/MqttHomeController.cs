@@ -17,6 +17,8 @@ using MqttHome.Mqtt.Devices;
 using MqttHome.Mqtt.Devices.Environment;
 using MqttHome.Mqtt.Devices.Sonoff;
 using MqttHome.Mqtt.Devices.Victron;
+using MqttHome.Presence;
+using MqttHome.Presence.Huawei;
 using MqttHome.WebSockets;
 using Newtonsoft.Json;
 
@@ -29,15 +31,18 @@ namespace MqttHome
         public WebsocketManager WebsocketManager;
 
         public List<MqttCommunicator> MqttCommunicators = new List<MqttCommunicator>();
-        public IQueryable<MqttDevice> MqttDevices;
+        public List<MqttDevice> MqttDevices;
+        public List<PresenceDevice> PresenceDevices;
 
         public InfluxCommunicator InfluxCommunicator = null;
         public List<string> MqttDeviceTopics;
         public RuleEngine RuleEngine;
+        public List<Person> People = new List<Person>();
 
         public bool Debug;
 
-        // if false, will only save updated values to influx -- this has the advantage of less writes/data but Grafana queries will need to cater for "missing" values i.e. use "previous"
+        // if false, will only save updated values to influx -- this has the advantage of less writes/data but Grafana queries will need to cater for "missing" values i.e. use "previous" 
+        // which doesnt actually work if "previous" is outside of selected date range
         public bool SaveAllSensorValuesToDatabaseEveryTime = true;
         
         public double Longitude;
@@ -81,17 +86,11 @@ namespace MqttHome
                 if (InfluxDbEnabled && !string.IsNullOrEmpty(influxUrl) && !string.IsNullOrEmpty(influxDatabase))
                     InfluxCommunicator = new InfluxCommunicator(InfluxLog, influxUrl, influxDatabase);
 
+                LoadPeople();
+
                 LoadDevices();
 
-                foreach (IStatefulDevice device in MqttDevices.Where(d => d is IStatefulDevice))
-                {
-                    device.StateChanged += Device_StateChanged;
-                }
-
-                foreach (ISensorDevice<ISensorData> device in MqttDevices.Where(d => d is ISensorDevice<ISensorData>))
-                {
-                    device.SensorDataChanged += Device_SensorDataChanged;
-                }
+                SetupDeviceEventListeners();
 
                 DeviceLog.Debug($"Added {MqttDevices.Count()} MQTT devices...");
 
@@ -115,17 +114,36 @@ namespace MqttHome
             }
         }
 
+        private void LoadPeople() {
+            try
+            {
+                // read device config
+                var content = File.ReadAllText("people.json");
+                People = JsonConvert.DeserializeObject<List<Person>>(content);
+
+                DeviceLog.Info($"LoadPeople :: Loaded {People.Count()} people from people.json");
+
+            }
+            catch (Exception err)
+            {
+                DeviceLog.Error($"LoadPeople :: Failed to load people. {err.Message}", err);
+            }
+
+        }
+
         private void LoadDevices()
         {
-
             DeviceConfig deviceConfig;
-            var devices = new List<MqttDevice>();
+
+            MqttDevices = new List<MqttDevice>();
+            PresenceDevices = new List<PresenceDevice>();
 
             // add time device
-            devices.Add(new TimeDevice(this, "time", "Time Sensor (System)"));
+            MqttDevices.Add(new TimeDevice(this, "time", "Time Sensor (System)"));
 
             try
             {
+                // read device config
                 var content = File.ReadAllText("devices.json");
                 deviceConfig = JsonConvert.DeserializeObject<DeviceConfig>(content);
                 var allMqttDeviceTypes = Assembly.GetExecutingAssembly().GetTypes();
@@ -133,7 +151,19 @@ namespace MqttHome
                 foreach (var device in deviceConfig.Devices)
                 {
                     var type = allMqttDeviceTypes.First(t => t.Name == device.Type);
-                    devices.Add((MqttDevice)Activator.CreateInstance(type, this, device.Id, device.FriendlyName, device.Parameters));
+
+                    var interfaces = type.GetInterfaces();
+
+                    // add the device to the relevant list
+                    // TODO: Change the master list to be an IDevice list
+                    if (interfaces.Any(i => i.Name == "IMqttDevice"))
+                    {
+                        MqttDevices.Add((MqttDevice)Activator.CreateInstance(type, this, device.Id, device.FriendlyName, device.Parameters));
+                    }
+                    else if (interfaces.Any(i => i.Name == "IPresenceDevice"))
+                    {
+                        PresenceDevices.Add((PresenceDevice)Activator.CreateInstance(type, this, device.Id, device.FriendlyName, device.Parameters));
+                    }
                 }
 
                 DeviceLog.Info($"LoadDevices :: Loaded {deviceConfig.Devices.Count} devices from devices.json");
@@ -143,8 +173,23 @@ namespace MqttHome
             {
                 DeviceLog.Error($"LoadDevices :: Failed to load devices. {err.Message}", err);
             }
+        }
 
-            MqttDevices = devices.AsQueryable();
+        private void SetupDeviceEventListeners() {
+            foreach (IStatefulDevice device in MqttDevices.Where(d => d is IStatefulDevice))
+            {
+                device.StateChanged += Device_StateChanged;
+            }
+
+            foreach (ISensorDevice<ISensorData> device in MqttDevices.Where(d => d is ISensorDevice<ISensorData>))
+            {
+                device.SensorDataChanged += Device_SensorDataChanged;
+            }
+
+            foreach (IPresenceDevice device in PresenceDevices.Where(d => d is IPresenceDevice))
+            {
+                device.PresenceChanged += Device_PresenceChanged;
+            }
         }
 
         private void Device_StateChanged(object sender, StateChangedEventArgs e)
@@ -187,6 +232,10 @@ namespace MqttHome
 
                 RuleEngine?.OnDeviceSensorDataChanged(sensorDevice, e.ChangedValues);
             }
+        }
+
+        private void Device_PresenceChanged(object sender, PresenceChangedEventArgs e) {
+            
         }
 
         public void Start()

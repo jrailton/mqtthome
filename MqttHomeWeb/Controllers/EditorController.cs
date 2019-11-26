@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MqttHomeWeb.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,Operator,Viewer")]
     public class EditorController : Controller
     {
         public static string GetAutocompleteList() {
@@ -33,6 +33,7 @@ namespace MqttHomeWeb.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Index(string id, string newcontent)
         {
             try
@@ -47,6 +48,7 @@ namespace MqttHomeWeb.Controllers
             return RedirectToAction("Index", new { id = id });
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(string id) {
 
             try {

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using MqttHome.Mqtt;
 using MqttHome.Mqtt.Devices;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace MqttHome
 {
@@ -16,6 +17,9 @@ namespace MqttHome
         public RuleConfig RuleConfig { get; private set; } = new RuleConfig();
         public ConditionConfig ConditionConfig { get; private set; } = new ConditionConfig();
         private MqttHomeController _controller;
+
+        public List<Notification> RuleValidationNotifications = new List<Notification>();
+        public List<Notification> ConditionValidationNotifications = new List<Notification>();
 
         public RuleEngine(MqttHomeController controller)
         {
@@ -37,6 +41,8 @@ namespace MqttHome
             if (remove.Any())
             {
                 // log it
+                remove.ForEach(r => RuleValidationNotifications.Add(new Notification("warning", $"{r.Name} refers to a switch ({r.Switch}) that does not exist")));
+
                 _controller.RuleLog.Warn($"ValidateRules :: Removing {remove.Count} rules that refer to non-existent SWITCH devices: {string.Join(", ", remove.Select(r => r.Name))}");
                 RuleConfig.Rules.RemoveAll(r => !switches.Any(s => s.Id == r.Switch));
             }
@@ -51,7 +57,9 @@ namespace MqttHome
             if (remove.Any())
             {
                 // log it
+                remove.ForEach(r => RuleValidationNotifications.Add(new Notification("warning", $"{r.Name} either does not have any valid conditions or refers to a condition that does not exist")));
                 _controller.RuleLog.Warn($"ValidateRules :: Removing {remove.Count} rules that refer to non-existent conditions OR have no conditions specified: {string.Join(", ", remove.Select(r => r.Name))}");
+
                 RuleConfig.Rules.RemoveAll(r =>
                     (!r.ConditionsAnd.Any() && !r.ConditionsOr.Any()) ||
                     r.ConditionsAnd.Any(ca => !ConditionConfig.Conditions.Any(c => c.Id == ca)) ||
@@ -89,6 +97,7 @@ namespace MqttHome
             }
             catch (Exception err)
             {
+                ConditionValidationNotifications.Add(new Notification("danger", $"Failed to load rules - {err.Message}"));
                 _controller.RuleLog.Error($"LoadRules :: Failed to load rules. {err.Message}", err);
             }
         }
@@ -103,10 +112,13 @@ namespace MqttHome
                 // validate each rule and attach event to each
                 foreach (var condition in ConditionConfig.Conditions)
                 {
-
+                    // validate condition
                     var problems = condition.CheckProblems();
+
                     if (problems.Any())
                     {
+                        // log it
+                        problems.ForEach(p => ConditionValidationNotifications.Add(new Notification("warning", $"{condition.Id} has a problem: {p}")));
                         _controller.RuleLog.Error($"LoadConditions :: Condition ID {condition.Id} has problems: {string.Join(Environment.NewLine, problems)}");
                     }
                     else
@@ -123,6 +135,7 @@ namespace MqttHome
             }
             catch (Exception err)
             {
+                ConditionValidationNotifications.Add(new Notification("danger", $"Failed to load conditions - {err.Message}"));
                 _controller.RuleLog.Error($"LoadConditions :: Failed to load rules. {err.Message}", err);
             }
         }

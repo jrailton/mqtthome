@@ -2,5 +2,9 @@
   {
     "outputFile": "wwwroot/css/buttons.css",
     "inputFile": "wwwroot/css/buttons.less"
+  },
+  {
+    "outputFile": "wwwroot/css/panels.css",
+    "inputFile": "wwwroot/css/panels.less"
   }
 ]

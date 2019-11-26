@@ -1,0 +1,29 @@
+﻿@model MqttHomeController
+<div class="panel panel-default">
+    <div class="panel-heading">People</div>
+    <div class="panel-body">
+
+        @foreach (var person in Model.People)
+        {
+            <div class="col-md-4">
+                <div class="panel panel-@(person.Present ? "success" : "danger")">
+                    <div class="panel-heading">@person.FriendlyName</div>
+                    <div class="panel-body">
+                        <div>
+                            <label>Presence Changed</label>
+                            @person.PresenceChanged.GetPrettyDateHtml()
+                        </div>
+                        <div class="technical">
+                            <label>ID</label>
+                            @person.Id
+                        </div>
+                        <div class="technical">
+                            <label>MAC Address</label>
+                            @person.MacAddress
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

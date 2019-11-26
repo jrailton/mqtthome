@@ -6,6 +6,25 @@ function SubscribeToPush() {
     );
 }
 
+function Notify(messageHtml, duration) {
+    // create container if there isnt one
+    if (!window.notifyContainer)
+        window.notifyContainer = $("<div style=\"position: fixed; top: 51px; left: 50 %; transform: translate(-50 %); z - index: 99999;\"></div>");
+
+    // create object of new message
+    var message = $(messageHtml);
+
+    // add new message to view
+    window.notifyContainer.append(message);
+
+    // hide message after specified duration (default 2000ms)
+    setTimeout(function () {
+        message.hide(200, function () {
+            message.remove();
+        });
+    }, duration ? duration : 2000);
+}
+
 function RegisterPushSubscription(serviceWorkerRegistration) {
     return new Promise(function (resolve, reject) {
         serviceWorkerRegistration.pushManager.getSubscription()
@@ -49,10 +68,14 @@ function RegisterPushSubscription(serviceWorkerRegistration) {
 }
 function SwitchOff(id) {
     if (confirm('Are you sure you want to turn ' + id + ' off?'))
-        $("#message-content").load("/switch/off/" + id);
+        $.get("/switch/off/" + id, function (response) {
+            Notify(response);
+        });
 }
 
 function SwitchOn(id) {
     if (confirm('Are you sure you want to turn ' + id + ' on?'))
-        $("#message-content").load("/switch/on/" + id);
+        $.get("/switch/on/" + id, function (response) {
+            Notify(response);
+        });
 }

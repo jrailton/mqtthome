@@ -4,7 +4,7 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         Sensor Devices
-        <a class="btn btn-xs btn-default" href="/editor/index/devices.json">Edit Devices</a>
+        <a class="btn btn-xs btn-default pull-right" href="/editor/index/devices.json">Edit Devices</a>
     </div>
     <div id="collapse-devices" class="panel-collapse collapse in">
         <div class="panel-body">
@@ -12,7 +12,7 @@
             @foreach (var device in Model.MqttDevices.Where(d => d is ISensorDevice<ISensorData>))
             {
                 <div class="col-sm-4 col-lg-3">
-                    <div class="panel panel-info">
+                    <div class="panel panel-@(device.LastMqttMessage.HasValue ? "info" : "default")">
                         <div class="panel-heading">@device.FriendlyName</div>
                         <div class="panel-body">
                             <div>
