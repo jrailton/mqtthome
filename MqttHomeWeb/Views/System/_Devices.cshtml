@@ -4,8 +4,11 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         Devices
-        <a class="btn btn-xs btn-default pull-right" href="/editor/index/devices.json">Edit Devices</a>
-    </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-xs btn-default pull-right" href="/editor/index/devices.json">Edit Devices</a>
+        }
+        </div>
     <div id="collapse-devices" class="panel-collapse collapse in">
         <div class="panel-body">
 
@@ -46,17 +49,21 @@
                                         <label>Power On</label>
                                         @switchDevice.PowerOn
                                     </div>
-                                    <div>
-                                        @if (switchDevice.PowerOn ?? true)
-                                        {
-                                            <button class="btn btn-primary btn-xs btn-success" onclick="SwitchOff('@device.Id')">Switch Off</button>
-                                        }
-                                        else
-                                        {
-                                            <button class="btn btn-primary btn-xs btn-danger" onclick="SwitchOn('@device.Id')">Switch On</button>
-                                        }
-                                    </div>
+                                    @if (!User.IsInRole("Viewer"))
+                                    {
+                                        <div>
+                                            @if (switchDevice.PowerOn ?? true)
+                                            {
+                                                <button class="btn btn-primary btn-xs btn-success" onclick="SwitchOff('@device.Id')">Switch Off</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-primary btn-xs btn-danger" onclick="SwitchOn('@device.Id')">Switch On</button>
+                                            }
+                                        </div>
+                                    }
                                 }
+
                                 @if (device is IMqttSensorDevice<ISensorData>)
                                 {
                                     var sensor = device as IMqttSensorDevice<ISensorData>;

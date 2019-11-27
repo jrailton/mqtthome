@@ -10,8 +10,14 @@
         <div>
             <label>MQTT Home Controller Uptime</label>
             <a href="#" data-toggle="popover" title="@Model.StartupTime.ToString("d MMM yyyy HH:mm:ss")">@(DateTime.Now.Subtract(Model.StartupTime).ToString("d'd 'h'h 'm'm 's's'"))</a>
-            <a class="btn btn-xs btn-warning" onclick="return confirm('This will restart the controller and clear all live values. Are you sure?');" href="/system/restart">Restart</a>
-            <a class="btn btn-xs btn-danger" onclick="return confirm('This will kill the controller completely! It will need to be restarted from the Web Server. Are you sure?');" href="/system/kill">Emergency Stop</a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="btn btn-xs btn-warning" onclick="return confirm('This will restart the controller and clear all live values. Are you sure?');" href="/system/restart">Restart</a>
+            }
+            @if (!User.IsInRole("Viewer"))
+            {
+                <a class="btn btn-xs btn-danger" onclick="return confirm('This will kill the controller completely! It will need to be restarted from the Web Server. Are you sure?');" href="/system/kill">Emergency Stop</a>
+            }
         </div>
     </div>
     @{await Html.RenderPartialAsync("_MqttBrokers");}

@@ -5,7 +5,9 @@
     <div class="panel panel-default">
         <div class="panel-heading">
             MQTT Servers
-            <a class="btn btn-xs btn-default" href="/editor/index/appsettings.json">Edit MQTT Servers</a>
+            @if (User.IsInRole("Admin")){
+                <a class="btn btn-xs btn-default pull-right" href="/editor/index/appsettings.json">Edit MQTT Servers</a>
+            }
         </div>
         <div id="collapse-mqttservers" class="panel-collapse collapse in">
 
@@ -13,6 +15,6 @@
                 <label>@communicator.Broker.Name (@(communicator.Connected ? "Connected" : "Disconnected"))</label>
                 @communicator.Broker.IpAddress:@communicator.Broker.Port
             </div>
-            </div>
         </div>
-        }
+    </div>
+}

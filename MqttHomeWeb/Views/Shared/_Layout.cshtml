@@ -86,11 +86,16 @@
                         <li><a asp-area="" asp-controller="System" asp-action="Details">System</a></li>
                         <li><a asp-area="" asp-controller="System" asp-action="Sensors">Sensors</a></li>
                         <li><a asp-area="" asp-controller="System" asp-action="Switches">Switches</a></li>
-                        <li><a asp-area="" asp-controller="System" asp-action="Rules">Rules</a></li>
-                        <li><a asp-area="" asp-controller="System" asp-action="Conditions">Conditions</a></li>
-                        <li><a asp-area="" asp-controller="System" asp-action="Devices">Devices</a></li>
-                        <li><a asp-area="" asp-controller="Editor" asp-action="Index">Editor</a></li>
-                        <li><a asp-area="" asp-controller="System" asp-action="Logs">Logs</a></li>
+                        <li class="dropdown-submenu">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">Settings <b class="caret"></b></a>
+                            <ul class="dropdown-menu">
+                                <li><a asp-area="" asp-controller="System" asp-action="Rules">Rules</a></li>
+                                <li><a asp-area="" asp-controller="System" asp-action="Conditions">Conditions</a></li>
+                                <li><a asp-area="" asp-controller="System" asp-action="Devices">Devices</a></li>
+                                <li><a asp-area="" asp-controller="Editor" asp-action="Index">Editor</a></li>
+                                <li><a asp-area="" asp-controller="System" asp-action="Logs">Logs</a></li>
+                            </ul>
+                        </li>
                         <li><a asp-area="" asp-controller="Account" asp-action="Logout">Sign Out</a></li>
                     </ul>
                 </div>
@@ -98,17 +103,17 @@
         </nav>
     }
 
-<div class="container body-content">
+    <div class="container body-content">
 
-    @{ await Html.RenderPartialAsync("_Messages"); }
+        @{ await Html.RenderPartialAsync("_Messages"); }
 
-    @RenderBody()
+        @RenderBody()
 
-    <hr />
-    <footer>
-        <p>&copy; James Railton 2019 - MqttHome</p>
-    </footer>
-</div>
+        <hr />
+        <footer>
+            <p>&copy; James Railton 2019 - MqttHome</p>
+        </footer>
+    </div>
 
     <div id="ajax-spinner" style="display: none; position: fixed; bottom: 0; right: 0; background-color: #EEE; border: 1px solid #DDD; padding: 15px; border-width: 1px 0 0 1px;">
         <img alt="Loading" title="Server communication in progress..." src="~/images/spinner.gif" />

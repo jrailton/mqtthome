@@ -3,8 +3,11 @@
 <div class="panel panel-default" id="switch-devices">
     <div class="panel-heading">
         Switch Devices
-        <a class="btn btn-xs btn-default pull-right" href="/editor/index/devices.json">Edit Devices</a>
-    </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-xs btn-default pull-right" href="/editor/index/devices.json">Edit Devices</a>
+        }
+        </div>
     <div class="panel-body">
 
         @foreach (var device in Model.MqttDevices.Where(d => d is ISwitchDevice))
@@ -13,8 +16,10 @@
             <div class="col-sm-4 col-lg-3">
                 <div class="panel panel-@(switchDevice.PowerOn.HasValue ? (switchDevice.PowerOn.Value ? "success" : "danger") : "default")">
                     <div class="panel-heading">
-                        @if (device.LastCommunication.HasValue)
+                        @if (!User.IsInRole("Viewer"))
                         {
+                            if (device.LastCommunication.HasValue)
+                            {
                             @if (switchDevice.PowerOn ?? true)
                             {
                                 <button class="btn btn-primary btn-xs btn-danger pull-right" onclick="SwitchOff('@device.Id')">Switch Off</button>
@@ -23,10 +28,11 @@
                             {
                                 <button class="btn btn-primary btn-xs btn-success pull-right" onclick="SwitchOn('@device.Id')">Switch On</button>
                             }
-                        }
-                        else
-                        {
+                            }
+                            else
+                            {
                             <button class="btn btn-default btn-xs disabled pull-right">Unavailable</button>
+                            }
                         }
                         <a role="button" data-toggle="collapse" data-parent="#switch-devices" href="#collapse-switch-@device.Id.UrlReady()" aria-expanded="false" aria-controls="collapse-switch-@device.Id.UrlReady()">
                             @device.FriendlyName

@@ -4,8 +4,11 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         Sensor Devices
-        <a class="btn btn-xs btn-default pull-right" href="/editor/index/devices.json">Edit Devices</a>
-    </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-xs btn-default pull-right" href="/editor/index/devices.json">Edit Devices</a>
+        }
+        </div>
     <div id="collapse-devices" class="panel-collapse collapse in">
         <div class="panel-body">
 

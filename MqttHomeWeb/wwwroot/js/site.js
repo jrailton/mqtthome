@@ -8,8 +8,11 @@
 
 function Notify(messageHtml, duration) {
     // create container if there isnt one
-    if (!window.notifyContainer)
-        window.notifyContainer = $("<div style=\"position: fixed; top: 51px; left: 50 %; transform: translate(-50 %); z - index: 99999;\"></div>");
+    if (!window.notifyContainer) {
+        var container = $("<div style=\"position: fixed; top: 51px; left: 50%; transform: translate(-50%); z-index: 99999;\"></div>");
+        $("body").append(container);
+        window.notifyContainer = container;
+    }
 
     // create object of new message
     var message = $(messageHtml);

@@ -3,7 +3,10 @@
 <div class="panel panel-default">
     <div class="panel-heading">
         Rules
-        <a class="btn btn-xs btn-default pull-right" href="/editor/index/rules.json">Edit Rules</a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a class="btn btn-xs btn-default pull-right" href="/editor/index/rules.json">Edit Rules</a>
+        }
     </div>
     <div class="panel-body">
         @if (!Model.RuleEngineEnabled)
@@ -11,7 +14,7 @@
             <div class="alert alert-warning">The rule engine is DISABLED in appsettings.json</div>
         }
 
-        @foreach(var note in Model.RuleEngine.RuleValidationNotifications)
+        @foreach (var note in Model.RuleEngine.RuleValidationNotifications)
         {
             <div class="alert alert-@note.Class">@note.Message</div>
         }
