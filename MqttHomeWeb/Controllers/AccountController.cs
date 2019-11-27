@@ -87,7 +87,8 @@ namespace MqttHomeWeb.Controllers
             }
             catch(Exception err)
             {
-                TempData["danger"] = $"Permission to authenticate from Google was denied. {err}";
+                Program.GeneralLog.Error($"Account.OAuthResponse :: ");
+                TempData["danger"] = $"Permission to authenticate from Google was denied. {err.Message}";
                 return Redirect(string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl);
             }
 

@@ -15,7 +15,7 @@ namespace MqttHomeWeb.Controllers
         {
             try
             {
-                ((IStatefulDevice)Program.MqttHomeController.MqttDevices.Single(d => d.Id == id)).SwitchOff("UI Request");
+                ((ISwitchDevice)Program.MqttHomeController.MqttDevices.Single(d => d.Id == id)).SwitchOff("UI Request");
                 TempData["success"] = $"Switch {id} was sent a request to switch OFF";
             }
             catch (Exception err)
@@ -29,7 +29,7 @@ namespace MqttHomeWeb.Controllers
         {
             try
             {
-                ((IStatefulDevice)Program.MqttHomeController.MqttDevices.Single(d => d.Id == id)).SwitchOn("UI Request", null);
+                ((ISwitchDevice)Program.MqttHomeController.MqttDevices.Single(d => d.Id == id)).SwitchOn("UI Request", null);
                 TempData["success"] = $"Switch {id} was sent a request to switch ON";
             }
             catch (Exception err)

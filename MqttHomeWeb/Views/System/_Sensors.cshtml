@@ -9,15 +9,15 @@
     <div id="collapse-devices" class="panel-collapse collapse in">
         <div class="panel-body">
 
-            @foreach (var device in Model.MqttDevices.Where(d => d is ISensorDevice<ISensorData>))
+            @foreach (var device in Model.MqttDevices.Where(d => d is IMqttSensorDevice<ISensorData>))
             {
                 <div class="col-sm-4 col-lg-3">
-                    <div class="panel panel-@(device.LastMqttMessage.HasValue ? "info" : "default")">
+                    <div class="panel panel-@(device.LastCommunication.HasValue ? "info" : "default")">
                         <div class="panel-heading">@device.FriendlyName</div>
                         <div class="panel-body">
                             <div>
                                 <label>Last Contact</label>
-                                @device.LastMqttMessage.GetPrettyDateHtml()
+                                @device.LastCommunication.GetPrettyDateHtml()
                             </div>
                             <div class="technical">
                                 <label>Class</label>
@@ -36,9 +36,9 @@
                                 @Html.Raw(string.Join("<br />", device.AllTopics))
                             </div>
 
-                            @if (device.LastMqttMessage.HasValue)
+                            @if (device.LastCommunication.HasValue)
                             {
-                                var sensor = device as ISensorDevice<ISensorData>;
+                                var sensor = device as IMqttSensorDevice<ISensorData>;
                                 if (sensor.SensorValues != null)
                                 {
                                     <div>

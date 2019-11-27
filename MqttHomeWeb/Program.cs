@@ -53,16 +53,9 @@ namespace MqttHomeWeb
 
         public static void RestartMqttHomeController()
         {
-            var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()).Name;
+            var mqttBrokers = Config.GetSection("MqttBrokers").Get<List<MqttBroker>>();
 
-            var mqttBrokers = Program.Config.GetSection("MqttBrokers").Get<List<MqttBroker>>();
-
-            MqttHomeController = new MqttHomeController(Program.Config,
-                LogManager.GetLogger(logRepository, "RuleLog"),
-                LogManager.GetLogger(logRepository, "DeviceLog"),
-                GeneralLog,
-                LogManager.GetLogger(logRepository, "InfluxLog"),
-                LogManager.GetLogger(logRepository, "MqttLog"),
+            MqttHomeController = new MqttHomeController(Config,
                 mqttBrokers,
                 WebsocketManager
             );

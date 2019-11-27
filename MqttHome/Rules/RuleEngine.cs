@@ -35,7 +35,7 @@ namespace MqttHome
         private void ValidateRules()
         {
             // remove rules that dont apply to any switches
-            var switches = _controller.MqttDevices.Where(d => d is IStatefulDevice);
+            var switches = _controller.MqttDevices.Where(d => d is ISwitchDevice);
             var remove = RuleConfig.Rules.Where(r => !switches.Any(s => s.Id == r.Switch)).ToList();
 
             if (remove.Any())
@@ -154,7 +154,7 @@ namespace MqttHome
                 {
                     logIdentity += $" :: Find SWITCH device {rule.Switch}";
 
-                    var statefulDevice = _controller.MqttDevices.OfType<IStatefulDevice>().FirstOrDefault(d => d.Id == rule.Switch);
+                    var switchDevice = _controller.MqttDevices.OfType<ISwitchDevice>().FirstOrDefault(d => d.Id == rule.Switch);
 
                     logIdentity += $" :: Test Conditions";
 
@@ -173,21 +173,21 @@ namespace MqttHome
                         if (ruleState)
                         {
                             // only switch device ON if its currently OFF (presume its OFF if no power state set yet)
-                            if (!(statefulDevice.PowerOn ?? false))
+                            if (!(switchDevice.PowerOn ?? false))
                             {
-                                logIdentity += $" :: Device ID {statefulDevice.Id} is OFF. Turning it ON";
+                                logIdentity += $" :: Device ID {switchDevice.Id} is OFF. Turning it ON";
 
-                                statefulDevice.SwitchOn($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})", rule.FlipFlop);
+                                switchDevice.SwitchOn($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})", rule.FlipFlop);
                             }
                         }
                         else
                         {
                             // only switch device OFF if its currently ON (presume its ON if no power state set yet)
-                            if (statefulDevice.PowerOn ?? true)
+                            if (switchDevice.PowerOn ?? true)
                             {
-                                logIdentity += $" :: Device ID {statefulDevice.Id} is ON. Turning it OFF";
+                                logIdentity += $" :: Device ID {switchDevice.Id} is ON. Turning it OFF";
 
-                                statefulDevice.SwitchOff($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})");
+                                switchDevice.SwitchOff($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})");
                             }
                         }
                     }
@@ -206,7 +206,7 @@ namespace MqttHome
         {
         }
 
-        public void OnDeviceSensorDataChanged(ISensorDevice<ISensorData> device, Dictionary<string, object> allSensorValues)
+        public void OnDeviceSensorDataChanged(IMqttSensorDevice<ISensorData> device, Dictionary<string, object> allSensorValues)
         {
             foreach (var condition in ConditionConfig.Conditions.Where(c => c.Device == device.Id))
             {

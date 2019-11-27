@@ -10,6 +10,7 @@ using InfluxDB.LineProtocol.Payload;
 using log4net;
 using Microsoft.Extensions.Configuration;
 using MqttHome.Config;
+using MqttHome.Devices.Base;
 using MqttHome.Influx;
 using MqttHome.Mqtt;
 using MqttHome.Mqtt.BrokerCommunicator;
@@ -57,24 +58,29 @@ namespace MqttHome
         public bool InfluxDbEnabled = true;
         public bool RuleEngineEnabled = true;
 
-        public MqttHomeController(IConfiguration config, ILog ruleLog, ILog deviceLog, ILog generalLog, ILog influxLog, ILog mqttLog, List<MqttBroker> mqttBrokers, WebsocketManager wsm = null)
+        public MqttHomeController(IConfiguration config, List<MqttBroker> mqttBrokers, WebsocketManager wsm = null)
         {
             try
             {
+                // setup logging
+                var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()).Name;
+
+                MqttLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "MqttLog"));
+                RuleLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "RuleLog"));
+                DeviceLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "DeviceLog"));
+                GeneralLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "GeneralLog"));
+                InfluxLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "InfluxLog"));
+
                 StartupTime = DateTime.Now;
 
                 SaveAllSensorValuesToDatabaseEveryTime = config["SaveAllSensorValuesToDatabaseEveryTime"]?.Contains("true") ?? true;
 
+                // load long/lat for sunrise/sunset calculations
                 double.TryParse(config["Latitude"], out Latitude);
                 double.TryParse(config["Longitude"], out Longitude);
 
+                // keep reference to websocketmanager
                 WebsocketManager = wsm;
-
-                MqttLog = new MqttHomeLogger(wsm, mqttLog);
-                RuleLog = new MqttHomeLogger(wsm, ruleLog);
-                DeviceLog = new MqttHomeLogger(wsm, deviceLog);
-                GeneralLog = new MqttHomeLogger(wsm, generalLog);
-                InfluxLog = new MqttHomeLogger(wsm, influxLog);
 
                 Debug = false;
 
@@ -176,12 +182,12 @@ namespace MqttHome
         }
 
         private void SetupDeviceEventListeners() {
-            foreach (IStatefulDevice device in MqttDevices.Where(d => d is IStatefulDevice))
+            foreach (ISwitchDevice device in MqttDevices.Where(d => d is ISwitchDevice))
             {
                 device.StateChanged += Device_StateChanged;
             }
 
-            foreach (ISensorDevice<ISensorData> device in MqttDevices.Where(d => d is ISensorDevice<ISensorData>))
+            foreach (IMqttSensorDevice<ISensorData> device in MqttDevices.Where(d => d is IMqttSensorDevice<ISensorData>))
             {
                 device.SensorDataChanged += Device_SensorDataChanged;
             }
@@ -213,7 +219,7 @@ namespace MqttHome
         private void Device_SensorDataChanged(object sender, SensorDataChangedEventArgs e)
         {
             var device = (MqttDevice)sender;
-            var sensorDevice = device as ISensorDevice<ISensorData>;
+            var sensorDevice = device as IMqttSensorDevice<ISensorData>;
 
             // make sure some values were specified before saving to db or running rules
             if ((e.ChangedValues?.Count() ?? 0) > 0)

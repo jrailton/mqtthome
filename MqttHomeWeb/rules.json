@@ -13,7 +13,8 @@
         "SocGt85"
       ],
       "ConditionsAnd": [
-        "NightTime"
+        "NightTime",
+        "SomeoneHome"
       ],
       "FlipFlop": 10
     },

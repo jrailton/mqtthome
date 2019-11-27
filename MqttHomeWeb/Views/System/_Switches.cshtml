@@ -7,15 +7,15 @@
     </div>
     <div class="panel-body">
 
-        @foreach (var device in Model.MqttDevices.Where(d => d is IStatefulDevice))
+        @foreach (var device in Model.MqttDevices.Where(d => d is ISwitchDevice))
         {
-            var stateful = device as IStatefulDevice;
+            var switchDevice = device as ISwitchDevice;
             <div class="col-sm-4 col-lg-3">
-                <div class="panel panel-@(stateful.PowerOn.HasValue ? (stateful.PowerOn.Value ? "success" : "danger") : "default")">
+                <div class="panel panel-@(switchDevice.PowerOn.HasValue ? (switchDevice.PowerOn.Value ? "success" : "danger") : "default")">
                     <div class="panel-heading">
-                        @if (device.LastMqttMessage.HasValue)
+                        @if (device.LastCommunication.HasValue)
                         {
-                            @if (stateful.PowerOn ?? true)
+                            @if (switchDevice.PowerOn ?? true)
                             {
                                 <button class="btn btn-primary btn-xs btn-danger pull-right" onclick="SwitchOff('@device.Id')">Switch Off</button>
                             }
@@ -38,15 +38,15 @@
                         <div class="panel-body">
                             <div>
                                 <label>Last Contact</label>
-                                @device.LastMqttMessage.GetPrettyDateHtml()
+                                @device.LastCommunication.GetPrettyDateHtml()
                             </div>
                             <div>
                                 <label>State History</label>
-                                <pre class="small">@string.Join(Environment.NewLine, stateful.StateHistory.OrderByDescending(h => h.Key).Select(h => $"{h.Key.ToString("HH:mm:ss")} {h.Value}"))</pre>
+                                <pre class="small">@string.Join(Environment.NewLine, switchDevice.StateHistory.OrderByDescending(h => h.Key).Select(h => $"{h.Key.ToString("HH:mm:ss")} {h.Value}"))</pre>
                             </div>
                             <div>
                                 <label>State Query</label>
-                                @stateful.StateQuery
+                                @switchDevice.StateQuery
                             </div>
                             <div class="technical">
                                 <label>Class</label>

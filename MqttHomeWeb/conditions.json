@@ -3,42 +3,47 @@
     {
       "Id": "SocGt95",
       "Device": "icc",
-      "SensorValue": "BatterySoC > 95"
+      "Criteria": "BatterySoC > 95"
     },
     {
       "Id": "SocGt85",
       "Device": "icc",
-      "SensorValue": "BatterySoC > 85"
+      "Criteria": "BatterySoC > 85"
     },
     {
       "Id": "SocGt75",
       "Device": "icc",
-      "SensorValue": "BatterySoC > 75"
+      "Criteria": "BatterySoC > 75"
     },
     {
       "Id": "GridPower",
       "Device": "icc",
-      "SensorValue": "GridVoltage >= 200"
+      "Criteria": "GridVoltage >= 200"
     },
     {
       "Id": "NightTime",
       "Device": "time",
-      "SensorValue": "Sundown == true"
+      "Criteria": "Sundown == true"
     },
     {
       "Id": "Before7am",
       "Device": "time",
-      "SensorValue": "Hour < 7"
+      "Criteria": "Hour < 7"
     },
     {
       "Id": "After5pm",
       "Device": "time",
-      "SensorValue": "Hour >= 17"
+      "Criteria": "Hour >= 17"
     },
     {
-      "Id": "SomeoneHome",
+      "Id": "JimHome",
       "Device": "people",
-      "PeoplePresent": "jim,tracey"
+      "Criteria": "Presence == true"
+    },
+    {
+      "Id": "TraceyHome",
+      "Device": "people",
+      "Criteria": "Presence == true"
     }
   ]
 }

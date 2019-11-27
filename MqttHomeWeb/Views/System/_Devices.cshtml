@@ -17,7 +17,7 @@
                         <div class="panel-body">
                             <div>
                                 <label>Last Contact</label>
-                                @device.LastMqttMessage.GetPrettyDateHtml()
+                                @device.LastCommunication.GetPrettyDateHtml()
                             </div>
                             <div class="technical">
                                 <label>Class</label>
@@ -36,18 +36,18 @@
                                 @Html.Raw(string.Join("<br />", device.AllTopics))
                             </div>
 
-                            @if (device.LastMqttMessage.HasValue)
+                            @if (device.LastCommunication.HasValue)
                             {
 
-                                @if (device is IStatefulDevice)
+                                @if (device is ISwitchDevice)
                                 {
-                                    var stateful = device as IStatefulDevice;
+                                    var switchDevice = device as ISwitchDevice;
                                     <div>
                                         <label>Power On</label>
-                                        @stateful.PowerOn
+                                        @switchDevice.PowerOn
                                     </div>
                                     <div>
-                                        @if (stateful.PowerOn ?? true)
+                                        @if (switchDevice.PowerOn ?? true)
                                         {
                                             <button class="btn btn-primary btn-xs btn-success" onclick="SwitchOff('@device.Id')">Switch Off</button>
                                         }
@@ -57,9 +57,9 @@
                                         }
                                     </div>
                                 }
-                                @if (device is ISensorDevice<ISensorData>)
+                                @if (device is IMqttSensorDevice<ISensorData>)
                                 {
-                                    var sensor = device as ISensorDevice<ISensorData>;
+                                    var sensor = device as IMqttSensorDevice<ISensorData>;
                                     if (sensor.SensorValues != null)
                                     {
                                         <div>
