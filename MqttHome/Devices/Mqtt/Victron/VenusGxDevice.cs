@@ -16,18 +16,18 @@ namespace MqttHome.Mqtt.Devices.Victron
         private int _venusGxMqttServerPort;
         private Timer _timer;
 
-        public VenusGxDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, DeviceType.VictronCCGX, config)
+        public VenusGxDevice(MqttHomeController controller, Config.Device config) : base(controller, DeviceType.VictronCCGX, config)
         {
             SensorTopics = new List<string> {
-                $"N/{id}/system/0/Dc/Battery/#",
-                $"N/{id}/system/0/Ac/Grid/#"
+                $"N/{Id}/system/0/Dc/Battery/#",
+                $"N/{Id}/system/0/Ac/Grid/#"
             };
 
-            if (config == null || config.Length !=2)
-                controller.DeviceLog.Error($"VenusGxDevice.ctor Error :: Device ID {id} ({friendlyName}) - Missing config parameters (for Venus GX Mqtt Server). Should contain two: ip address and port number");
+            if (config.Parameters == null || config.Parameters.Length !=2)
+                controller.DeviceLog.Error($"VenusGxDevice.ctor Error :: Device ID {Id} ({FriendlyName}) - Missing config parameters (for Venus GX Mqtt Server). Should contain two: ip address and port number");
 
-            _venusGxMqttServerAddress = config[0];
-            _venusGxMqttServerPort = int.Parse(config[1]);
+            _venusGxMqttServerAddress = config.Parameters[0];
+            _venusGxMqttServerPort = int.Parse(config.Parameters[1]);
 
             // setup the publish command to keep venus gx device publishing alive
             // setup timer to send publish command every 30 seconds

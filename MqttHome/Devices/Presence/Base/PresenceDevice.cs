@@ -9,7 +9,7 @@ namespace MqttHome.Presence
     {
         public event EventHandler<PresenceChangedEventArgs> PresenceChanged;
 
-        public PresenceDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName)
+        public PresenceDevice(MqttHomeController controller, Config.Device config) : base(controller, config)
         {
             DeviceClass = DeviceClass.Person;
         }

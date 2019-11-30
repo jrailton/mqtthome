@@ -6,6 +6,6 @@ namespace MqttHome.Mqtt.Devices.Sonoff
 {
     public class SonoffBasicDevice : SonoffGenericSwitchDevice
     {
-        public SonoffBasicDevice(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, DeviceType.SonoffBasic, config) { }
+        public SonoffBasicDevice(MqttHomeController controller, Config.Device config) : base(controller, DeviceType.SonoffBasic, config) { }
     }
 }

@@ -15,10 +15,9 @@ namespace MqttHome.Mqtt
         /// Constructor
         /// </summary>
         /// <param name="id">Id is the device ID that will be used as the topic and influx data tag</param>
-        public MqttDevice(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName)
+        public MqttDevice(MqttHomeController controller, DeviceType type, Config.Device config) : base(controller, config)
         {
             DeviceType = type;
-            Controller.DeviceLog.Debug($"Adding {DeviceType} {DeviceClass} device {id}");
         }
 
         public DateTime? LastCommunication { get; set; }

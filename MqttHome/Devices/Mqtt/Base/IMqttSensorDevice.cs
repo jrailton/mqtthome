@@ -8,6 +8,7 @@ namespace MqttHome.Mqtt.Devices
 {
     public interface IMqttSensorDevice<ISensorData> : ISensorDevice<ISensorData>
     {
+        bool SaveSensorValuesToDatabase { get; }
         void ParseSensorPayload(MqttApplicationMessage e);
         List<string> SensorTopics { get; }
     }

@@ -9,7 +9,7 @@ namespace MqttHome.Mqtt.Devices
 {
     public class ICC : MqttSensorDevice<ICCSensorData>
     {
-        public ICC(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, DeviceType.ICC, config)
+        public ICC(MqttHomeController controller, Config.Device config) : base(controller, DeviceType.ICC, config)
         {
             SensorTopics = new List<string> { "Inverter/AllValues", "Inverter/AllValues2", "Pylontech/#" };
         }

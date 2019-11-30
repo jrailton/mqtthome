@@ -2,10 +2,13 @@
 {
     public abstract class Device : IDevice
     {
-        public Device(MqttHomeController controller, string id, string friendlyName) {
+        public Device(MqttHomeController controller, Config.Device config) {
             Controller = controller;
-            Id = id;
-            FriendlyName = friendlyName;
+            Id = config.Id;
+            FriendlyName = config.FriendlyName;
+
+            Controller.DeviceLog.Debug($"Adding {DeviceType} {DeviceClass} device {config.Id}");
+
         }
 
         public MqttHomeController Controller { get; protected set; }

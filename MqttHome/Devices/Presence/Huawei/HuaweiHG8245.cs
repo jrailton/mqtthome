@@ -19,11 +19,11 @@ namespace MqttHome.Presence.Huawei
         private Timer _timer;
         private List<RouterDevice> _devices;
 
-        public HuaweiHG8245(MqttHomeController controller, string id, string friendlyName, params string[] config) : base(controller, id, friendlyName, config)
+        public HuaweiHG8245(MqttHomeController controller, Config.Device config) : base(controller, config)
         {
-            _host = config[0];
-            _username = config[1];
-            _password = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(config[2]));
+            _host = config.Parameters[0];
+            _username = config.Parameters[1];
+            _password = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(config.Parameters[2]));
 
             //check every 20 seconds, starting immediately
             _timer = new Timer((state) =>

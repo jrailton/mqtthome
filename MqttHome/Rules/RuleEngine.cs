@@ -104,6 +104,7 @@ namespace MqttHome
 
         private void LoadConditions()
         {
+            var logIdentity = "Parsing conditions JSON";
             try
             {
                 var content = File.ReadAllText("conditions.json");
@@ -112,6 +113,8 @@ namespace MqttHome
                 // validate each rule and attach event to each
                 foreach (var condition in ConditionConfig.Conditions)
                 {
+                    logIdentity = $"Setting up condition {condition.Id}";
+
                     // validate condition
                     var problems = condition.CheckProblems();
 
@@ -136,7 +139,7 @@ namespace MqttHome
             catch (Exception err)
             {
                 ConditionValidationNotifications.Add(new Notification("danger", $"Failed to load conditions - {err.Message}"));
-                _controller.RuleLog.Error($"LoadConditions :: Failed to load rules. {err.Message}", err);
+                _controller.RuleLog.Error($"LoadConditions :: {logIdentity} :: Failed to load rules. {err.Message}", err);
             }
         }
 

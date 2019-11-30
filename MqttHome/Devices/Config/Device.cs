@@ -21,5 +21,9 @@ namespace MqttHome.Config
         /// Friendly name for the device
         /// </summary>
         public string FriendlyName { get; set; }
+        /// <summary>
+        /// Applies to sensor devices. Whether or not the sensor values should be saved to database (for use by Grafana)
+        /// </summary>
+        public bool SaveSensorValuesToDatabase { get; set; } = true;
     }
 }

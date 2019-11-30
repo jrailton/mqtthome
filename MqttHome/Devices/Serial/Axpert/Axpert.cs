@@ -16,22 +16,22 @@ namespace MqttHome.Devices.Serial.Axpert
         private object _statusTimerLocker = new object();
         private AxpertCommand _commander;
 
-        public Axpert(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
+        public Axpert(MqttHomeController controller, DeviceType type, Config.Device config) : base(controller, type, config)
         {
             try
             {
-                var port = config[0];
+                var port = config.Parameters[0];
                 int baud = 2400;
 
                 // set baud if specified -- default is 2400
-                if (config.Length > 1)
-                    baud = int.Parse(config[1]);
+                if (config.Parameters.Length > 1)
+                    baud = int.Parse(config.Parameters[1]);
 
                 _commander = new AxpertCommand(port, baud, this);
 
                 int statusInterval = 1000;
-                if (config.Length > 2)
-                    statusInterval = int.Parse(config[2]);
+                if (config.Parameters.Length > 2)
+                    statusInterval = int.Parse(config.Parameters[2]);
 
                 // status timer will run every 1 second
                 _statusTimer = new Timer(StatusTimer, null, 0, statusInterval);

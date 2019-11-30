@@ -8,7 +8,7 @@ namespace MqttHome.Devices.Serial.Base
 {
     public abstract class SerialSensorDevice<TSensorData> : SerialDevice, ISensorDevice<ISensorData> where TSensorData : SensorData, new()
     {
-        public SerialSensorDevice(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
+        public SerialSensorDevice(MqttHomeController controller, DeviceType type, Config.Device config) : base(controller, type, config)
         {
             DeviceClass = DeviceClass.Sensor;
             SensorData = new TSensorData();

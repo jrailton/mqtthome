@@ -13,15 +13,13 @@ namespace MqttHome.Mqtt
         public event EventHandler<StateChangedEventArgs> StateChanged;
 
         private SwitchHelper _switchHelper;
-        private MqttHomeController _controller;
 
-        public MqttSwitchDevice(MqttHomeController controller, string id, string friendlyName, DeviceType type, params string[] config) : base(controller, id, friendlyName, type, config)
+        public MqttSwitchDevice(MqttHomeController controller, DeviceType type, Config.Device config) : base(controller, type, config)
         {
             DeviceClass = DeviceClass.Switch;
-            SetPowerStateOn = new MqttCommand(controller, id, $"cmnd/{id}/Power", "ON");
-            SetPowerStateOff = new MqttCommand(controller, id, $"cmnd/{id}/Power", "OFF");
+            SetPowerStateOn = new MqttCommand(controller, config.Id, $"cmnd/{config.Id}/Power", "ON");
+            SetPowerStateOff = new MqttCommand(controller, config.Id, $"cmnd/{config.Id}/Power", "OFF");
             _switchHelper = new SwitchHelper(this);
-            _controller = controller;
         }
 
 

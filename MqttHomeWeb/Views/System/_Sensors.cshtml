@@ -14,6 +14,7 @@
 
             @foreach (var device in Model.MqttDevices.Where(d => d is IMqttSensorDevice<ISensorData>))
             {
+                var sensor = device as IMqttSensorDevice<ISensorData>;
                 <div class="col-sm-4 col-lg-3">
                     <div class="panel panel-@(device.LastCommunication.HasValue ? "info" : "default")">
                         <div class="panel-heading">@device.FriendlyName</div>
@@ -25,6 +26,10 @@
                             <div class="technical">
                                 <label>Class</label>
                                 @device.DeviceClass
+                            </div>
+                            <div class="@(sensor.SaveSensorValuesToDatabase ? "technical" : "")">
+                                <label>Save Values to Database</label>
+                                <span class="label label-@(sensor.SaveSensorValuesToDatabase ? "success" : "danger")">@(sensor.SaveSensorValuesToDatabase ? "Yes" : "No")</span>
                             </div>
                             <div class="technical">
                                 <label>Type</label>
@@ -41,7 +46,6 @@
 
                             @if (device.LastCommunication.HasValue)
                             {
-                                var sensor = device as IMqttSensorDevice<ISensorData>;
                                 if (sensor.SensorValues != null)
                                 {
                                     <div>

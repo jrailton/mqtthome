@@ -145,7 +145,7 @@ namespace MqttHome
             PresenceDevices = new List<PresenceDevice>();
 
             // add time device
-            MqttDevices.Add(new TimeDevice(this, "time", "Time Sensor (System)"));
+            MqttDevices.Add(new TimeDevice(this));
 
             try
             {
@@ -164,11 +164,11 @@ namespace MqttHome
                     // TODO: Change the master list to be an IDevice list
                     if (interfaces.Any(i => i.Name == "IMqttDevice"))
                     {
-                        MqttDevices.Add((MqttDevice)Activator.CreateInstance(type, this, device.Id, device.FriendlyName, device.Parameters));
+                        MqttDevices.Add((MqttDevice)Activator.CreateInstance(type, this, device));
                     }
                     else if (interfaces.Any(i => i.Name == "IPresenceDevice"))
                     {
-                        PresenceDevices.Add((PresenceDevice)Activator.CreateInstance(type, this, device.Id, device.FriendlyName, device.Parameters));
+                        PresenceDevices.Add((PresenceDevice)Activator.CreateInstance(type, this, device));
                     }
                 }
 

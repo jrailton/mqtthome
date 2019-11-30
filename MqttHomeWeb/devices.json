@@ -55,7 +55,8 @@
       "Type": "HuaweiHG8245",
       "Id": "HuaweiHG8245",
       "FriendlyName": "Home Router",
-      "Parameters": [ "10.0.0.1", "telecomadmin", "lt16sXtu" ]
+      "Parameters": [ "10.0.0.1", "telecomadmin", "lt16sXtu" ],
+      "SaveSensorValuesToDatabase":  false
     }
   ]
 }

@@ -10,12 +10,19 @@ namespace MqttHome.Mqtt.Devices.Environment
     {
         private Timer _updateValues;
 
-        public TimeDevice(MqttHomeController controller, string id, string friendlyName) : base(controller, id, friendlyName, DeviceType.TimeSensor) {
+        public TimeDevice(MqttHomeController controller) : base(controller, DeviceType.TimeSensor, new Config.Device
+        {
+            Id = "time",
+            SaveSensorValuesToDatabase = false,
+            FriendlyName = "Time Sensor (System)"
+        })
+        {
             SensorData = new TimeSensorData(controller.Longitude, controller.Latitude);
             LastCommunication = DateTime.Now;
 
             // trigger a new update of values every 30 seconds
-            _updateValues = new Timer((state) => {
+            _updateValues = new Timer((state) =>
+            {
                 base.ParseSensorPayload(null);
             }, null, 5000, 30000);
 

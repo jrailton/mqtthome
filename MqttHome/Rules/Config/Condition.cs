@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace MqttHome
 {
-    public abstract class Condition
+    public class Condition
     {
         public event EventHandler ConditionValueChanged;
 
