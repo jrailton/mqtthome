@@ -36,12 +36,12 @@ namespace MqttHome
         public bool Test(List<Condition> c, ILog logger) {
             bool result;
 
-            var conditions = c.ToDictionary(o => o.Id, o => o.ConditionValue);
+            var conditions = c.ToDictionary(o => o.Id, o => o.DeviceCondition);
 
             string logIdentity = $"Test :: Rule: {Name}, Switch: {Switch}";
 
             logger.Debug($@"{logIdentity}
-{string.Join(Environment.NewLine, c.Select(s => $"Condition {s.Id}: {s.ConditionValue}"))}");
+{string.Join(Environment.NewLine, c.Select(s => $"Condition {s.Id}: {s.DeviceCondition}"))}");
 
             foreach (var conditionId in ConditionsAnd)
             {

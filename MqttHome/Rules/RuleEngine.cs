@@ -9,6 +9,7 @@ using MqttHome.Mqtt;
 using MqttHome.Mqtt.Devices;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using MqttHome.Presence;
 
 namespace MqttHome
 {
@@ -215,13 +216,28 @@ namespace MqttHome
             {
                 try
                 {
-                    condition.CheckCondition(device, allSensorValues);
+                    condition.CheckDeviceCondition(device, allSensorValues);
                 }
                 catch (Exception err)
                 {
-                    _controller.RuleLog.Error($"OnDeviceSensorDataChanged :: CheckCondition :: Condition: {condition.Id}, Device: {device.Id} - Failed. {err.Message}", err);
+                    _controller.RuleLog.Error($"OnDeviceSensorDataChanged :: CheckDeviceCondition :: Condition: {condition.Id}, Device: {device.Id} - Failed. {err.Message}", err);
                 }
             }
+        }
+
+        public void OnPresenceChanged(Person person) {
+            foreach (var condition in ConditionConfig.Conditions.Where(c => c.People?.Contains(person.Id) ?? false))
+            {
+                try
+                {
+                    condition.CheckPeopleCondition(_controller.People);
+                }
+                catch (Exception err)
+                {
+                    _controller.RuleLog.Error($"OnPresenceChanged :: CheckPeopleCondition :: Condition: {condition.Id}, Person: {person.Id} - Failed. {err.Message}", err);
+                }
+            }
+
         }
     }
 }

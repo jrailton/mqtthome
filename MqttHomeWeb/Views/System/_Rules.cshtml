@@ -74,7 +74,7 @@
 
                             @foreach (var condition in rule.ConditionsOr)
                             {
-                                var conditionValue = @Model.RuleEngine.ConditionConfig.Conditions.First(c => c.Id == condition).ConditionValue ?? false;
+                                var conditionValue = @Model.RuleEngine.ConditionConfig.Conditions.First(c => c.Id == condition).DeviceCondition ?? false;
                                 <div>
                                     @condition
                                     <span class="label label-@(conditionValue ? "success" : "danger")">@conditionValue</span>
@@ -90,7 +90,7 @@
 
                             @foreach (var condition in rule.ConditionsAnd)
                             {
-                                var conditionValue = @Model.RuleEngine.ConditionConfig.Conditions.First(c => c.Id == condition).ConditionValue ?? false;
+                                var conditionValue = @Model.RuleEngine.ConditionConfig.Conditions.First(c => c.Id == condition).DeviceCondition ?? false;
                                 <div>
                                     @condition
                                     <span class="label label-@(conditionValue ? "success" : "danger")">@conditionValue</span>

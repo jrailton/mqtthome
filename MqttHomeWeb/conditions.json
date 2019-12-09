@@ -36,14 +36,8 @@
       "Criteria": "Hour >= 17"
     },
     {
-      "Id": "JimHome",
-      "Device": "people",
-      "Criteria": "Presence == true"
-    },
-    {
-      "Id": "TraceyHome",
-      "Device": "people",
-      "Criteria": "Presence == true"
+      "Id": "SomeoneHome",
+      "People": "jim OR tracey"
     }
   ]
 }

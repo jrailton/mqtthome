@@ -9,6 +9,8 @@ namespace MqttHome.Presence
     {
         public event EventHandler<PresenceChangedEventArgs> PresenceChanged;
 
+        public bool SaveSensorValuesToDatabase { get; }
+
         public PresenceDevice(MqttHomeController controller, Config.Device config) : base(controller, config)
         {
             DeviceClass = DeviceClass.Person;
@@ -24,6 +26,8 @@ namespace MqttHome.Presence
     public interface IPresenceDevice : IDevice
     {
         event EventHandler<PresenceChangedEventArgs> PresenceChanged;
+
+        bool SaveSensorValuesToDatabase { get; }
 
         public List<Person> People { get; }
     }

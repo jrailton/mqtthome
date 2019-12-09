@@ -45,7 +45,7 @@ namespace MqttHome
         // if false, will only save updated values to influx -- this has the advantage of less writes/data but Grafana queries will need to cater for "missing" values i.e. use "previous" 
         // which doesnt actually work if "previous" is outside of selected date range
         public bool SaveAllSensorValuesToDatabaseEveryTime = true;
-        
+
         public double Longitude;
         public double Latitude;
 
@@ -120,7 +120,8 @@ namespace MqttHome
             }
         }
 
-        private void LoadPeople() {
+        private void LoadPeople()
+        {
             try
             {
                 // read device config
@@ -181,7 +182,8 @@ namespace MqttHome
             }
         }
 
-        private void SetupDeviceEventListeners() {
+        private void SetupDeviceEventListeners()
+        {
             foreach (ISwitchDevice device in MqttDevices.Where(d => d is ISwitchDevice))
             {
                 device.StateChanged += Device_StateChanged;
@@ -240,8 +242,35 @@ namespace MqttHome
             }
         }
 
-        private void Device_PresenceChanged(object sender, PresenceChangedEventArgs e) {
-            
+        private void Device_PresenceChanged(object sender, PresenceChangedEventArgs e)
+        {
+            var device = (PresenceDevice)sender;
+            var presenceDevice = device as IPresenceDevice;
+
+            // maintain live list of People
+            var person = People.SingleOrDefault(p => p.Id == e.Person.Id);
+
+            if (person != null && person.Present != e.Person.Present)
+            {
+                person.Present = e.Person.Present;
+                person.PresenceChanged = e.Person.PresenceChanged;
+
+                if (presenceDevice.SaveSensorValuesToDatabase)
+                {
+                    var lpp = new LineProtocolPoint("Person",
+                        new Dictionary<string, object>{
+                    { "Present", (e.Person.Present ? "1" : "0") }
+                        },
+                        new Dictionary<string, string>
+                        {
+                    {"device", device.Id}
+                        });
+
+                    InfluxCommunicator?.Write(lpp);
+                }
+            }
+
+            RuleEngine?.OnPresenceChanged(person);
         }
 
         public void Start()

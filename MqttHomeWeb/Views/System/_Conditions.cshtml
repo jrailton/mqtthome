@@ -26,25 +26,45 @@
                 <div class="panel panel-info">
                     <div class="panel-heading">@condition.Id</div>
                     <div class="panel-body">
-                        <div>
-                            <label>Device</label>
-                            @condition.Device
-                        </div>
-                        <div>
-                            <label>Criteria</label>
-                            @condition.Criteria
-                        </div>
+                        @if (!string.IsNullOrEmpty(condition.Device))
+                        {
+                            <div>
+                                <label>Device</label>
+                                @condition.Device
+                            </div>
+                            <div>
+                                <label>Criteria</label>
+                                @condition.Criteria
+                            </div>
+                            <div>
+                                <label>Result</label>
+                                @condition.DeviceCondition
+                            </div>
+                            <div>
+                                <label>Last Sensor Value</label>
+                                @condition.LastSensorValue
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(condition.People))
+                        {
+                            <div>
+                                <label>People</label>
+                                @condition.People
+                            </div>
+                            <div>
+                                <label>Result</label>
+                                @condition.PeopleCondition
+                            </div>
+                        }
+
                         <div>
                             <label>Condition Value</label>
-                            <span class="label label-@(condition.ConditionValue.HasValue ? (condition.ConditionValue.Value ? "success" : "danger") : "default")">@(condition.ConditionValue.HasValue ? condition.ConditionValue.Value.ToString() : "n/a")</span>
+                            <span class="label label-@(condition.DeviceCondition.HasValue ? (condition.DeviceCondition.Value ? "success" : "danger") : "default")">@(condition.DeviceCondition.HasValue ? condition.DeviceCondition.Value.ToString() : "n/a")</span>
                         </div>
                         <div>
                             <label>Condition Value Updated</label>
                             @condition.ConditionValueUpdated.GetPrettyDateHtml()
-                        </div>
-                        <div>
-                            <label>Last Sensor Value</label>
-                            @condition.LastSensorValue
                         </div>
                     </div>
                 </div>
