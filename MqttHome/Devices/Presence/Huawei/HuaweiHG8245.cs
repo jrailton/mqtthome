@@ -41,19 +41,29 @@ namespace MqttHome.Presence.Huawei
             foreach (var person in Controller.People) {
                 var device = _devices.SingleOrDefault(d => d.MacAddress == person.MacAddress);
                 
-                // default to not-present
-                var present = false;
+                // if device is found and online, then they are present -- default to not-present
+                var present = device?.Status.Equals("Online") ?? false;
 
-                // if device is found and online, then they are present
-                present = device?.Status.Equals("Online") ?? false;
+                // if present, person state will immediately change but if not present, state will only change after 5 minutes (because wifi devices disconnect/reconnect often)
+                if (present)
+                {
+                    person.LastSeen = DateTime.Now;
+                }
+                else if (DateTime.Now.Subtract(person.LastSeen ?? DateTime.MinValue).TotalSeconds <= 300) 
+                {
+                    // the person is not present, but was last seen up to 5 minutes ago, so dont assume presence has changed yet
+                    present = true;
+
+                    // N.B. last seen date will begin to age so after 5 minutes, presence will be changed to false
+                }
 
                 // if presence changed, raise event
-                if (person.Present != present) {
-                    
+                if (person.Present != present)
+                {
                     person.Present = present;
                     person.PresenceChanged = DateTime.Now;
 
-                    Woft(this, person);
+                    OnPresenceChanged(this, person);
                 }
             }
         }

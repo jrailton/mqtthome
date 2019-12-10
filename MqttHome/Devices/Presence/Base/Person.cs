@@ -14,6 +14,9 @@ namespace MqttHome.Presence
         public bool Present { get; set; }
         public DateTime? PresenceChanged { get; set; }
 
+        // used to delay "away" state change for X minutes (some devices connect and disconnect often)
+        public DateTime? LastSeen { get; set; }
+
         // these are just here for debugging huawei hg8245 device -- they can be removed
         public string Domain { get; set; }
         public string IpAddress { get; set; }

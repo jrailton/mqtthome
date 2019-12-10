@@ -16,7 +16,7 @@ namespace MqttHome.Presence
             DeviceClass = DeviceClass.Person;
         }
 
-        public void Woft(object sender, Person person) {
+        protected void OnPresenceChanged(object sender, Person person) {
             PresenceChanged?.Invoke(sender, new PresenceChangedEventArgs { Person = person });
         }
 
