@@ -160,18 +160,28 @@ namespace MqttHome.Devices.Serial.Pylontech
             return pret;
         }
 
-        public void PostParse()
+        public virtual void PostParse()
         {
         }
 
         public int GetInt2(int idx)
         {
+            // if index is negative, it indicates the index relative to the end of the array (python)
+            // translate it for c#
+            if (idx < 0)
+                idx = INFO.Length + idx;
+
             var val = INFO[idx] << 8 | INFO[idx + 1];
             return val;
         }
 
         public int GetInt2Complement(int idx)
         {
+            // if index is negative, it indicates the index relative to the end of the array (python)
+            // translate it for c#
+            if (idx < 0)
+                idx = INFO.Length + idx;
+
             var val = INFO[idx] << 8 | INFO[idx + 1];
             if ((val & 0x8000) == 0x8000)
                 val = val - 0x10000;
