@@ -20,25 +20,30 @@
                         {
                             if (device.LastCommunication.HasValue)
                             {
-                            @if (switchDevice.PowerOn ?? true)
-                            {
-                                <button class="btn btn-primary btn-xs btn-danger pull-right" onclick="SwitchOff('@device.Id')">Switch Off</button>
+                                @if (switchDevice.PowerOn ?? true)
+                                {
+                                    <button class="btn btn-primary btn-xs btn-danger pull-right" onclick="SwitchOff('@device.Id')">Switch Off</button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-primary btn-xs btn-success pull-right" onclick="SwitchOn('@device.Id')">Switch On</button>
+                                }
                             }
                             else
                             {
-                                <button class="btn btn-primary btn-xs btn-success pull-right" onclick="SwitchOn('@device.Id')">Switch On</button>
-                            }
-                            }
-                            else
-                            {
-                            <button class="btn btn-default btn-xs disabled pull-right">Unavailable</button>
+                                <button class="btn btn-default btn-xs disabled pull-right">Unavailable</button>
                             }
                         }
                         <a role="button" data-toggle="collapse" data-parent="#switch-devices" href="#collapse-switch-@device.Id.UrlReady()" aria-expanded="false" aria-controls="collapse-switch-@device.Id.UrlReady()">
                             @device.FriendlyName
                         </a>
+
                         <div class="clearfix"></div>
                     </div>
+                    @if (device.Config.Widgets != null)
+                    {
+                        await Html.RenderPartialAsync("_SensorWidgets", device);
+                    }
                     <div id="collapse-switch-@device.Id.UrlReady()" class="panel-collapse collapse">
 
                         <div class="panel-body">
@@ -48,7 +53,7 @@
                             </div>
                             <div>
                                 <label>State History</label>
-                                <pre class="small">@string.Join(Environment.NewLine, switchDevice.StateHistory.OrderByDescending(h => h.Key).Select(h => $"{h.Key.ToString("HH:mm:ss")} {h.Value}"))</pre>
+                                <pre class="small">@string.Join(Environment.NewLine, switchDevice.StateHistory.OrderByDescending(h => h.Key).Select(h => $"{h.Key.ToString("d/M HH:mm")} {h.Value}"))</pre>
                             </div>
                             <div>
                                 <label>State Query</label>

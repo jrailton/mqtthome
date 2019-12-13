@@ -62,6 +62,12 @@ namespace MqttHome
         {
             try
             {
+                // set jsonconvert global settings
+                JsonConvert.DefaultSettings = () => new JsonSerializerSettings
+                {
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                };
+
                 // setup logging
                 var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()).Name;
 

@@ -3,7 +3,9 @@
     ViewData["Title"] = "Logs";
 
     if (!string.IsNullOrEmpty(ViewBag.Filename))
+    {
         ViewData["Title"] += " - " + ViewBag.Filename;
+    }
 }
 <br />
 <div class="well">

@@ -1,4 +1,6 @@
-﻿namespace MqttHome
+﻿using MqttHome.Config;
+
+namespace MqttHome
 {
     public abstract class Device : IDevice
     {
@@ -6,6 +8,7 @@
             Controller = controller;
             Id = config.Id;
             FriendlyName = config.FriendlyName;
+            Config = config;
 
             Controller.DeviceLog.Debug($"Adding {DeviceType} {DeviceClass} device {config.Id}");
 
@@ -21,5 +24,6 @@
 
         public virtual DeviceClass DeviceClass { get; set; }
 
+        public Config.Device Config { get; set; }
     }
 }

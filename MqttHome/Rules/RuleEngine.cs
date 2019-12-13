@@ -10,6 +10,7 @@ using MqttHome.Mqtt.Devices;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using MqttHome.Presence;
+using MqttHome.Devices.Mqtt.Base;
 
 namespace MqttHome
 {
@@ -22,6 +23,12 @@ namespace MqttHome
         public List<Notification> RuleValidationNotifications = new List<Notification>();
         public List<Notification> ConditionValidationNotifications = new List<Notification>();
 
+        // this timer is used when a rule's attempt to switch a device on is blocked by flipflop prevention
+        // it will check the rule's conditions again against the switch which blocked the initial request
+        private Timer _flipFlopRecheckTimer;
+        private static object _flipFlopTimerLocker = new object();
+        private Dictionary<string, DateTime> _flipFlopRecheckList = new Dictionary<string, DateTime>();
+
         public RuleEngine(MqttHomeController controller)
         {
             _controller = controller;
@@ -31,6 +38,83 @@ namespace MqttHome
             LoadRules();
 
             ValidateRules();
+
+            _flipFlopRecheckTimer = new Timer(OnFlipFlopRecheck, null, 60000, 60000);
+        }
+
+        /// <summary>
+        /// If a device is turned off (manually or automatically) it should be removed from the flipfloprecheck list in case its turned on again by flipflop control
+        /// </summary>
+        public void FlipFlopRecheckRemove(string deviceId)
+        {
+            var toRemove = _flipFlopRecheckList.Where(o => o.Key.EndsWith($" {deviceId}")).Select(o => o.Key).ToList();
+            foreach (var item in toRemove)
+                _flipFlopRecheckList.Remove(item);
+        }
+
+        private void FlipFlopRecheckAdd(string ruleName, string deviceId, DateTime recheckTime)
+        {
+            if (_flipFlopRecheckList.ContainsKey($"{ruleName} {deviceId}"))
+            {
+                _flipFlopRecheckList[$"{ruleName} {deviceId}"] = recheckTime;
+            }
+            else
+            {
+                _flipFlopRecheckList.Add($"{ruleName} {deviceId}", recheckTime);
+            }
+        }
+
+        /// <summary>
+        /// Uses a monitor to prevent long running timer tasks for queuing up
+        /// </summary>
+        private void OnFlipFlopRecheck(object state)
+        {
+            var hasLock = false;
+
+            try
+            {
+                Monitor.TryEnter(_flipFlopTimerLocker, ref hasLock);
+                if (!hasLock)
+                    return;
+
+                // check items that are past due
+                var toCheck = _flipFlopRecheckList.Where(o => o.Value < DateTime.Now).Select(o => o.Key).ToList();
+                foreach (var item in toCheck)
+                {
+                    var rd = item.Split(" ");
+
+                    var logIdentity = $"OnFlipFlopRecheck :: Rule: {rd[0]}, Device: {rd[1]}";
+
+                    try
+                    {
+                        var rule = RuleConfig.Rules.Single(r => r.Name == rd[0]);
+
+                        // check if rule state is still true (to turn device on)
+                        if (rule.Test(ConditionConfig.Conditions, _controller.RuleLog))
+                        {
+                            var switchDevice = _controller.MqttDevices.OfType<ISwitchDevice>().FirstOrDefault(d => d.Id == rd[1]);
+                            switchDevice.SwitchOn($"FLIPFLOP RECHECK: {rule.Name}", rule.FlipFlop);
+                        }
+                        else
+                        {
+                            _controller.RuleLog.Warn($"{logIdentity} - aborted because retested conditions indicate switch should remain OFF");
+                        }
+                    }
+                    catch (Exception err)
+                    {
+                        _controller.RuleLog.Error($"{logIdentity} :: Failed - {err.Message}", err);
+                    }
+                }
+
+                // remove checked items from list
+                foreach (var item in toCheck)
+                    _flipFlopRecheckList.Remove(item);
+            }
+            finally
+            {
+                if (hasLock)
+                    Monitor.Exit(_flipFlopTimerLocker);
+            }
         }
 
         private void ValidateRules()
@@ -181,7 +265,15 @@ namespace MqttHome
                             {
                                 logIdentity += $" :: Device ID {switchDevice.Id} is OFF. Turning it ON";
 
-                                switchDevice.SwitchOn($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})", rule.FlipFlop);
+                                try
+                                {
+                                    switchDevice.SwitchOn($"RULE: {rule.Name}, CONDITION CHANGE: {condition.Id} ({condition.LastSensorValue})", rule.FlipFlop);
+                                }
+                                catch (FlipFlopException err)
+                                {
+                                    // if flipflop stops the device from turning on, check the rule conditions again when flipflop prevention ends
+                                    FlipFlopRecheckAdd(rule.Name, switchDevice.Id, err.FlipFlopTimeout);
+                                }
                             }
                         }
                         else
@@ -195,7 +287,8 @@ namespace MqttHome
                             }
                         }
                     }
-                    else {
+                    else
+                    {
                         _controller.RuleLog.Warn($"{logIdentity} - Cancelling, rule engine disabled by appsettings.json");
                     }
                 }
@@ -225,7 +318,8 @@ namespace MqttHome
             }
         }
 
-        public void OnPresenceChanged(Person person) {
+        public void OnPresenceChanged(Person person)
+        {
             foreach (var condition in ConditionConfig.Conditions.Where(c => c.People?.Contains(person.Id) ?? false))
             {
                 try

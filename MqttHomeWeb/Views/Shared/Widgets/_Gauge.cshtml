@@ -1,0 +1,55 @@
+﻿@using MqttHome.Config
+@using MqttHome.Devices.Base
+@using MqttHome.Mqtt
+@model MqttHome.Device
+
+@{
+    var id = $"gauge{Guid.NewGuid().ToString().Replace("-", "")}";
+    var widget = (WidgetConfig)ViewBag.Widget;
+    var gauge = widget.Gauge;
+    var sensorDevice = Model as ISensorDevice<ISensorData>;
+}
+
+@if (gauge == null || sensorDevice == null)
+{
+    @Html.Raw("ERROR")
+}
+else
+{
+    <div id="@id" data-type="@widget.Type" data-value="@Model.Id.@widget.ValueName" class="widget widget-@Model.Config.Widgets.Count">
+
+    </div>
+
+    <script type="text/javascript">
+        var @id = Gauge(
+            document.getElementById("@id"),
+            {
+                min: @gauge.Min,
+                max: @gauge.Max,
+                name: "@(widget.Name ?? widget.ValueName)",
+                viewBox: "0 0 100 95",
+                //dialStartAngle: 180,
+                //dialEndAngle: 0,
+                value: @sensorDevice.SensorValues[widget.ValueName],
+                label: function () {
+                    return "@widget.FormattedValue(sensorDevice.SensorValues[widget.ValueName])";
+                },
+                color: function(value) {
+                    @for (var i = 0; i < gauge.ColourValues.Count; i++)
+                    {
+                        @Html.Raw($"if (value < {gauge.ColourValues[i]}) return \"{gauge.Colours[i]}\";")
+                    }
+
+                    @if (gauge.Colours.Count > gauge.ColourValues.Count)
+                    {
+                        @:return "@(gauge.Colours[gauge.ColourValues.Count])";
+                    }
+                    else
+                    {
+                        @:return "black";
+                    }
+                }
+            }
+        );
+    </script>
+}

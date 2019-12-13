@@ -151,7 +151,7 @@ namespace MqttHome.Devices.Serial.Pylontech
 
             pret.UpdateChecksum();
 
-            if (pret.checksum[0] != bdata[bdata.Length - 2] || pret.checksum[1] != bdata[bdata.Length - 1]{
+            if (pret.checksum[0] != bdata[bdata.Length - 2] || pret.checksum[1] != bdata[bdata.Length - 1]){
                 Console.WriteLine("Invalid checksum!");
                 throw new Exception("Invalid checksum");
             }

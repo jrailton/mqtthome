@@ -1,0 +1,32 @@
+﻿@using MqttHome.Config
+@using MqttHome.Devices.Base
+@using MqttHome.Mqtt
+@model MqttHome.Device
+
+@if (Model.Config.Widgets != null)
+{
+    if (Model is ISensorDevice<ISensorData> sensorDevice)
+    {
+    <div class="panel-body">
+        <div class="widget-container">
+            @foreach (var widget in Model.Config.Widgets)
+            {
+                switch (widget.Type)
+                {
+                    case WidgetType.Gauge:
+                        ViewBag.Widget = widget;
+                        await Html.RenderPartialAsync("Widgets/_Gauge");
+                        break;
+
+                    default:
+                        var id = $"gauge{Guid.NewGuid().ToString().Replace("-", "")}";
+                        <div id="@id" data-type="@widget.Type" data-value="@Model.Id.@widget.ValueName" class="widget widget-@Model.Config.Widgets.Count">
+                            @Html.Raw(widget.FormattedValue(sensorDevice.SensorValues[widget.ValueName]))
+                        </div>
+                        break;
+                }
+            }
+        </div>
+    </div>
+    }
+}

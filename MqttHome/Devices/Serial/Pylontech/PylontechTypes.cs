@@ -114,153 +114,153 @@ CellVoltages: {string.Join(", ", CellVoltages)}
 Temperatures: {string.Join(", ", Temperatures)}
 ";
         }
+    }
 
-        public class PPGetSystemParameter : PylonPacket
+    public class PPGetSystemParameter : PylonPacket
+    {
+        public PPGetSystemParameter() : base()
         {
-            public PPGetSystemParameter() : base()
-            {
-                CID1 = 0x46;
-                CID2 = 0x47;
-            }
+            CID1 = 0x46;
+            CID2 = 0x47;
         }
+    }
 
-        public class PPSystemParameter : PylonPacket
+    public class PPSystemParameter : PylonPacket
+    {
+        public byte INFOFLAG => INFO[0];
+        public double UnitCellVoltage => GetInt2(1) / 1000.0;
+        public double UnitCellLowVoltage => GetInt2(3) / 1000.0;
+        public double UnitCellUnderVoltage => GetInt2(5) / 1000.0;
+
+        public override string ToString()
         {
-            public byte INFOFLAG => INFO[0];
-            public double UnitCellVoltage => GetInt2(1) / 1000.0;
-            public double UnitCellLowVoltage => GetInt2(3) / 1000.0;
-            public double UnitCellUnderVoltage => GetInt2(5) / 1000.0;
-
-            public override string ToString()
-            {
-                return $@"{base.ToString()}
+            return $@"{base.ToString()}
 FLAG: {INFOFLAG}, UnitCellVoltage: {UnitCellVoltage}, UnitCellLowVoltage: {UnitCellLowVoltage}, UnitCellUnderVoltage: {UnitCellUnderVoltage}
 ";
-            }
         }
-        public class PPGetAlarmInformation : PylonPacket
+    }
+    public class PPGetAlarmInformation : PylonPacket
+    {
+        public PPGetAlarmInformation() : base()
         {
-            public PPGetAlarmInformation() : base()
-            {
-                CID1 = 0x46;
-                CID2 = 0x44;
-                INFO = new byte[1];
-                LENGTH = 0x02;
-            }
-
-            public byte Command
-            {
-                get => INFO[0];
-                set => INFO[0] = value;
-            }
-
-            public override string ToString()
-            {
-                return $"{base.ToString()}, Command: {Command}";
-            }
+            CID1 = 0x46;
+            CID2 = 0x44;
+            INFO = new byte[1];
+            LENGTH = 0x02;
         }
 
-        public class PPAlarmInformation : PylonPacket
+        public byte Command
         {
+            get => INFO[0];
+            set => INFO[0] = value;
         }
 
-        public class PPGetChargeManagementInformation : PylonPacket
+        public override string ToString()
         {
-            public PPGetChargeManagementInformation() : base()
-            {
-                CID1 = 0x46;
-                CID2 = 0x92;
-                INFO = new byte[1];
-                LENGTH = 0x02;
-            }
+            return $"{base.ToString()}, Command: {Command}";
+        }
+    }
 
-            public byte Command
-            {
-                get => INFO[0];
-                set => INFO[0] = value;
-            }
+    public class PPAlarmInformation : PylonPacket
+    {
+    }
 
-            public override string ToString()
-            {
-                return $"{base.ToString()}, Command: {Command}";
-            }
+    public class PPGetChargeManagementInformation : PylonPacket
+    {
+        public PPGetChargeManagementInformation() : base()
+        {
+            CID1 = 0x46;
+            CID2 = 0x92;
+            INFO = new byte[1];
+            LENGTH = 0x02;
         }
 
-        public class PPChargeManagementInformation : PylonPacket
+        public byte Command
         {
-            public double VoltageUpLimit => GetInt2(1) / 1000.0;
-            public double VoltageDownLimit => GetInt2(3) / 1000.0;
-            public double MaxChargeCurrent => GetInt2Complement(5) / 1.0;
-            public double MaxDischargeCurrent => GetInt2Complement(7) / 1.0;
-            public byte Status => INFO[9];
+            get => INFO[0];
+            set => INFO[0] = value;
+        }
 
-            public override string ToString()
-            {
-                return $@"{base.ToString()}
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Command: {Command}";
+        }
+    }
+
+    public class PPChargeManagementInformation : PylonPacket
+    {
+        public double VoltageUpLimit => GetInt2(1) / 1000.0;
+        public double VoltageDownLimit => GetInt2(3) / 1000.0;
+        public double MaxChargeCurrent => GetInt2Complement(5) / 1.0;
+        public double MaxDischargeCurrent => GetInt2Complement(7) / 1.0;
+        public byte Status => INFO[9];
+
+        public override string ToString()
+        {
+            return $@"{base.ToString()}
 VoltageUpLimit: {VoltageUpLimit}, VoltageDownLimit: {VoltageDownLimit}, MaxChargeCurrent: {MaxChargeCurrent}, MaxDischargeCurrent: {MaxDischargeCurrent}, Status: {Status}
 ";
-            }
+        }
+    }
+
+    public class PPGetSeriesNumber : PylonPacket
+    {
+
+        public PPGetSeriesNumber() : base()
+        {
+            CID1 = 0x46;
+            CID2 = 0x93;
+            INFO = new byte[1];
+            LENGTH = 0x02;
+        }
+        public byte Command
+        {
+            get => INFO[0];
+            set => INFO[0] = value;
         }
 
-        public class PPGetSeriesNumber : PylonPacket
+        public override string ToString()
         {
-
-            public PPGetSeriesNumber() : base()
-            {
-                CID1 = 0x46;
-                CID2 = 0x93;
-                INFO = new byte[1];
-                LENGTH = 0x02;
-            }
-            public byte Command
-            {
-                get => INFO[0];
-                set => INFO[0] = value;
-            }
-
-            public override string ToString()
-            {
-                return $"{base.ToString()}, Command: {Command}";
-            }
+            return $"{base.ToString()}, Command: {Command}";
         }
+    }
 
-        public class PPSeriesNumber : PylonPacket
+    public class PPSeriesNumber : PylonPacket
+    {
+
+        public string SeriesNumber => Encoding.UTF8.GetString(INFO[1..]);
+
+        public override string ToString()
         {
-
-            public string SeriesNumber => Encoding.UTF8.GetString(INFO[1..]);
-
-            public override string ToString()
-            {
-                return $@"{base.ToString()}
+            return $@"{base.ToString()}
 Series Number: {SeriesNumber}
 ";
-            }
         }
+    }
 
-        public class PPTurnOff : PylonPacket
+    public class PPTurnOff : PylonPacket
+    {
+        public PPTurnOff() : base()
         {
-            public PPTurnOff() : base()
-            {
-                CID1 = 0x46;
-                CID2 = 0x95;
-                INFO = new byte[1];
-                LENGTH = 0x02;
-            }
-
-            public byte Command
-            {
-                get => INFO[0];
-                set => INFO[0] = value;
-            }
-
-            public override string ToString()
-            {
-                return $"{base.ToString()}, Command: {Command}";
-            }
+            CID1 = 0x46;
+            CID2 = 0x95;
+            INFO = new byte[1];
+            LENGTH = 0x02;
         }
 
-        public class PPTurnOffReply : PylonPacket
+        public byte Command
         {
+            get => INFO[0];
+            set => INFO[0] = value;
         }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Command: {Command}";
+        }
+    }
+
+    public class PPTurnOffReply : PylonPacket
+    {
     }
 }

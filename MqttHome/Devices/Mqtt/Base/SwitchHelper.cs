@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using MqttHome.Devices.Mqtt.Base;
 using MQTTnet;
 
 namespace MqttHome.Mqtt.Devices
@@ -23,6 +24,7 @@ namespace MqttHome.Mqtt.Devices
             {
                 AddStateHistory($"OFF: {reason}");
 
+                _device.Controller.RuleEngine.FlipFlopRecheckRemove(_device.Id);
                 _device.Controller.RuleLog.Info($"{logIdentity} :: Reason - {reason}");
                 _device.SetPowerStateOff.Execute();
             }
@@ -34,6 +36,9 @@ namespace MqttHome.Mqtt.Devices
             }
         }
 
+        /// <summary>
+        /// Flipflop seconds is a bit confusing, probably shouldnt be on the RULE config and rather on the DEVICE config -- should be changed (from my current perspective)
+        /// </summary>
         public void SwitchOn(string reason, int? flipFlopSeconds)
         {
             var logIdentity = $"{_device.Id} :: SwitchOn";
@@ -46,12 +51,17 @@ namespace MqttHome.Mqtt.Devices
                 _device.Controller.RuleLog.Info($"{logIdentity} :: Reason - {reason}");
 
                 // prevent flipflop
-                if (_device.PowerOffTime.HasValue && _device.PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value) > DateTime.Now)
-                {
-                    AddStateHistory($"(FlipFlop) ON: {reason}");
+                if (_device.PowerOffTime.HasValue){
+                    var flipFlopUntil = _device.PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value);
+                    if (flipFlopUntil > DateTime.Now)
+                    {
+                        AddStateHistory($"(FlipFlop) ON: {reason}");
 
-                    var error = $"Flipflop prevention. Need to wait until {_device.PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value).ToString("HH:mm:ss")}";
-                    _device.Controller.RuleLog.Warn($"{logIdentity} :: Reason - {reason} :: Aborted - {error}");
+                        var error = $"Flipflop prevention. Need to wait until {flipFlopUntil.ToString("HH:mm:ss")}";
+                        _device.Controller.RuleLog.Warn($"{logIdentity} :: Reason - {reason} :: Aborted - {error}");
+
+                        throw new FlipFlopException(flipFlopUntil);
+                    }
                 }
                 else
                 {

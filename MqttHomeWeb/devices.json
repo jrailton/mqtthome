@@ -3,37 +3,150 @@
     {
       "Type": "ICC",
       "Id": "icc",
-      "FriendlyName": "Mecer Axpert MKSII 5kva"
+      "FriendlyName": "Mecer Axpert MKSII 5kva",
+      "Widgets": [
+        {
+          "ValueName": "PvWatts",
+          "Type": "Gauge",
+          "ValueType": "Watts",
+          "Gauge": {
+            "Min": 0,
+            "Max": 4000,
+            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
+            "ColourValues": [ 1000, 2000, 3000 ]
+          }
+        }
+      ]
     },
     {
       "Type": "SonoffTHDevice",
       "Id": "th16_1",
-      "FriendlyName": "Security Lights"
+      "FriendlyName": "Security Lights",
+      "Widgets": [
+        {
+          "ValueName": "Temperature",
+          "Type": "Gauge",
+          "ValueType": "Temperature",
+          "Gauge": {
+            "Min": 0,
+            "Max": 50,
+            "Colours": [ "DarkOrchid", "DeepSkyBlue", "GREENYELLOW", "DARKORANGE", "ORANGERED" ],
+            "ColourValues": [ 10, 18, 28, 38 ]
+          }
+        },
+        {
+          "ValueName": "Humidity",
+          "Type": "Gauge",
+          "ValueType": "Percent",
+          "Gauge": {
+            "Min": 0,
+            "Max": 100,
+            "Colours": [ "WHITESMOKE", "LIGHTSTEELBLUE", "LIGHTSKYBLUE", "DEEPSKYBLUE" ],
+            "ColourValues": [ 20, 40, 60 ]
+          }
+        }
+      ]
     },
     {
       "Type": "SonoffTHDevice",
       "Id": "th16_2",
-      "FriendlyName": "Workshop & Max's Room"
+      "FriendlyName": "Workshop & Max's Room",
+      "Widgets": [
+        {
+          "ValueName": "Temperature",
+          "Type": "Gauge",
+          "ValueType": "Temperature",
+          "Gauge": {
+            "Min": 0,
+            "Max": 50,
+            "Colours": [ "DarkOrchid", "DeepSkyBlue", "GREENYELLOW", "DARKORANGE", "ORANGERED" ],
+            "ColourValues": [ 15, 21, 26, 35 ]
+          }
+        },
+        {
+          "ValueName": "Humidity",
+          "Type": "Gauge",
+          "ValueType": "Percent",
+          "Gauge": {
+            "Min": 0,
+            "Max": 100,
+            "Colours": [ "WHITESMOKE", "LIGHTSTEELBLUE", "LIGHTSKYBLUE", "DEEPSKYBLUE" ],
+            "ColourValues": [ 20, 40, 60 ]
+          }
+        }
+      ]
     },
     {
       "Type": "SonoffPowR2Device",
       "Id": "powr2_1",
-      "FriendlyName": "Laundry Circuit"
+      "FriendlyName": "Laundry Circuit",
+      "Widgets": [
+        {
+          "ValueName": "Power",
+          "Type": "Gauge",
+          "ValueType": "Watts",
+          "Gauge": {
+            "Min": 0,
+            "Max": 3520,
+            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
+            "ColourValues": [ 500, 1000, 2000 ]
+          }
+        }
+      ]
     },
     {
       "Type": "SonoffPowR2Device",
       "Id": "powr2_2",
-      "FriendlyName": "Kitchen Circuit"
+      "FriendlyName": "Kitchen Circuit",
+      "Widgets": [
+        {
+          "ValueName": "Power",
+          "Type": "Gauge",
+          "ValueType": "Watts",
+          "Gauge": {
+            "Min": 0,
+            "Max": 3520,
+            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
+            "ColourValues": [ 500, 1000, 2000 ]
+          }
+        }
+      ]
     },
     {
       "Type": "SonoffPowR2Device",
       "Id": "powr2_3",
-      "FriendlyName": "Essentials Circuit"
+      "FriendlyName": "Essentials Circuit",
+      "Widgets": [
+        {
+          "ValueName": "Power",
+          "Type": "Gauge",
+          "ValueType": "Watts",
+          "Gauge": {
+            "Min": 0,
+            "Max": 3520,
+            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
+            "ColourValues": [ 500, 1000, 2000 ]
+          }
+        }
+      ]
     },
     {
       "Type": "SonoffPowR2Device",
       "Id": "powr2_5",
-      "FriendlyName": "Garden Lights"
+      "FriendlyName": "Garden Lights",
+      "Widgets": [
+        {
+          "ValueName": "Power",
+          "Type": "Gauge",
+          "ValueType": "Watts",
+          "Gauge": {
+            "Min": 0,
+            "Max": 3520,
+            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
+            "ColourValues": [ 500, 1000, 2000 ]
+          }
+        }
+      ]
     },
     {
       "Type": "SonoffS26Device",
@@ -49,7 +162,31 @@
       "Type": "VenusGxDevice",
       "Id": "7c386655e76b",
       "FriendlyName": "Victron Venus GX",
-      "Parameters": [ "10.0.0.59", "1883" ]
+      "Parameters": [ "10.0.0.59", "1883" ],
+      "Widgets": [
+        {
+          "ValueName": "BatteryPower",
+          "Type": "Gauge",
+          "ValueType": "Watts",
+          "Gauge": {
+            "Min": -4000,
+            "Max": 4000,
+            "Colours": [ "Red", "Orange", "Yellow", "Green", "DarkGreen", "DarkGreen" ],
+            "ColourValues": [ -1000, -500, 0, 500, 1000 ]
+          }
+        },
+        {
+          "ValueName": "BatterySoC",
+          "Type": "Gauge",
+          "ValueType": "Percent",
+          "Gauge": {
+            "Min": 0,
+            "Max": 100,
+            "Colours": [ "Red", "Orange", "Yellow", "Green" ],
+            "ColourValues": [ 30, 60, 85 ]
+          }
+        }
+      ]
     },
     {
       "Type": "HuaweiHG8245",

@@ -34,37 +34,44 @@ namespace MqttHome.Presence.Huawei
 
         private void UpdatePeople() 
         {
-            // get list of attached devices
-            _devices = GetDevices();
+            try
+            {
+                // get list of attached devices
+                _devices = GetDevices();
 
-            // check list of People
-            foreach (var person in Controller.People) {
-                var device = _devices.SingleOrDefault(d => d.MacAddress == person.MacAddress);
-                
-                // if device is found and online, then they are present -- default to not-present
-                var present = device?.Status.Equals("Online") ?? false;
-
-                // if present, person state will immediately change but if not present, state will only change after 5 minutes (because wifi devices disconnect/reconnect often)
-                if (present)
+                // check list of People
+                foreach (var person in Controller.People)
                 {
-                    person.LastSeen = DateTime.Now;
-                }
-                else if (DateTime.Now.Subtract(person.LastSeen ?? DateTime.MinValue).TotalSeconds <= 300) 
-                {
-                    // the person is not present, but was last seen up to 5 minutes ago, so dont assume presence has changed yet
-                    present = true;
+                    var device = _devices.SingleOrDefault(d => d.MacAddress == person.MacAddress);
 
-                    // N.B. last seen date will begin to age so after 5 minutes, presence will be changed to false
-                }
+                    // if device is found and online, then they are present -- default to not-present
+                    var present = device?.Status.Equals("Online") ?? false;
 
-                // if presence changed, raise event
-                if (person.Present != present)
-                {
-                    person.Present = present;
-                    person.PresenceChanged = DateTime.Now;
+                    // if present, person state will immediately change but if not present, state will only change after 5 minutes (because wifi devices disconnect/reconnect often)
+                    if (present)
+                    {
+                        person.LastSeen = DateTime.Now;
+                    }
+                    else if (DateTime.Now.Subtract(person.LastSeen ?? DateTime.MinValue).TotalSeconds <= 300)
+                    {
+                        // the person is not present, but was last seen up to 5 minutes ago, so dont assume presence has changed yet
+                        present = true;
 
-                    OnPresenceChanged(this, person);
+                        // N.B. last seen date will begin to age so after 5 minutes, presence will be changed to false
+                    }
+
+                    // if presence changed, raise event
+                    if (person.Present != present)
+                    {
+                        person.Present = present;
+                        person.PresenceChanged = DateTime.Now;
+
+                        OnPresenceChanged(this, person);
+                    }
                 }
+            }
+            catch (Exception err) {
+                Controller.DeviceLog.Error($"{DeviceClass}, {DeviceType}, {Id}, {FriendlyName} :: UpdatePeople - Failed", err);
             }
         }
 
