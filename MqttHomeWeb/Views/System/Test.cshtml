@@ -1,0 +1,45 @@
+﻿
+@{
+    ViewData["Title"] = "Test";
+}
+
+<h2>Test</h2>
+
+<div id="mygauge"></div>
+<div id="mygauge2"></div>
+<div id="mygauge3"></div>
+<div id="mygauge4"></div>
+
+<script type="text/javascript">
+    var gauge = new Widget("mygauge", {
+        value: -50,
+        valueLabel: "-50W",
+        name: "Gauge 1",
+        min: -50,
+        max: 250
+    });
+
+    var gauge2 = new Widget("mygauge2", {
+        value: -10,
+        valueLabel: "-10W",
+        name: "Gauge 2",
+        min: -50,
+        max: 250
+    });
+
+    var gauge3 = new Widget("mygauge3", {
+        value: 100,
+        valueLabel: "100W",
+        name: "Gauge 3",
+        min: -50,
+        max: 250
+    });
+
+    var gauge4 = new Widget("mygauge4", {
+        value: 250,
+        valueLabel: "250W",
+        name: "Gauge 4",
+        min: -50,
+        max: 250
+    });
+</script>

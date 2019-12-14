@@ -18,7 +18,8 @@
       "!*.min.js",
       "!wwwroot/js/sw-cachehandlers.js",
       "!wwwroot/js/sw-toolbox.js",
-      "!wwwroot/js/sw-utils.js"
+      "!wwwroot/js/sw-utils.js",
+      "!wwwroot/js/visualization/widgets.js"
     ],
     "outputFileName": "wwwroot/js/site.bundle.js",
     "minify": {

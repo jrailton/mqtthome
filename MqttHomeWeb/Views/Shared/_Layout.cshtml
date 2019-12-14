@@ -23,7 +23,7 @@
     <meta name="msapplication-config" content="~/images/browserconfig.xml" />
     <meta name="theme-color" content="#185FF9" />
     <script src="~/js/sw-utils.js"></script>
-
+    <script src="~/js/visualization/widgets.js"></script>
 
     <environment include="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
@@ -120,5 +120,39 @@
     </div>
 
     @RenderSection("Scripts", required: false)
+
+    <script type="text/javascript">
+        // OMG JAVASCRIPT TAKES THE FUN OUT OF PROGRAMMING :|
+        $(function () {
+            var widgets = $(".widget-container .widget");
+
+            if (widgets.length > 0) {
+                var ids = "";
+                for (var i = 0; i < widgets.length; i++)
+                    ids += "," + $(widgets[i]).data("value");
+
+                setInterval(function () {
+                    $.getJSON("/api/values/sensorvalues/",
+                        { names: ids.substring(1) },
+                        function (response) {
+                            $.each(response,
+                                function () {
+                                    var widget = $("[data-value='" + this.DeviceId + "." + this.WidgetId + "']");
+                                    switch (widget.attr("data-type")) {
+                                        case "Text":
+                                            widget.text(this.Value);
+                                            break;
+
+                                        case "Gauge":
+                                            window[this.WidgetId].SetDial(this.Value, this.ValueFormatted);
+                                            break;
+                                    }
+                                });
+                        });
+                },
+                    5000);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -12,15 +12,11 @@
     "inputFile": "wwwroot/js/vis/gauge.less"
   },
   {
-    "outputFile": "wwwroot/js/vis/gauge.es5.js",
-    "inputFile": "wwwroot/js/vis/gauge.js"
-  },
-  {
-    "outputFile": "wwwroot/css/visualization/gauge.css",
-    "inputFile": "wwwroot/css/visualization/gauge.less"
-  },
-  {
     "outputFile": "wwwroot/css/visualization/widgets.css",
     "inputFile": "wwwroot/css/visualization/widgets.less"
+  },
+  {
+    "outputFile": "wwwroot/js/site.es5.js",
+    "inputFile": "wwwroot/js/site.js"
   }
 ]

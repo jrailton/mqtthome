@@ -32,6 +32,11 @@ namespace MqttHome.Config
 
     public class WidgetConfig
     {
+        public WidgetConfig() {
+            Id = $"widget{Guid.NewGuid().ToString().Replace("-", "")}";
+        }
+
+        public string Id { get; private set; }
         public string Name { get; set; }
         public string ValueName { get; set; }
 
@@ -41,27 +46,27 @@ namespace MqttHome.Config
 
         public GaugeConfig Gauge { get; set; }
 
-        public IHtmlContent FormattedValue(object value)
+        public string FormattedValue(object value)
         {
             try
             {
                 switch (ValueType)
                 {
                     case WidgetValueType.Number:
-                        return new HtmlString(decimal.Parse(value.ToString()).ToString("#,##0.##"));
+                        return decimal.Parse(value.ToString()).ToString("#,##0.##");
                     case WidgetValueType.Percent:
-                        return new HtmlString($"{decimal.Parse(value.ToString()).ToString("#,##0.##")}%");
+                        return $"{decimal.Parse(value.ToString()).ToString("#,##0.##")}%";
                     case WidgetValueType.Temperature:
-                        return new HtmlString($"{decimal.Parse(value.ToString()).ToString("#,##0.##")}°C");
+                        return $"{decimal.Parse(value.ToString()).ToString("#,##0.##")}°C";
                     case WidgetValueType.Watts:
-                        return new HtmlString(FormattedValueConvert(value.ToString(), new List<decimal> { 0.001m, 1, 1000, 1000000 }, new List<string> { "mW", "W", "kW", "MW" }));
+                        return FormattedValueConvert(value.ToString(), new List<decimal> { 0.001m, 1, 1000, 1000000 }, new List<string> { "mW", "W", "kW", "MW" });
                 }
             }
             catch
             {
             }
 
-            return new HtmlString(value.ToString());
+            return value.ToString();
         }
 
         private string FormattedValueConvert(string value, List<decimal> divisors, List<string> labels) {

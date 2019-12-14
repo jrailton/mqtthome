@@ -13,6 +13,11 @@ namespace MqttHomeWeb.Controllers
     [Authorize]
     public class SystemController : Controller
     {
+        public IActionResult Test()
+        {
+            return View();
+        }
+
         public IActionResult Index()
         {
             return View("Switches", Program.MqttHomeController);

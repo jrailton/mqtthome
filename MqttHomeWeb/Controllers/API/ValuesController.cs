@@ -17,16 +17,22 @@ namespace MqttHomeWeb.Controllers
         public string SensorValues(string names)
         {
             var output = new List<SensorValue>();
-            var requests = names.Split(',');
-            foreach (var request in requests)
+
+            try
             {
-                var kv = request.Split('.', 2);
-                var deviceId = kv[0];
-                var valueName = kv[1];
-                var device = Program.MqttHomeController.MqttDevices.Single(d => d.Id == deviceId);
-                var sensor = device as ISensorDevice<ISensorData>;
-                output.Add(new SensorValue(deviceId, valueName, sensor.SensorValues[valueName], device.Config.Widgets));
+                var requests = names.Split(',');
+                foreach (var request in requests)
+                {
+                    var kv = request.Split('.', 2);
+                    var deviceId = kv[0];
+                    var widgetId = kv[1];
+                    var device = Program.MqttHomeController.MqttDevices.Single(d => d.Id == deviceId);
+                    var widget = device.Config.Widgets.Single(w => w.Id == widgetId);
+                    var sensor = device as ISensorDevice<ISensorData>;
+                    output.Add(new SensorValue(deviceId, widget.Id, widget.ValueName, sensor.SensorValues[widget.ValueName], widget.FormattedValue(sensor.SensorValues[widget.ValueName])));
+                }
             }
+            catch { }
 
             return JsonConvert.SerializeObject(output);
         }
@@ -34,18 +40,19 @@ namespace MqttHomeWeb.Controllers
 
     public class SensorValue
     {
-        public SensorValue(string deviceId, string valueName, object value, string valueFormatted)
+        public SensorValue(string deviceId, string widgetId, string valueName, object value, string valueFormatted)
         {
             DeviceId = deviceId;
             ValueName = valueName;
             Value = value;
             ValueFormatted = valueFormatted;
+            WidgetId = widgetId;
         }
 
         public string DeviceId;
         public object ValueName;
         public object Value;
         public string ValueFormatted;
-        public string Id => $"{DeviceId}.{ValueName}";
+        public string WidgetId;
     }
 }
