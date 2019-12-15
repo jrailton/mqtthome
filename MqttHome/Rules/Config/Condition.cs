@@ -82,19 +82,19 @@ namespace MqttHome
                 switch (comparer)
                 {
                     case ">":
-                        newValue = ((dynamic)sensorValues[property] > decimal.Parse(value));
+                        newValue = ((dynamic)sensorValues[property] > double.Parse(value));
                         break;
 
                     case ">=":
-                        newValue = ((dynamic)sensorValues[property] >= decimal.Parse(value));
+                        newValue = ((dynamic)sensorValues[property] >= double.Parse(value));
                         break;
 
                     case "<=":
-                        newValue = ((dynamic)sensorValues[property] <= decimal.Parse(value));
+                        newValue = ((dynamic)sensorValues[property] <= double.Parse(value));
                         break;
 
                     case "<":
-                        newValue = ((dynamic)sensorValues[property] < decimal.Parse(value));
+                        newValue = ((dynamic)sensorValues[property] < double.Parse(value));
                         break;
 
                     case "==":

@@ -1,0 +1,23 @@
+VENUS GX FORGETS ALL THESE SETTINGS AFTER AND UPDATE BECAUSE FILESYSTEM IS OVERWRITTEN BY UPDATE
+SO IF YOU CARE, DISABLE AUTO UPDATING
+
+1. Set access level to Superuser
+To set the root password, first set the access level to Superuser:
+Go to Settings, General
+Set the Access Level to User and installer, the password is ZZZ
+Highlight Access Level (don't open the select page!)
+Press and hold the right button of the center pad until you see the Access Level change to Superuser. Note: when working from the Remote Console, you need to use the right key on your keyboard. Pressing and holding the right button with your mouse won't work.
+Now you have access to the super user features.
+2. Create a root password
+Go to Settings ? General ? Set root password. And create a root password.
+Note that, for firmware version v2.00 and later, the root password will be reset by a firmware update. The reason is that the passwd file is on the rootfs, which is fully replaced by an update. More info here.
+Our advice is to create a root password. But use it to login only the first time, and then install a public ssh key(s). Thereafter login with the keys.
+
+1. Login on SSH (putty) with root and whatever password you configured
+2. nano /etc/mosquitto/mosquitto.configured
+3. Create MQTT bridge similar to below:
+#connection to mqtthome
+connection bridge-01
+address <mqtthome-mosquitto-ip>:1883
+topic # out 0
+4. reboot and you're good to go

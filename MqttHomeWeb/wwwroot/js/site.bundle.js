@@ -1,3 +1,12 @@
+$(function () {
+    $('a[data-toggle="tooltip"]').tooltip({
+        animated: 'fade',
+        //placement: 'bottom',
+        trigger: 'click',
+        delay: { "show": 500, "hide": 100 }
+    });
+});
+
 function SubscribeToPush() {
     navigator.serviceWorker && navigator.serviceWorker.ready.then(
         function (registration) {

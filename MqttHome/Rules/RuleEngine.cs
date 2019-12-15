@@ -313,7 +313,13 @@ namespace MqttHome
                 }
                 catch (Exception err)
                 {
-                    _controller.RuleLog.Error($"OnDeviceSensorDataChanged :: CheckDeviceCondition :: Condition: {condition.Id}, Device: {device.Id} - Failed. {err.Message}", err);
+                    _controller.RuleLog.Error($@"OnDeviceSensorDataChanged :: CheckDeviceCondition :: 
+Condition: {condition.Id}
+Device: {device.Id}
+Criteria: {condition.Criteria}
+Sensor Values: 
+{string.Join(Environment.NewLine, allSensorValues.Select(v => $"{v.Key}={v.Value}"))}
+{err.Message}", err);
                 }
             }
         }
