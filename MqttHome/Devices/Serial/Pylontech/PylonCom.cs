@@ -34,7 +34,11 @@ namespace MqttHome.Devices.Serial.Pylontech
 
         private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            sp.Read(rxBuffer, rxIndex += sp.BytesToRead, sp.BytesToRead);
+            int bytesToRead = sp.BytesToRead;
+
+            sp.Read(rxBuffer, rxIndex, sp.BytesToRead);
+
+            rxIndex += bytesToRead;
 
             // considered complete when last byte read is a carriage return character
             rxComplete = rxBuffer[rxIndex - 1] == 0x0D;
