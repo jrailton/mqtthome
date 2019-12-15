@@ -11,7 +11,7 @@ namespace MqttHome.Devices.Serial.Pylontech
     {
         public static void GetInfo()
         {
-            var pc = new PylonCom();
+            var pc = new PylonCom("COM5");
 
             //# for adr in range(0,255):
             //# ppIn = pylonpacket.PPGetVersionInfo()
