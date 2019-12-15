@@ -8,7 +8,7 @@ namespace MqttHome.Devices.Serial.Pylontech
 {
     public class PylonCom
     {
-        public string PORT = "COM11";
+        public string PORT = "COM5";
         public int BAUD = 115200;
         private SerialPort sp;
 
@@ -16,14 +16,20 @@ namespace MqttHome.Devices.Serial.Pylontech
         private bool rxComplete;
         private int rxIndex;
 
-        public PylonCom()
+        public PylonCom(string port, int baud = 115200)
         {
+            PORT = port;
+            BAUD = baud;
+
             sp = new SerialPort(PORT, BAUD);
 
             sp.DataReceived += OnDataReceived;
 
             sp.ReadTimeout = 500;
             sp.WriteTimeout = 500;
+
+            sp.Open();
+
         }
 
         private void OnDataReceived(object sender, SerialDataReceivedEventArgs e)
