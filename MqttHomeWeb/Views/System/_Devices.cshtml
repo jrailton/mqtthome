@@ -1,4 +1,6 @@
-﻿@using MqttHome.Mqtt
+﻿@using MqttHome.Devices.Base
+@using MqttHome.Devices.Serial.Base
+@using MqttHome.Mqtt
 @using MqttHome.Mqtt.Devices
 @model MqttHome.MqttHomeController
 <div class="panel panel-default">
@@ -67,6 +69,78 @@
                                 @if (device is IMqttSensorDevice<ISensorData>)
                                 {
                                     var sensor = device as IMqttSensorDevice<ISensorData>;
+                                    if (sensor.SensorValues != null)
+                                    {
+                                        <div>
+                                            <label>Sensor Data</label>
+                                            @foreach (var pair in sensor.SensorValues)
+                                            {
+                                                <div>
+                                                    <label>@pair.Key</label>
+                                                    @pair.Value
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
+                            }
+
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @foreach (var device in Model.SerialDevices)
+            {
+                <div class="col-sm-4 col-lg-3">
+                    <div class="panel panel-info">
+                        <div class="panel-heading">@device.FriendlyName</div>
+                        <div class="panel-body">
+                            <div>
+                                <label>Last Contact</label>
+                                @device.LastCommunication.GetPrettyDateHtml()
+                            </div>
+                            <div class="technical">
+                                <label>Class</label>
+                                @device.DeviceClass
+                            </div>
+                            <div class="technical">
+                                <label>Type</label>
+                                @device.DeviceType
+                            </div>
+                            <div class="technical">
+                                <label>ID</label>
+                                @device.Id
+                            </div>
+
+                            @if (device.LastCommunication.HasValue)
+                            {
+
+                                @if (device is ISwitchDevice)
+                                {
+                                    var switchDevice = device as ISwitchDevice;
+                                    <div>
+                                        <label>Power On</label>
+                                        @switchDevice.PowerOn
+                                    </div>
+                                    @if (!User.IsInRole("Viewer"))
+                                    {
+                                        <div>
+                                            @if (switchDevice.PowerOn ?? true)
+                                            {
+                                                <button class="btn btn-primary btn-xs btn-success" onclick="SwitchOff('@device.Id')">Switch Off</button>
+                                            }
+                                            else
+                                            {
+                                                <button class="btn btn-primary btn-xs btn-danger" onclick="SwitchOn('@device.Id')">Switch On</button>
+                                            }
+                                        </div>
+                                    }
+                                }
+
+                                @if (device is ISensorDevice<ISensorData>)
+                                {
+                                    var sensor = device as ISensorDevice<ISensorData>;
                                     if (sensor.SensorValues != null)
                                     {
                                         <div>

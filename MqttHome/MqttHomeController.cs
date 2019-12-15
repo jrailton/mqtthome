@@ -11,6 +11,7 @@ using log4net;
 using Microsoft.Extensions.Configuration;
 using MqttHome.Config;
 using MqttHome.Devices.Base;
+using MqttHome.Devices.Serial.Base;
 using MqttHome.Influx;
 using MqttHome.Mqtt;
 using MqttHome.Mqtt.BrokerCommunicator;
@@ -34,6 +35,7 @@ namespace MqttHome
         public List<MqttCommunicator> MqttCommunicators = new List<MqttCommunicator>();
         public List<MqttDevice> MqttDevices;
         public List<PresenceDevice> PresenceDevices;
+        public List<SerialDevice> SerialDevices;
 
         public InfluxCommunicator InfluxCommunicator = null;
         public List<string> MqttDeviceTopics;
@@ -149,6 +151,7 @@ namespace MqttHome
             DeviceConfig deviceConfig;
 
             MqttDevices = new List<MqttDevice>();
+            SerialDevices = new List<SerialDevice>();
             PresenceDevices = new List<PresenceDevice>();
 
             // add time device
@@ -176,6 +179,10 @@ namespace MqttHome
                     else if (interfaces.Any(i => i.Name == "IPresenceDevice"))
                     {
                         PresenceDevices.Add((PresenceDevice)Activator.CreateInstance(type, this, device));
+                    }
+                    else if (interfaces.Any(i => i.Name == "ISerialDevice"))
+                    {
+                        SerialDevices.Add((SerialDevice)Activator.CreateInstance(type, this, device));
                     }
                 }
 

@@ -8,5 +8,7 @@ namespace MqttHome.Mqtt
     {
         Dictionary<string, object> ToDictionary();
         Dictionary<string, object> Update(MqttApplicationMessage message);
+        Dictionary<string, object> Update(byte[] data);
+        Dictionary<string, object> Update(string data);
     }
 }

@@ -189,11 +189,17 @@
       ]
     },
     {
+      "Type": "Pylontech",
+      "Id": "pylontech",
+      "FriendlyName": "Pylontech",
+      "Parameters": [ "COM5" ]
+    },
+    {
       "Type": "HuaweiHG8245",
       "Id": "HuaweiHG8245",
       "FriendlyName": "Home Router",
       "Parameters": [ "10.0.0.1", "telecomadmin", "lt16sXtu" ],
-      "SaveSensorValuesToDatabase":  false
+      "SaveSensorValuesToDatabase": false
     }
   ]
 }

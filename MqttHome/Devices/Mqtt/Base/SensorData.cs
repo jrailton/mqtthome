@@ -9,6 +9,16 @@ namespace MqttHome.Mqtt
     {
         public abstract Dictionary<string, object> Update(MqttApplicationMessage message);
 
+        public virtual Dictionary<string, object> Update(string data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual Dictionary<string, object> Update(byte[] data)
+        {
+            throw new NotImplementedException();
+        }
+
         protected Dictionary<string, object> UpdateValues(SensorData newValues)
         {
             try
