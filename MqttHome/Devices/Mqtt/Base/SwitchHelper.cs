@@ -51,7 +51,8 @@ namespace MqttHome.Mqtt.Devices
                 _device.Controller.RuleLog.Info($"{logIdentity} :: Reason - {reason}");
 
                 // prevent flipflop
-                if (_device.PowerOffTime.HasValue){
+                if (_device.PowerOffTime.HasValue)
+                {
                     var flipFlopUntil = _device.PowerOffTime.Value.AddSeconds(flipFlopSeconds.Value);
                     if (flipFlopUntil > DateTime.Now)
                     {
@@ -63,12 +64,9 @@ namespace MqttHome.Mqtt.Devices
                         throw new FlipFlopException(flipFlopUntil);
                     }
                 }
-                else
-                {
-                    AddStateHistory($"ON: {reason}");
+                AddStateHistory($"ON: {reason}");
 
-                    _device.SetPowerStateOn.Execute();
-                }
+                _device.SetPowerStateOn.Execute();
             }
             catch (Exception err)
             {
@@ -79,7 +77,8 @@ namespace MqttHome.Mqtt.Devices
 
         }
 
-        public void AddStateHistory(string message) {
+        public void AddStateHistory(string message)
+        {
             StateHistory.Add(DateTime.Now, message);
 
             // dont let the list grow to more than 20 items
