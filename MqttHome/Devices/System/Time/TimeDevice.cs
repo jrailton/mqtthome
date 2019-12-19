@@ -17,7 +17,7 @@ namespace MqttHome.Mqtt.Devices.Environment
             FriendlyName = "Time Sensor (System)"
         })
         {
-            SensorData = new TimeSensorData(controller.Longitude, controller.Latitude);
+            SensorData = new TimeSensorData(controller.Settings.Longitude, controller.Settings.Latitude);
             LastCommunication = DateTime.Now;
 
             // trigger a new update of values every 30 seconds

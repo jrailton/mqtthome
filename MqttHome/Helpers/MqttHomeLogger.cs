@@ -10,12 +10,12 @@ namespace MqttHome
 {
     public class MqttHomeLogger : ILog
     {
-        WebsocketManager wsm;
-        ILog logger;
+        private MqttHomeController controller;
+        private ILog logger;
 
-        public MqttHomeLogger(WebsocketManager wsm, ILog logger)
+        public MqttHomeLogger(MqttHomeController controller, ILog logger)
         {
-            this.wsm = wsm;
+            this.controller = controller;
             this.logger = logger;
         }
 
@@ -68,13 +68,15 @@ namespace MqttHome
 
         public void Error(object message)
         {
-            wsm.SendMessageToAllAsync(message.ToString());
+            controller.SystemMessages.Add(SystemMessageType.danger, message.ToString());
+            controller.WebsocketManager?.SendMessageToAllAsync(message.ToString());
             logger.Error(message);
         }
 
         public void Error(object message, Exception exception)
         {
-            wsm.SendMessageToAllAsync(message.ToString());
+            controller.SystemMessages.Add(SystemMessageType.danger, message.ToString());
+            controller.WebsocketManager?.SendMessageToAllAsync(message.ToString());
             logger.Error(message, exception);
         }
 
@@ -105,13 +107,15 @@ namespace MqttHome
 
         public void Fatal(object message)
         {
-            wsm.SendMessageToAllAsync(message.ToString());
+            controller.SystemMessages.Add(SystemMessageType.danger, message.ToString());
+            controller.WebsocketManager?.SendMessageToAllAsync(message.ToString());
             logger.Fatal(message);
         }
 
         public void Fatal(object message, Exception exception)
         {
-            wsm.SendMessageToAllAsync(message.ToString());
+            controller.SystemMessages.Add(SystemMessageType.danger, message.ToString());
+            controller.WebsocketManager?.SendMessageToAllAsync(message.ToString());
             logger.Fatal(message, exception);
         }
 
@@ -177,11 +181,13 @@ namespace MqttHome
 
         public void Warn(object message)
         {
+            controller.SystemMessages.Add(SystemMessageType.warning, message.ToString());
             logger.Warn(message);
         }
 
         public void Warn(object message, Exception exception)
         {
+            controller.SystemMessages.Add(SystemMessageType.warning, message.ToString());
             logger.Warn(message, exception);
         }
 

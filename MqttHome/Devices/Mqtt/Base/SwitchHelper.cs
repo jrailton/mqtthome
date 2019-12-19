@@ -68,6 +68,11 @@ namespace MqttHome.Mqtt.Devices
 
                 _device.SetPowerStateOn.Execute();
             }
+            catch (FlipFlopException)
+            {
+                // flipflop exceptions will be handled gracefully
+                throw;
+            }
             catch (Exception err)
             {
                 AddStateHistory($"(Failed) ON: {reason}");

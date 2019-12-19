@@ -1,0 +1,24 @@
+﻿.system-messages {
+  margin-top: 8px;
+}
+.system-messages a i {
+  color: #999;
+}
+.system-messages div.messages {
+  background-color: white;
+  padding: 10px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  position: fixed;
+  width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  right: 0;
+}
+.system-messages div.message a {
+  margin-right: 2px;
+  margin-left: -2px;
+}
+.system-messages div.message a i {
+  color: white;
+}

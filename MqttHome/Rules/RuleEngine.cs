@@ -256,7 +256,7 @@ namespace MqttHome
                     }
 
                     // dont attach the event if rule engine disabled
-                    if (_controller.RuleEngineEnabled)
+                    if (_controller.Settings.RuleEngineEnabled)
                     {
                         if (ruleState)
                         {

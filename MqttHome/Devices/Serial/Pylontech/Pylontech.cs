@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO.Ports;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -22,18 +23,16 @@ namespace MqttHome.Devices.Serial.Pylontech
 
         public Pylontech(MqttHomeController controller, Config.Device config) : base(controller, DeviceType.Unknown, config)
         {
-            _sp = new SerialPort(config.Parameters[0], 115200);
-
             try
             {
-                _sp.DataReceived += OnDataReceived;
-                _sp.Open();
+                if (!System.IO.Ports.SerialPort.GetPortNames().Any(s => Config.Parameters[0] == s))
+                    throw new Exception();
 
                 _timer = new Timer(OnTimer, null, 0, 1000);
             }
             catch (Exception err)
             {
-                controller.DeviceLog.Error($"Pylontech..ctor :: Failed to open connection to serial port '{config.Parameters[0]}' - {err.Message}");
+                controller.DeviceLog.Error($"Pylontech..ctor :: Serial port '{config.Parameters[0]}' was not found");
             }
         }
 
@@ -66,29 +65,42 @@ namespace MqttHome.Devices.Serial.Pylontech
                 if (!hasLock)
                     return;
 
-                _rxComplete = false;
-                _rxBuffer = string.Empty;
-                _rxTimeout = DateTime.Now.AddSeconds(800);
-                _rxStart = DateTime.Now;
-                _sp.WriteLine("pwrsys");
-
-                var timeout = false;
-
-                while (!_rxComplete)
+                try
                 {
-                    if (DateTime.Now >= _rxTimeout)
+                    if (_sp == null || !_sp.IsOpen)
+                        InitSerialPort();
+
+                    _rxComplete = false;
+                    _rxBuffer = string.Empty;
+                    _rxTimeout = DateTime.Now.AddMilliseconds(500);
+                    _rxStart = DateTime.Now;
+                    _sp.DiscardInBuffer();
+                    _sp.WriteLine("pwrsys");
+
+                    var timeout = false;
+
+                    while (!_rxComplete)
                     {
-                        // timeout log
-                        timeout = true;
+                        if (DateTime.Now >= _rxTimeout)
+                        {
+                            Controller.DeviceLog.Error($"Pylontech :: Serial comm. timeout.");
+                            timeout = true;
+                        }
+                        else
+                        {
+                            Thread.Sleep(10);
+                        }
                     }
 
-                    Thread.Sleep(10);
+                    if (!timeout)
+                    {
+                        LastCommunication = DateTime.Now;
+                        SensorData.Update(_rxBuffer);
+                    }
                 }
-
-                if (!timeout)
+                catch (Exception err)
                 {
-                    LastCommunication = DateTime.Now;
-                    SensorData.Update(_rxBuffer);
+                    Controller.DeviceLog.Error($"Pylontech :: Serial comm. error: {err.Message}");
                 }
             }
             finally
@@ -96,6 +108,26 @@ namespace MqttHome.Devices.Serial.Pylontech
                 if (hasLock)
                     Monitor.Exit(_timerLock);
             }
+        }
+
+        private void InitSerialPort() {
+            try
+            {
+                _sp = new SerialPort(Config.Parameters[0], 115200);
+                _sp.DataReceived += OnDataReceived;
+                _sp.ErrorReceived += OnErrorReceived;
+                _sp.Open();
+            }
+            catch
+            {
+                _sp = null;
+                throw;
+            }
+        }
+
+        private void OnErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            Controller.DeviceLog.Error($"Pylontech :: Serial comm. error: {e.EventType}");
         }
     }
 

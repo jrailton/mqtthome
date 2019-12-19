@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MqttHome;
-using MqttHome.Mqtt.BrokerCommunicator;
 using MqttHome.WebSockets;
 using MqttHomeWeb.Models;
 using Newtonsoft.Json;
@@ -53,12 +52,7 @@ namespace MqttHomeWeb
 
         public static void RestartMqttHomeController()
         {
-            var mqttBrokers = Config.GetSection("MqttBrokers").Get<List<MqttBroker>>();
-
-            MqttHomeController = new MqttHomeController(Config,
-                mqttBrokers,
-                WebsocketManager
-            );
+            MqttHomeController = new MqttHomeController(WebsocketManager);
 
             MqttHomeController.Start();
         }

@@ -1,6 +1,6 @@
 ﻿
 @{
-    var keys = new List<string> {"success", "warning", "danger"};
+    var keys = new List<string> { "danger", "warning", "success", "info" };
 }
 
 @foreach (var key in TempData.Keys.Where(k => keys.Contains(k)))

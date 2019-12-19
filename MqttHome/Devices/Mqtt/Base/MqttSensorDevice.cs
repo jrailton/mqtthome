@@ -31,7 +31,7 @@ namespace MqttHome.Mqtt
         public virtual void ParseSensorPayload(MqttApplicationMessage e) {            
             var updated = SensorData.Update(e);
 
-            if (Controller.SaveAllSensorValuesToDatabaseEveryTime)
+            if (Controller.Settings.SaveAllSensorValuesToDatabaseEveryTime)
             {
                 SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
                 {

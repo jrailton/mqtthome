@@ -1,0 +1,48 @@
+﻿<div class="system-messages pull-right">
+    <a class="btn btn-default @((Program.MqttHomeController.SystemMessages.Count > 0) ? "" : "disabled")" data-toggle="collapse" href="#system-messages">
+        <i class="glyphicon glyphicon-bullhorn"></i>
+        @if (Program.MqttHomeController.SystemMessages.Any())
+        {
+            <span class="label label-default">@Program.MqttHomeController.SystemMessages.Count</span>
+        }
+    </a>
+    <div class="messages collapse" id="system-messages">
+        @if (Program.MqttHomeController.SystemMessages.Any(m => m.Type == SystemMessageType.danger))
+        {
+            <span class="label label-danger">@Program.MqttHomeController.SystemMessages.Count(m => m.Type == SystemMessageType.danger)</span>
+            <a class="btn btn-link btn-xs" href="javascript:HideSystemMessages('danger')">Clear Errors</a>
+        }
+        @if (Program.MqttHomeController.SystemMessages.Any(m => m.Type == SystemMessageType.warning))
+        {
+            <span class="label label-warning">@Program.MqttHomeController.SystemMessages.Count(m => m.Type == SystemMessageType.warning)</span>
+            <a class="btn btn-link btn-xs" href="javascript:HideSystemMessages('warning')">Clear Warnings</a>
+        }
+        @if (Program.MqttHomeController.SystemMessages.Any(m => m.Type == SystemMessageType.info))
+        {
+            <span class="label label-info">@Program.MqttHomeController.SystemMessages.Count(m => m.Type == SystemMessageType.info)</span>
+            <a class="btn btn-link btn-xs" href="javascript:HideSystemMessages('info')">Clear Info</a>
+        }
+
+        @foreach (var message in Program.MqttHomeController.SystemMessages)
+        {
+            <div id="system-message-@message.Id" class="message label label-@(message.Type)">
+                <a href="javascript:HideSystemMessages('@message.Id')"><i class="glyphicon glyphicon-remove-sign"></i></a>
+                @message.Description
+            </div>
+        }
+    </div>
+</div>
+
+<script type="text/javascript">
+    function HideSystemMessages(id) {
+        if (["warning", "danger", "info"].indexOf(id) >= 0) {
+            $.get("/system/HideAllSystemMessages/" + id, function () {
+                $(".system-messages .messages .label-" + id).remove();
+            });
+        } else {
+            $.get("/system/HideSystemMessage/" + id, function () {
+                $("#system-message-" + id).remove();
+            });
+        }
+    }
+</script>

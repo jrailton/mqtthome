@@ -43,6 +43,11 @@ body {
     display: none;
 }
 
+.map {
+    width: 400px;
+    height: 400px;
+}
+
 /* Hide/rearrange for smaller screens */
 @media screen and (max-width: 767px) {
     /* Hide captions */

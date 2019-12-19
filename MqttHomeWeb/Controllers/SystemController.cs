@@ -13,6 +13,17 @@ namespace MqttHomeWeb.Controllers
     [Authorize]
     public class SystemController : Controller
     {
+        public void HideSystemMessage(string id)
+        {
+            var cunt = Program.MqttHomeController.SystemMessages.SingleOrDefault(m => m.Id == id);
+            Program.MqttHomeController.SystemMessages.Remove(cunt);
+        }
+
+        public void HideAllSystemMessages(SystemMessageType id)
+        {
+            Program.MqttHomeController.SystemMessages.RemoveAll(m => m.Type == id);
+        }
+
         public IActionResult Test()
         {
             return View();

@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using log4net;
-using MqttHome.Mqtt.BrokerCommunicator;
 using MqttHome.Mqtt.Devices;
 using MQTTnet;
 using MQTTnet.Client;
@@ -14,6 +13,7 @@ using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Disconnecting;
 using MQTTnet.Client.Options;
 using MQTTnet.Client.Publishing;
+using MqttHome.Config;
 
 namespace MqttHome.Mqtt
 {

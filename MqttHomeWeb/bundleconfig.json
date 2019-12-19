@@ -27,26 +27,5 @@
       "renameLocals": true
     },
     "sourceMap": false
-  },
-  {
-    "inputFiles": [
-      "wwwroot/css/site.bundle.css"
-    ],
-    "outputFileName": "wwwroot/css/site.bundle.min.css",
-    "minify": {
-      "enabled": true,
-      "renameLocals": true
-    }
-  },
-  {
-    "inputFiles": [
-      "wwwroot/js/site.bundle.js"
-    ],
-    "outputFileName": "wwwroot/js/site.bundle.min.js",
-    "minify": {
-      "enabled": true,
-      "renameLocals": true
-    },
-    "sourceMap": false
   }
 ]

@@ -14,7 +14,6 @@ using MqttHome.Devices.Base;
 using MqttHome.Devices.Serial.Base;
 using MqttHome.Influx;
 using MqttHome.Mqtt;
-using MqttHome.Mqtt.BrokerCommunicator;
 using MqttHome.Mqtt.Devices;
 using MqttHome.Mqtt.Devices.Environment;
 using MqttHome.Mqtt.Devices.Sonoff;
@@ -37,19 +36,12 @@ namespace MqttHome
         public List<PresenceDevice> PresenceDevices;
         public List<SerialDevice> SerialDevices;
 
+        public SystemMessages SystemMessages = new SystemMessages();
+
         public InfluxCommunicator InfluxCommunicator = null;
         public List<string> MqttDeviceTopics;
         public RuleEngine RuleEngine;
         public List<Person> People = new List<Person>();
-
-        public bool Debug;
-
-        // if false, will only save updated values to influx -- this has the advantage of less writes/data but Grafana queries will need to cater for "missing" values i.e. use "previous" 
-        // which doesnt actually work if "previous" is outside of selected date range
-        public bool SaveAllSensorValuesToDatabaseEveryTime = true;
-
-        public double Longitude;
-        public double Latitude;
 
         public MqttHomeLogger RuleLog;
         public MqttHomeLogger DeviceLog;
@@ -57,10 +49,9 @@ namespace MqttHome
         public MqttHomeLogger InfluxLog;
         public MqttHomeLogger MqttLog;
 
-        public bool InfluxDbEnabled = true;
-        public bool RuleEngineEnabled = true;
+        public AppSettings Settings;
 
-        public MqttHomeController(IConfiguration config, List<MqttBroker> mqttBrokers, WebsocketManager wsm = null)
+        public MqttHomeController(WebsocketManager wsm = null)
         {
             try
             {
@@ -73,32 +64,22 @@ namespace MqttHome
                 // setup logging
                 var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly()).Name;
 
-                MqttLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "MqttLog"));
-                RuleLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "RuleLog"));
-                DeviceLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "DeviceLog"));
-                GeneralLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "GeneralLog"));
-                InfluxLog = new MqttHomeLogger(wsm, LogManager.GetLogger(logRepository, "InfluxLog"));
+                MqttLog = new MqttHomeLogger(this, LogManager.GetLogger(logRepository, "MqttLog"));
+                RuleLog = new MqttHomeLogger(this, LogManager.GetLogger(logRepository, "RuleLog"));
+                DeviceLog = new MqttHomeLogger(this, LogManager.GetLogger(logRepository, "DeviceLog"));
+                GeneralLog = new MqttHomeLogger(this, LogManager.GetLogger(logRepository, "GeneralLog"));
+                InfluxLog = new MqttHomeLogger(this, LogManager.GetLogger(logRepository, "InfluxLog"));
 
                 StartupTime = DateTime.Now;
 
-                SaveAllSensorValuesToDatabaseEveryTime = config["SaveAllSensorValuesToDatabaseEveryTime"]?.Contains("true") ?? true;
-
-                // load long/lat for sunrise/sunset calculations
-                double.TryParse(config["Latitude"], out Latitude);
-                double.TryParse(config["Longitude"], out Longitude);
+                // load app settings
+                LoadAppSettings();
 
                 // keep reference to websocketmanager
                 WebsocketManager = wsm;
 
-                Debug = false;
-
-                // string influxUrl = "http://localhost:8086", string influxDatabase = "home_db"
-                string influxUrl = config["InfluxDbUrl"];
-                string influxDatabase = config["InfluxDbDatabase"];
-                InfluxDbEnabled = !(config["InfluxDbEnabled"]?.Contains("False") ?? false); // presumes TRUE
-
-                if (InfluxDbEnabled && !string.IsNullOrEmpty(influxUrl) && !string.IsNullOrEmpty(influxDatabase))
-                    InfluxCommunicator = new InfluxCommunicator(InfluxLog, influxUrl, influxDatabase);
+                if (Settings.InfluxDbEnabled && !string.IsNullOrEmpty(Settings.InfluxDbUrl) && !string.IsNullOrEmpty(Settings.InfluxDbDatabase))
+                    InfluxCommunicator = new InfluxCommunicator(InfluxLog, Settings.InfluxDbUrl, Settings.InfluxDbDatabase);
 
                 LoadPeople();
 
@@ -111,10 +92,9 @@ namespace MqttHome
                 // this is a hack which needs more thought
                 MqttDeviceTopics = MqttDevices.SelectMany(d => d.AllTopics).Distinct().ToList();
 
-                foreach (var broker in mqttBrokers)
-                    MqttCommunicators.Add(new MqttCommunicator(this, broker));
-
-                RuleEngineEnabled = !(config["RuleEngineEnabled"]?.Contains("False") ?? false); // presumes TRUE
+                if (Settings.MqttBrokers != null)
+                    foreach (var broker in Settings.MqttBrokers)
+                        MqttCommunicators.Add(new MqttCommunicator(this, broker));
 
                 RuleEngine = new RuleEngine(this);
 
@@ -125,6 +105,20 @@ namespace MqttHome
             catch (Exception err)
             {
                 GeneralLog.Error($"Exception in MqttHomeController.ctor - {err.Message}", err);
+            }
+        }
+
+        private void LoadAppSettings() {
+            try
+            {
+                // read config
+                var content = File.ReadAllText("appsettings.json");
+                Settings = JsonConvert.DeserializeObject<AppSettings>(content);
+            }
+            catch (Exception err)
+            {
+                GeneralLog.Error($"Failed to load appsettings.json - {err.Message}", err);
+                Settings = new AppSettings();
             }
         }
 

@@ -89,6 +89,7 @@
                         <li class="dropdown-submenu">
                             <a class="dropdown-toggle" data-toggle="dropdown" href="#">Settings <b class="caret"></b></a>
                             <ul class="dropdown-menu">
+                                <li><a asp-area="" asp-controller="Config" asp-action="Index">Config</a></li>
                                 <li><a asp-area="" asp-controller="System" asp-action="Rules">Rules</a></li>
                                 <li><a asp-area="" asp-controller="System" asp-action="Conditions">Conditions</a></li>
                                 <li><a asp-area="" asp-controller="System" asp-action="Devices">Devices</a></li>
@@ -98,6 +99,7 @@
                         </li>
                         <li><a asp-area="" asp-controller="Account" asp-action="Logout">Sign Out</a></li>
                     </ul>
+                    @{ await Html.RenderPartialAsync("_SystemMessages"); }
                 </div>
             </div>
         </nav>

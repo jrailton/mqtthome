@@ -9,7 +9,7 @@
         }
         </div>
     <div class="panel-body">
-        @if (!Model.RuleEngineEnabled)
+        @if (!Model.Settings.RuleEngineEnabled)
         {
             <div class="alert alert-warning">The rule engine is DISABLED in appsettings.json</div>
         }
