@@ -9,22 +9,32 @@
 
     div.messages {
         background-color: white;
+        color: white; // for ellipsis
         padding: 10px;
         border: 1px solid #eee;
         border-radius: 4px;
         position: fixed;
         width: 320px;
-        overflow: hidden;
-        text-overflow: ellipsis;
         right: 0;
-    }
 
-    div.message {
-        a {
-            margin-right: 2px;
-            margin-left: -2px;
-            i {
-                color: white;
+        div.messages-subcontainer {
+            overflow: hidden;
+            max-height: 90%;
+            overflow-y: auto;
+            text-overflow: ellipsis;
+
+            div.message {
+                margin-top: 5px;
+                margin-bottom: 0;
+
+                a {
+                    margin-right: 2px;
+                    margin-left: -2px;
+
+                    i {
+                        color: white;
+                    }
+                }
             }
         }
     }

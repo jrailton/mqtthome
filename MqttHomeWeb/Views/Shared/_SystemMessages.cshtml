@@ -23,13 +23,18 @@
             <a class="btn btn-link btn-xs" href="javascript:HideSystemMessages('info')">Clear Info</a>
         }
 
+    <div class="messages-subcontainer">
         @foreach (var message in Program.MqttHomeController.SystemMessages)
         {
-            <div id="system-message-@message.Id" class="message label label-@(message.Type)">
-                <a href="javascript:HideSystemMessages('@message.Id')"><i class="glyphicon glyphicon-remove-sign"></i></a>
+            <div id="system-message-@message.Id" class="message alert alert-@(message.Type) alert-dismissable">
+                <a href="javascript:HideSystemMessages('@message.Id')" class="close">&times;</a>
+                <div>
+                    @message.Generated.ToString("dd MMM yy HH:mm:ss")
+                </div>
                 @message.Description
             </div>
         }
+    </div>
     </div>
 </div>
 
@@ -37,7 +42,7 @@
     function HideSystemMessages(id) {
         if (["warning", "danger", "info"].indexOf(id) >= 0) {
             $.get("/system/HideAllSystemMessages/" + id, function () {
-                $(".system-messages .messages .label-" + id).remove();
+                $(".system-messages .messages .alert-" + id).remove();
             });
         } else {
             $.get("/system/HideSystemMessage/" + id, function () {

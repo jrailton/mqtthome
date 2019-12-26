@@ -2,8 +2,8 @@
   {
     "inputFiles": [
       "wwwroot/css/**/*.css",
-      "!*.bundle.css",
-      "!*.min.css"
+      "!wwwroot/css/**/*.bundle.css",
+      "!wwwroot/css/**/*.min.css"
     ],
     "outputFileName": "wwwroot/css/site.bundle.css",
     "minify": {
@@ -14,8 +14,8 @@
   {
     "inputFiles": [
       "wwwroot/js/**/*.js",
-      "!*.bundle.js",
-      "!*.min.js",
+      "!wwwroot/js/**/*.bundle.js",
+      "!wwwroot/js/**/*.min.js",
       "!wwwroot/js/sw-cachehandlers.js",
       "!wwwroot/js/sw-toolbox.js",
       "!wwwroot/js/sw-utils.js",
