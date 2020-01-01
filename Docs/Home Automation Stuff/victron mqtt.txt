@@ -1,3 +1,6 @@
+# To setup MQTT on VenusGX see here https://community.openhab.org/t/mqtt-1-x-2-x-interface-to-victron-ccgx/43888
+# To get root access to VenusGX see here https://www.victronenergy.com/live/ccgx:root_access
+
 Venus/CCGX MQTT broker will stop publishing to subscribed topics if no publish command received every 60 seconds. You can start it pushlishing again by posting this:
 .\mosquitto_pub.exe -h 10.0.0.59 -t "R/7c386655e76b/system/0/Serial" -n
 NOTICE ITS A PUB, NOT A SUB! AND THAT 7c386655e76b IS THE SERIAL NUMBER OF THE VENUS/CCGX

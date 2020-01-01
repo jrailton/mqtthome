@@ -95,7 +95,7 @@ namespace MqttHome.Mqtt.Devices
                     break;
 
                 case "Temperature":
-                    BatteryTemperature = decimal.Parse(value);
+                    BatteryTemperature = value == null ? (decimal?)null : decimal.Parse(value);
                     break;
 
                 case "TimeToGo":

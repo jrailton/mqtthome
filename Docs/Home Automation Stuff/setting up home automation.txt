@@ -37,7 +37,33 @@ sudo service influxdb restart
 #create home_db database
 influx
 CREATE DATABASE home_db
-LIST DATABASES
+SHOW DATABASES
+
+#INSTALL DUCKDNS
+mkdir duckdns
+cd duckdns
+nano duck.sh
+
+#put this content -- replace with your token and domain
+echo url="https://www.duckdns.org/update?domains=exampledomain&token=a7c4d0ad-114e-40ef-ba1d-d217904a50f2&ip=" | curl -k -o ~/duckdns/duck.log -K -
+
+#now make the duck.sh file executeable
+chmod 700 duck.sh
+
+crontab -e
+
+#copy this text and paste it at the bottom of the crontab
+*/5 * * * * ~/duckdns/duck.sh >/dev/null 2>&1
+
+# test the script
+./duck.sh
+
+# check the result
+cat duck.log
+
+# (when setting up google oauth) add a txt record for domain ownership for google oauth
+# call this url once to add the txt record
+https://www.duckdns.org/update?domains=<domain>&token=<token>&txt=<txt record>
 
 #INSTALL MOSQUITTO BROKER
 #Mosquitto broker runs on http://localhost:1886
