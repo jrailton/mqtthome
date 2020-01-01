@@ -11,8 +11,6 @@
         public bool Available;
         public bool IsTasmota;
         public string Errors;
-        public string Timezone;
-        public string FriendlyName;
-        public TasmotaResponse TasmotaResponse;
+        public TasmotaResponse Config;
     }
 }

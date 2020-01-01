@@ -52,6 +52,8 @@
     <None Include="rules.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
+    <None Include="wwwroot\lib\bootstrap\dist\font-awesome\fontawesome-webfont.svg" />
+    <None Include="wwwroot\lib\bootstrap\dist\font-awesome\fontawesome-webfont.woff2" />
   </ItemGroup>
 
   <ItemGroup>

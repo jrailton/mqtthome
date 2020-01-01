@@ -1,0 +1,10 @@
+﻿
+@{
+    ViewData["Title"] = "Device Configuration Updated";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="alert alert-warning">
+    Your device may need time to restart after the configuration update (20 seconds or so) - after which you can <a href="/tasmota/view?ipaddress=@ViewBag.IPAddress&password=@ViewBag.Password">click here</a> to verify the configuration was updated
+</div>

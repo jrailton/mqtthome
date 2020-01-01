@@ -8,9 +8,48 @@
 
 <hr />
 <div class="row">
-    <div class="col-md-4">
-        <form asp-action="Index">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <form asp-action="Update">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="col-md-6">
+            <strong>MQTT Brokers</strong>
+
+            <table id="mqtt-brokers" class="table table-striped table-condensed">
+                <thead>
+                    <tr>
+                        <th>I.P. Address/Hostname</th>
+                        <th>Port</th>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="hidden" id="mqtt-template">
+                        <td>@Html.TextBoxBootstrap("mqtt-IpAddress", "")</td>
+                        <td>@Html.TextBoxBootstrap("mqtt-Port", "1883")</td>
+                        <td>@Html.TextBoxBootstrap("mqtt-Name", "")</td>
+                        <td><button type="button" class="btn btn-xs btn-danger" onclick="$(this).parents('tr').remove();">Remove</button></td>
+                    </tr>
+                    @foreach (var broker in (Model.MqttBrokers ?? new List<MqttHome.Config.MqttBroker>()))
+                    {
+                        <tr>
+                            <td>@Html.TextBoxBootstrap("mqtt-IpAddress", broker.IpAddress)</td>
+                            <td>@Html.TextBoxBootstrap("mqtt-Port", broker.Port)</td>
+                            <td>@Html.TextBoxBootstrap("mqtt-Name", broker.Name)</td>
+                            <td><button type="button" class="btn btn-xs btn-danger" onclick="$(this).parents('tr').remove();">Remove</button></td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4">
+                            <button type="button" class="btn btn-xs btn-success" onclick="$('#mqtt-template').clone().removeClass('hidden').appendTo('#mqtt-brokers tbody');">Add New MQTT Broker</button>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
             <div class="form-group">
                 <label asp-for="InfluxDbUrl" class="control-label"></label>
                 <input asp-for="InfluxDbUrl" class="form-control" />
@@ -21,20 +60,14 @@
                 <input asp-for="InfluxDbDatabase" class="form-control" />
                 <span asp-validation-for="InfluxDbDatabase" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="InfluxDbEnabled" /> @Html.DisplayNameFor(model => model.InfluxDbEnabled)
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="SaveAllSensorValuesToDatabaseEveryTime" /> @Html.DisplayNameFor(model => model.SaveAllSensorValuesToDatabaseEveryTime)
-                    </label>
-                </div>
-            </div>
+
+            @Html.CheckboxBootstrap("InfluxDbEnabled", Model.InfluxDbEnabled, "Influx DB Enabled")
+            @Html.CheckboxBootstrap("SaveAllSensorValuesToDatabaseEveryTime", Model.SaveAllSensorValuesToDatabaseEveryTime, "Save All Sensor Values To Database Every Time")
+            @Html.CheckboxBootstrap("RuleEngineEnabled", Model.RuleEngineEnabled, "Rule Engine Enabled")
+
+        </div>
+        <div class="col-md-6">
+
             <div class="form-group">
                 <label asp-for="Longitude" class="control-label"></label>
                 <input asp-for="Longitude" class="form-control" />
@@ -46,13 +79,6 @@
                 <span asp-validation-for="Latitude" class="text-danger"></span>
             </div>
             <div id="map" class="map"></div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="RuleEngineEnabled" /> @Html.DisplayNameFor(model => model.RuleEngineEnabled)
-                    </label>
-                </div>
-            </div>
             <div class="form-group">
                 <label asp-for="GoogleAppId" class="control-label"></label>
                 <input asp-for="GoogleAppId" class="form-control" />
@@ -78,19 +104,13 @@
                 <input asp-for="PushPrivateKey" class="form-control" />
                 <span asp-validation-for="PushPrivateKey" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <div class="checkbox">
-                    <label>
-                        <input asp-for="Debug" /> @Html.DisplayNameFor(model => model.Debug)
-                    </label>
-                </div>
-            </div>
+            @Html.CheckboxBootstrap("Debug", Model.Debug, "Debugging Enabled")
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
                 <button class="btn btn-link" type="button" onclick="history.go(-1);">Back</button>
             </div>
-        </form>
-    </div>
+        </div>
+    </form>
 </div>
 
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqF_nHqonqBBIWcRAw2U5Hm9sQ7iZgULQ&callback=initMap"></script>

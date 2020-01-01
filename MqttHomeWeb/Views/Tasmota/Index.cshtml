@@ -1,0 +1,52 @@
+﻿
+@{
+    ViewData["Title"] = "Tasmota Device Discovery";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="discover-form" method="get" target="discover-results" action="/tasmota/discover" onsubmit="$('#discover-results-container').show()">
+    @Html.TextBoxBootstrap("ipaddress", "10.0.0.0", "I.P. Address", "A /24 IPv4 subnet to scan e.g. 10.0.0.0")
+    @Html.PasswordBootstrap("password", "Web Admin Password", "Optional. If you have set a password on the Tasmota devices already")
+
+    <button type="submit" class="btn btn-primary">Scan for Devices</button>
+</form>
+
+<div id="discover-results-container" style="display:none">
+    <iframe name="discover-results" id="discover-results" style="width: 100%; height: 400px; border: 1px solid #CCC; border-radius: 4px; font-family: Arial; font-size: 12px;">
+        (enter an IP range and password to start scanning)
+    </iframe>
+
+    <div class="alert alert-info">
+        If you'd like to bulk update device configurations, select them from the discovered devices above, enter the configuration below and click 'Update'
+    </div>
+
+    <form id="config-form" method="post" action="/tasmota/updateconfigs" onsubmit="return GetIpAddresses();" target="config-results">
+        @{ await Html.RenderPartialAsync("_DeviceConfig"); }
+
+        @Html.Hidden("ipaddresses", "")
+        @Html.Hidden("password", "")
+        @Html.AntiForgeryToken()
+
+        <button type="submit" class="btn btn-primary">Update</button>
+
+    </form>
+
+    <iframe name="config-results" id="config-results" style="width: 100%; border: 1px solid #CCC; border-radius: 4px; font-family: Arial; font-size: 12px;">
+    </iframe>
+</div>
+
+<script type="text/javascript">
+    function GetIpAddresses() {
+        var ips = document.getElementById('discover-results').contentWindow.GetIpAddresses();
+
+        if (ips.length == 0) {
+            alert("You havent selected any devices from the scan results to send this configuration to");
+            return false;
+        }
+
+        $("#ipaddresses").val(ips);
+        $("#password", "#config-form").val($("#password", "#discover-form").val());
+        return true;
+    }
+</script>

@@ -14,6 +14,8 @@ namespace MqttHome.Presence
         public bool Present { get; set; }
         public DateTime? PresenceChanged { get; set; }
 
+        public Dictionary<DateTime, bool> PresenceHistory { get; private set; } = new Dictionary<DateTime, bool>();
+
         // used to delay "away" state change for X minutes (some devices connect and disconnect often)
         public DateTime? LastSeen { get; set; }
 
@@ -28,6 +30,15 @@ namespace MqttHome.Presence
         public string Time { get; set; }
         public bool IPV4 { get; set; }
         public bool IPV6 { get; set; }
+
+        public void AddPresenceHistory(bool present)
+        {
+            PresenceHistory.Add(DateTime.Now, present);
+
+            // dont let the list grow to more than 20 items
+            if (PresenceHistory.Count > 20)
+                PresenceHistory.Remove(PresenceHistory.Keys.Last());
+        }
 
     }
 }

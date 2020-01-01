@@ -1,0 +1,29 @@
+﻿@model MqttHomeWeb.Models.Tasmota.TasmotaConfig
+
+<div class="alert alert-info">
+    You can change basic configuration (relevant to MqttHome) below. Only configurations with a value specified will be updated (blank entries will be ignored)
+</div>
+
+<div class="row">
+    <div class="col-sm-6">
+        @Html.TextBoxBootstrap("FriendlyName", Model?.Status.FriendlyName[0], "Friendly Name", "Displayed in Web UI")
+        @Html.TextBoxBootstrap("HostName", Model?.StatusNET.Hostname, "Host Name", "Displayed in DHCP List")
+        @Html.DropDownListBootstrap("Module", MqttHomeWeb.Repositories.Tasmota.Modules.Select(m => new SelectListItem(m.Value, m.Key.ToString(), m.Key == Model?.Status.Module)), "Module", "Module functionality configuration")
+        @Html.DropDownListBootstrap("PowerOnState", MqttHomeWeb.Repositories.Tasmota.PowerOnStates(Model?.Status.PowerOnState), "Power On State", "Switch default state when device is powered up")
+        @Html.TextBoxBootstrap("TelePeriod", Model?.StatusLOG.TelePeriod, "Telemetry Period", "How often to report state (seconds)")
+    </div>
+    <div class="col-sm-6">
+        @Html.TextBoxBootstrap("MqttHost", Model?.StatusMQT.MqttHost, "MQTT Broker", "Hostname/I.P. address of MQTT broker to connect to")
+        @Html.TextBoxBootstrap("MqttPort", Model?.StatusMQT.MqttPort, "MQTT Broker Port", "Default 1883")
+        @Html.TextBoxBootstrap("MqttUser", Model?.StatusMQT.MqttUser, "MQTT Broker Username", "Optional")
+        @Html.TextBoxBootstrap("MqttPass", "", "MQTT Broker Password", "Optional")
+        @Html.TextBoxBootstrap("Topic", Model?.Status.Topic, "MQTT Topic", "MQTT device ID")
+        @Html.TextBoxBootstrap("FullTopic", "%prefix%/%topic%/", "Full Topic", "Default is %prefix%/%topic%/")
+    </div>
+    <div class="col-sm-6">
+        @Html.TextBoxBootstrap("Timezone", TimeZoneInfo.Local.BaseUtcOffset.TotalHours, "Timezone", "UTC Time Offset")
+        @Html.TextBoxBootstrap("Longitude", Program.MqttHomeController.Settings.Longitude, "GPS Longitude", "Specified in decimal format")
+        @Html.TextBoxBootstrap("Latitude", Program.MqttHomeController.Settings.Latitude, "GPS Latitude", "Specified in decimal format")
+        @Html.TextBoxBootstrap("WebPassword", "", "Web Admin Password", "N.B. Default username is admin")
+    </div>
+</div>

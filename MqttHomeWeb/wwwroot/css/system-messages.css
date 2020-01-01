@@ -1,5 +1,6 @@
 ﻿.system-messages {
   margin-top: 8px;
+  float: right;
 }
 .system-messages a i {
   color: #999;
@@ -13,10 +14,11 @@
   position: fixed;
   width: 320px;
   right: 0;
+  height: 90%;
 }
 .system-messages div.messages div.messages-subcontainer {
   overflow: hidden;
-  max-height: 90%;
+  max-height: 97%;
   overflow-y: auto;
   text-overflow: ellipsis;
 }
@@ -30,4 +32,19 @@
 }
 .system-messages div.messages div.messages-subcontainer div.message a i {
   color: white;
+}
+@media (max-width: 767px) {
+  .system-messages {
+    float: none;
+    margin-top: -5px;
+  }
+  .system-messages a {
+    border: none;
+    background-color: inherit;
+    padding-left: 0;
+    margin-bottom: 5px;
+  }
+  .system-messages div.messages {
+    width: 100%;
+  }
 }

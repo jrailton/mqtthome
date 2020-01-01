@@ -7,6 +7,7 @@ namespace MqttHomeWeb.Models.Tasmota
 {
     public class TasmotaConfig
     {
+        public string WARNING { get; set; }
         public Status Status { get; set; }
         public Statusprm StatusPRM { get; set; }
         public Statusfwr StatusFWR { get; set; }

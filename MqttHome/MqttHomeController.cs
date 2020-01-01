@@ -140,7 +140,7 @@ namespace MqttHome
 
         }
 
-        private void LoadDevices()
+        public void LoadDevices()
         {
             DeviceConfig deviceConfig;
 
@@ -156,11 +156,11 @@ namespace MqttHome
                 // read device config
                 var content = File.ReadAllText("devices.json");
                 deviceConfig = JsonConvert.DeserializeObject<DeviceConfig>(content);
-                var allMqttDeviceTypes = Assembly.GetExecutingAssembly().GetTypes();
+                var allDeviceTypes = Assembly.GetExecutingAssembly().GetTypes();
 
                 foreach (var device in deviceConfig.Devices)
                 {
-                    var type = allMqttDeviceTypes.First(t => t.Name == device.Type);
+                    var type = allDeviceTypes.First(t => t.Name == device.Type);
 
                     var interfaces = type.GetInterfaces();
 

@@ -65,6 +65,7 @@ namespace MqttHome.Presence.Huawei
                     {
                         person.Present = present;
                         person.PresenceChanged = DateTime.Now;
+                        person.AddPresenceHistory(present);
 
                         OnPresenceChanged(this, person);
                     }

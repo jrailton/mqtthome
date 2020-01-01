@@ -1,205 +1,367 @@
-﻿{
+{
   "Devices": [
     {
-      "Type": "ICC",
       "Id": "icc",
+      "Type": "ICC",
+      "Parameters": null,
       "FriendlyName": "Mecer Axpert MKSII 5kva",
+      "SaveSensorValuesToDatabase": true,
       "Widgets": [
         {
+          "Id": "widgetce7b4262ba8848f1bedd60aad4aea0e9",
+          "Name": null,
           "ValueName": "PvWatts",
-          "Type": "Gauge",
-          "ValueType": "Watts",
+          "ValueType": 2,
+          "Type": 1,
           "Gauge": {
             "Min": 0,
             "Max": 4000,
-            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
-            "ColourValues": [ 1000, 2000, 3000 ]
+            "Colours": [
+              "DeepSkyBlue",
+              "DarkOrchid",
+              "MediumOrchid",
+              "DeepPink"
+            ],
+            "ColourValues": [
+              1000,
+              2000,
+              3000
+            ]
           }
         }
       ]
     },
     {
-      "Type": "SonoffTHDevice",
       "Id": "th16_1",
-      "FriendlyName": "Security Lights",
-      "Widgets": [
-        {
-          "ValueName": "Temperature",
-          "Type": "Gauge",
-          "ValueType": "Temperature",
-          "Gauge": {
-            "Min": 0,
-            "Max": 50,
-            "Colours": [ "DarkOrchid", "DeepSkyBlue", "GREENYELLOW", "DARKORANGE", "ORANGERED" ],
-            "ColourValues": [ 10, 18, 28, 38 ]
-          }
-        },
-        {
-          "ValueName": "Humidity",
-          "Type": "Gauge",
-          "ValueType": "Percent",
-          "Gauge": {
-            "Min": 0,
-            "Max": 100,
-            "Colours": [ "WHITESMOKE", "LIGHTSTEELBLUE", "LIGHTSKYBLUE", "DEEPSKYBLUE" ],
-            "ColourValues": [ 20, 40, 60 ]
-          }
-        }
-      ]
-    },
-    {
       "Type": "SonoffTHDevice",
-      "Id": "th16_2",
-      "FriendlyName": "Workshop & Max's Room",
+      "Parameters": null,
+      "FriendlyName": "Security Lights",
+      "SaveSensorValuesToDatabase": true,
       "Widgets": [
         {
+          "Id": "widget2775ade6670c46b3b7a58709d59652a6",
+          "Name": null,
           "ValueName": "Temperature",
-          "Type": "Gauge",
-          "ValueType": "Temperature",
+          "ValueType": 4,
+          "Type": 1,
           "Gauge": {
             "Min": 0,
             "Max": 50,
-            "Colours": [ "DarkOrchid", "DeepSkyBlue", "GREENYELLOW", "DARKORANGE", "ORANGERED" ],
-            "ColourValues": [ 15, 21, 26, 35 ]
+            "Colours": [
+              "DarkOrchid",
+              "DeepSkyBlue",
+              "GREENYELLOW",
+              "DARKORANGE",
+              "ORANGERED"
+            ],
+            "ColourValues": [
+              10,
+              18,
+              28,
+              38
+            ]
           }
         },
         {
+          "Id": "widget88f36cc3fe164418b0476c762d57b7ff",
+          "Name": null,
           "ValueName": "Humidity",
-          "Type": "Gauge",
-          "ValueType": "Percent",
+          "ValueType": 3,
+          "Type": 1,
           "Gauge": {
             "Min": 0,
             "Max": 100,
-            "Colours": [ "WHITESMOKE", "LIGHTSTEELBLUE", "LIGHTSKYBLUE", "DEEPSKYBLUE" ],
-            "ColourValues": [ 20, 40, 60 ]
+            "Colours": [
+              "WHITESMOKE",
+              "LIGHTSTEELBLUE",
+              "LIGHTSKYBLUE",
+              "DEEPSKYBLUE"
+            ],
+            "ColourValues": [
+              20,
+              40,
+              60
+            ]
           }
         }
       ]
     },
     {
-      "Type": "SonoffPowR2Device",
+      "Id": "th16_2",
+      "Type": "SonoffTHDevice",
+      "Parameters": null,
+      "FriendlyName": "Workshop & Max's Room",
+      "SaveSensorValuesToDatabase": true,
+      "Widgets": [
+        {
+          "Id": "widget73b4a0583bc34990a2e113539e05c333",
+          "Name": null,
+          "ValueName": "Temperature",
+          "ValueType": 4,
+          "Type": 1,
+          "Gauge": {
+            "Min": 0,
+            "Max": 50,
+            "Colours": [
+              "DarkOrchid",
+              "DeepSkyBlue",
+              "GREENYELLOW",
+              "DARKORANGE",
+              "ORANGERED"
+            ],
+            "ColourValues": [
+              15,
+              21,
+              26,
+              35
+            ]
+          }
+        },
+        {
+          "Id": "widget8c54dfccc7ec4859bbb80bc32e992199",
+          "Name": null,
+          "ValueName": "Humidity",
+          "ValueType": 3,
+          "Type": 1,
+          "Gauge": {
+            "Min": 0,
+            "Max": 100,
+            "Colours": [
+              "WHITESMOKE",
+              "LIGHTSTEELBLUE",
+              "LIGHTSKYBLUE",
+              "DEEPSKYBLUE"
+            ],
+            "ColourValues": [
+              20,
+              40,
+              60
+            ]
+          }
+        }
+      ]
+    },
+    {
       "Id": "powr2_1",
+      "Type": "SonoffPowR2Device",
+      "Parameters": null,
       "FriendlyName": "Laundry Circuit",
+      "SaveSensorValuesToDatabase": true,
       "Widgets": [
         {
+          "Id": "widget9890677fd89a4daa99494799ce0cf689",
+          "Name": null,
           "ValueName": "Power",
-          "Type": "Gauge",
-          "ValueType": "Watts",
+          "ValueType": 2,
+          "Type": 1,
           "Gauge": {
             "Min": 0,
             "Max": 3520,
-            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
-            "ColourValues": [ 500, 1000, 2000 ]
+            "Colours": [
+              "DeepSkyBlue",
+              "DarkOrchid",
+              "MediumOrchid",
+              "DeepPink"
+            ],
+            "ColourValues": [
+              500,
+              1000,
+              2000
+            ]
           }
         }
       ]
     },
     {
-      "Type": "SonoffPowR2Device",
       "Id": "powr2_2",
+      "Type": "SonoffPowR2Device",
+      "Parameters": null,
       "FriendlyName": "Kitchen Circuit",
+      "SaveSensorValuesToDatabase": true,
       "Widgets": [
         {
+          "Id": "widgetf905e7e988d8434497a68ae67f29751a",
+          "Name": null,
           "ValueName": "Power",
-          "Type": "Gauge",
-          "ValueType": "Watts",
+          "ValueType": 2,
+          "Type": 1,
           "Gauge": {
             "Min": 0,
             "Max": 3520,
-            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
-            "ColourValues": [ 500, 1000, 2000 ]
+            "Colours": [
+              "DeepSkyBlue",
+              "DarkOrchid",
+              "MediumOrchid",
+              "DeepPink"
+            ],
+            "ColourValues": [
+              500,
+              1000,
+              2000
+            ]
           }
         }
       ]
     },
     {
-      "Type": "SonoffPowR2Device",
       "Id": "powr2_3",
-      "FriendlyName": "Essentials Circuit",
-      "Widgets": [
-        {
-          "ValueName": "Power",
-          "Type": "Gauge",
-          "ValueType": "Watts",
-          "Gauge": {
-            "Min": 0,
-            "Max": 3520,
-            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
-            "ColourValues": [ 500, 1000, 2000 ]
-          }
-        }
-      ]
-    },
-    {
       "Type": "SonoffPowR2Device",
-      "Id": "powr2_5",
-      "FriendlyName": "Garden Lights",
+      "Parameters": null,
+      "FriendlyName": "Essentials Circuit",
+      "SaveSensorValuesToDatabase": true,
       "Widgets": [
         {
+          "Id": "widget69fe56c632e446dfba7d1312a0a1b636",
+          "Name": null,
           "ValueName": "Power",
-          "Type": "Gauge",
-          "ValueType": "Watts",
+          "ValueType": 2,
+          "Type": 1,
           "Gauge": {
             "Min": 0,
             "Max": 3520,
-            "Colours": [ "DeepSkyBlue", "DarkOrchid", "MediumOrchid", "DeepPink" ],
-            "ColourValues": [ 500, 1000, 2000 ]
+            "Colours": [
+              "DeepSkyBlue",
+              "DarkOrchid",
+              "MediumOrchid",
+              "DeepPink"
+            ],
+            "ColourValues": [
+              500,
+              1000,
+              2000
+            ]
           }
         }
       ]
     },
     {
-      "Type": "SonoffS26Device",
-      "Id": "s26_2",
-      "FriendlyName": "Lounge Lamp"
-    },
-    {
-      "Type": "SonoffBasicDevice",
-      "Id": "mini_1",
-      "FriendlyName": "Veranda Lights"
-    },
-    {
-      "Type": "VenusGxDevice",
-      "Id": "7c386655e76b",
-      "FriendlyName": "Victron Venus GX",
-      "Parameters": [ "10.0.0.59", "1883" ],
+      "Id": "powr2_5",
+      "Type": "SonoffPowR2Device",
+      "Parameters": null,
+      "FriendlyName": "Garden Lights",
+      "SaveSensorValuesToDatabase": true,
       "Widgets": [
         {
+          "Id": "widget42889063964f468cb2a153ab46eb48aa",
+          "Name": null,
+          "ValueName": "Power",
+          "ValueType": 2,
+          "Type": 1,
+          "Gauge": {
+            "Min": 0,
+            "Max": 3520,
+            "Colours": [
+              "DeepSkyBlue",
+              "DarkOrchid",
+              "MediumOrchid",
+              "DeepPink"
+            ],
+            "ColourValues": [
+              500,
+              1000,
+              2000
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "Id": "s26_2",
+      "Type": "SonoffS26Device",
+      "Parameters": null,
+      "FriendlyName": "Lounge Lamp",
+      "SaveSensorValuesToDatabase": true,
+      "Widgets": null
+    },
+    {
+      "Id": "mini_1",
+      "Type": "SonoffBasicDevice",
+      "Parameters": null,
+      "FriendlyName": "Veranda Lights",
+      "SaveSensorValuesToDatabase": true,
+      "Widgets": null
+    },
+    {
+      "Id": "7c386655e76b",
+      "Type": "VenusGxDevice",
+      "Parameters": [
+        "10.0.0.59",
+        "1883"
+      ],
+      "FriendlyName": "Victron Venus GX",
+      "SaveSensorValuesToDatabase": true,
+      "Widgets": [
+        {
+          "Id": "widget5439d822299f4c7a87914ec3bf5be121",
+          "Name": null,
           "ValueName": "BatteryPower",
-          "Type": "Gauge",
-          "ValueType": "Watts",
+          "ValueType": 2,
+          "Type": 1,
           "Gauge": {
             "Min": -4000,
             "Max": 4000,
-            "Colours": [ "Red", "Orange", "Yellow", "Green", "DarkGreen", "DarkGreen" ],
-            "ColourValues": [ -1000, -500, 0, 500, 1000 ]
+            "Colours": [
+              "Red",
+              "Orange",
+              "Yellow",
+              "Green",
+              "DarkGreen",
+              "DarkGreen"
+            ],
+            "ColourValues": [
+              -1000,
+              -500,
+              0,
+              500,
+              1000
+            ]
           }
         },
         {
+          "Id": "widget5911509a1cdb4cbb8a9b03b227c56410",
+          "Name": null,
           "ValueName": "BatterySoC",
-          "Type": "Gauge",
-          "ValueType": "Percent",
+          "ValueType": 3,
+          "Type": 1,
           "Gauge": {
             "Min": 0,
             "Max": 100,
-            "Colours": [ "Red", "Orange", "Yellow", "Green" ],
-            "ColourValues": [ 30, 60, 85 ]
+            "Colours": [
+              "Red",
+              "Orange",
+              "Yellow",
+              "Green"
+            ],
+            "ColourValues": [
+              30,
+              60,
+              85
+            ]
           }
         }
       ]
     },
     {
-      "Type": "Pylontech",
-      "Id": "pylontech",
-      "FriendlyName": "Pylontech",
-      "Parameters": [ "COM5" ]
+      "Id": "HuaweiHG8245",
+      "Type": "HuaweiHG8245",
+      "Parameters": [
+        "10.0.0.1",
+        "telecomadmin",
+        "lt16sXtu"
+      ],
+      "FriendlyName": "Home Router",
+      "SaveSensorValuesToDatabase": false,
+      "Widgets": null
     },
     {
-      "Type": "HuaweiHG8245",
-      "Id": "HuaweiHG8245",
-      "FriendlyName": "Home Router",
-      "Parameters": [ "10.0.0.1", "telecomadmin", "lt16sXtu" ],
-      "SaveSensorValuesToDatabase": false
+      "Id": "s26_3",
+      "Type": "SonoffS26Device",
+      "Parameters": [
+        null
+      ],
+      "FriendlyName": "Sonoff S26 #3",
+      "SaveSensorValuesToDatabase": true,
+      "Widgets": null
     }
   ]
 }

@@ -21,6 +21,10 @@
                             <label>MAC Address</label>
                             @person.MacAddress
                         </div>
+                        <div>
+                            <label>Presence History</label>
+                            <pre class="small">@string.Join(Environment.NewLine, person.PresenceHistory.OrderByDescending(h => h.Key).Select(h => $"{h.Key.ToString("d/M HH:mm")} {h.Value}"))</pre>
+                        </div>
                     </div>
                 </div>
             </div>

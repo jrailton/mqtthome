@@ -1,0 +1,58 @@
+﻿@model MqttHomeWeb.Models.Tasmota.TasmotaConfig
+
+@if (Model == null)
+{
+    ViewData["Title"] = $"Tasmota Config - Failed";
+}
+else
+{
+    ViewData["Title"] = $"{Model.Status.FriendlyName[0]} Tasmota Config";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+@if (!string.IsNullOrEmpty(ViewBag.IPAddress))
+{
+    <p><a href="http://@ViewBag.IPAddress/">Open Tasmota Web UI</a></p>
+}
+
+@if (Model != null)
+{
+    <form method="post" action="/tasmota/updateconfig">
+
+        @{ await Html.RenderPartialAsync("_DeviceConfig"); }
+
+        @Html.Hidden("ipaddress", (string)ViewBag.IPAddress)
+        @Html.Hidden("password", (string)ViewBag.Password)
+        @Html.AntiForgeryToken()
+
+        <button type="submit" class="btn btn-primary">Update Configuration</button>
+    </form>
+
+    <h4>Full Device Configuration</h4>
+
+    <div class="row">
+        @foreach (var p in Model.GetType().GetProperties().Where(p => p.Name != "WARNING"))
+        {
+            <div class="col-sm-6">
+                @try
+                {
+                    var o = p.GetValue(Model);
+                    <h4>@p.Name</h4>
+                    @foreach (var p2 in o.GetType().GetProperties())
+                    {
+                        try
+                        {
+                            <div>
+                                <label>@p2.Name</label>
+                                @p2.GetValue(o)
+                            </div>
+                        }
+                        catch { }
+                    }
+                }
+                catch { }
+            </div>
+        }
+    </div>
+}

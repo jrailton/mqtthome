@@ -1,0 +1,5 @@
+IF NO UTILITY POWER
+garden lights off at 80% or 12am
+
+LAUNDRY
+gridpower OR soc > 85% OR hour < 7 OR hour > 17

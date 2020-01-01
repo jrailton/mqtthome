@@ -1,10 +1,8 @@
-﻿<div class="system-messages pull-right">
+﻿<div class="system-messages">
     <a class="btn btn-default @((Program.MqttHomeController.SystemMessages.Count > 0) ? "" : "disabled")" data-toggle="collapse" href="#system-messages">
-        <i class="glyphicon glyphicon-bullhorn"></i>
-        @if (Program.MqttHomeController.SystemMessages.Any())
-        {
-            <span class="label label-default">@Program.MqttHomeController.SystemMessages.Count</span>
-        }
+        <i class="glyphicon glyphicon-bullhorn hidden-xs"></i>
+        <span class="label label-default">@Program.MqttHomeController.SystemMessages.Count</span>
+        <span class="hidden visible-xs-inline">System Messages</span>
     </a>
     <div class="messages collapse" id="system-messages">
         @if (Program.MqttHomeController.SystemMessages.Any(m => m.Type == SystemMessageType.danger))

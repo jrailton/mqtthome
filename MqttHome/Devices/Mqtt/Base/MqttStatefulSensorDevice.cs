@@ -17,7 +17,7 @@ namespace MqttHome.Mqtt
             SetPowerStateOn = new MqttCommand(controller, Id, $"cmnd/{Id}/Power", "ON");
             SetPowerStateOff = new MqttCommand(controller, Id, $"cmnd/{Id}/Power", "OFF");
             StateTopic = $"tele/{Id}/STATE";
-            CommandResponseTopic = $"stat/{Id}/POWER";
+            CommandResponseTopic = $"stat/{Id}/#";
 
             _switchHelper = new SwitchHelper(this);
         }
@@ -61,6 +61,8 @@ namespace MqttHome.Mqtt
             get => _powerOn;
             protected set
             {
+                _switchHelper.AddStateHistory($"State {(_powerOn.HasValue ? "changed to" : "read as")} {(value.Value ? "ON" : "OFF")}");
+
                 _powerOn = value;
 
                 if (_powerOn.Value)
@@ -73,8 +75,6 @@ namespace MqttHome.Mqtt
                     // maintain power off time if its already set
                     PowerOffTime = PowerOffTime ?? DateTime.Now;
                 }
-
-                _switchHelper.AddStateHistory($"State changed to {(value.Value ? "ON" : "OFF")}");
 
                 StateChanged?.Invoke(this, new StateChangedEventArgs
                 {

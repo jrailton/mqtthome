@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Html;
 
 namespace MqttHome.Config
@@ -7,12 +8,14 @@ namespace MqttHome.Config
     public class Device
     {
         /// <summary>
-        /// The device Id to refer to it as, usually the same as the MQTT 
+        /// The device Id to refer to it as, usually the same as the MQTT topic
         /// </summary>
+        [Required]
         public string Id { get; set; }
         /// <summary>
         /// MqttDevice type (class) name
         /// </summary>
+        [Required]
         public string Type { get; set; }
         /// <summary>
         /// Reserved for future use, whereby the constructor of the device requires more than the default parameters
@@ -21,6 +24,7 @@ namespace MqttHome.Config
         /// <summary>
         /// Friendly name for the device
         /// </summary>
+        [Required]
         public string FriendlyName { get; set; }
         /// <summary>
         /// Applies to sensor devices. Whether or not the sensor values should be saved to database (for use by Grafana)

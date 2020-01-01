@@ -1,0 +1,210 @@
+#n.b. you can determine raspbian o/s version and cpu architecture by running
+sudo apt-get update
+# its probably buster armhf (raspberry pi 3b)
+
+#AUTO MOUNT EXTERNAL DRIVE (this guide presumes its ext4 but it can be ntfs, fat32, exfat, you just need a driver and change some params below where filesystem type is specified
+#see here for more info https://www.raspberrypi.org/documentation/configuration/external-storage.md
+#to determine file system, device uuid and device location
+sudo blkid
+#to create mount directory
+sudo mkdir /mnt/mqtt-home-ext
+sudo nano /etc/fstab
+#Add the following line in the fstab file, replacing <uuid> and <fstype> with the appropriate
+UUID=<uuid> /mnt/mqtt-home-ext <fstype> defaults,auto,users,rw,nofail 0 0
+
+#INSTALL INFLUXDB
+#Influxdb runs on http://localhost:8086
+sudo apt-get install -y influxdb influxdb-client
+
+# configure Influxdb - enable http access on port 8086
+sudo nano /etc/influxdb/influxdb.conf
+
+# relocate meta, data and wal folders to external drive 
+cd /mnt/mqtt-home-ext
+sudo mkdir influxdb-data
+sudo chown influxdb:influxdb influxdb-data
+cd influxdb-data
+sudo mkdir data
+sudo chown influxdb:influxdb data
+sudo mkdir meta
+sudo chown influxdb:influxdb meta
+sudo mkdir wal
+sudo chown influxdb:influxdb wal
+
+#restart influxdb
+sudo service influxdb restart
+
+#create home_db database
+influx
+CREATE DATABASE home_db
+LIST DATABASES
+
+#INSTALL MOSQUITTO BROKER
+#Mosquitto broker runs on http://localhost:1886
+# to test mosquitto (once nodes are publishing to it) run mosquitto_sub -t "#"
+sudo apt-get update
+sudo apt-get install -y mosquitto mosquitto-clients
+sudo systemctl enable mosquitto.service
+
+#INSTALL GRAFANA
+#Grafana runs on http://localhost:3000
+echo "deb https://packages.grafana.com/oss/deb stable main" | sudo tee /etc/apt/sources.list.d/grafana.list
+wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+sudo apt-get -y update
+sudo apt-get -y upgrade
+sudo apt-get install -y apt-transport-https
+sudo apt-get install -y grafana
+sudo /bin/systemctl daemon-reload
+sudo /bin/systemctl enable grafana-server
+sudo /bin/systemctl start grafana-server
+
+#INSTALL OPEN VPN SERVER -- https://pimylifeup.com/raspberry-pi-vpn-server/
+curl -L https://install.pivpn.io | bash
+
+#INSTALL SAMBA -- to update mqtt-home by folder copy and allow config file editing, log viewing -- https://pimylifeup.com/raspberry-pi-samba/
+sudo apt-get install -y samba samba-common-bin
+mkdir /home/pi/Desktop/mqtt-home-web
+
+# add mqtt-home-web folder to samba to allow for updating by file copy
+sudo nano /etc/samba/smb.conf
+# add the following
+[mqtt-home-web]
+path = /home/pi/Desktop/mqtt-home-web
+writeable=Yes
+create mask=0777
+directory mask=0777
+public=no
+
+#setup smb "pi" user
+sudo smbpasswd -a pi
+
+#restart samba
+sudo systemctl restart smbd
+
+#SETUP GODADDY DYNAMIC IP UPDATER -- first, copy godaddy-dns-updater.txt to /home/pi/Desktop/godaddy-dns-updater/updater -- https://www.instructables.com/id/Quick-and-Dirty-Dynamic-DNS-Using-GoDaddy/
+crontab -e
+#add this line
+*/10 * * * *     /home/pi/Desktop/godaddy-dns-updater/updater > /dev/null
+
+#INSTALL DOTNET CORE 3, NGINX AND SETUP MQTT HOME WEB -- https://edi.wang/post/2019/9/29/setup-net-core-30-runtime-and-sdk-on-raspberry-pi-4
+wget https://download.visualstudio.microsoft.com/download/pr/e9d4b012-a877-443c-8344-72ef910c86dd/b5e729b532d7b3b5488c97764bd0fb8e/aspnetcore-runtime-3.0.0-linux-arm.tar.gz
+mkdir $HOME/dotnet-arm32
+tar zxf aspnetcore-runtime-3.0.0-linux-arm.tar.gz -C $HOME/dotnet-arm32
+export DOTNET_ROOT=$HOME/dotnet-arm32
+export PATH=$PATH:$HOME/dotnet-arm32
+dotnet --info
+
+#auto set dotnet core variables on boot
+sudo nano .profile
+
+#Add those lines at the end of this file
+# set .NET Core SDK and Runtime path
+export DOTNET_ROOT=$HOME/dotnet-arm32
+export PATH=$PATH:$HOME/dotnet-arm32
+
+#install nginx for lan-wide access
+sudo apt-get install -y nginx
+sudo /etc/init.d/nginx start
+sudo nano /etc/nginx/sites-available/default
+
+#Replace its content with:
+server {
+    listen        80 default_server;
+    server_name   _;
+    location / {
+        proxy_pass         http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection $http_connection;
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}
+
+#reload nginx
+sudo nginx -t
+sudo nginx -s reload
+
+#setup kestrel to run mqtt-home-web
+sudo nano /etc/systemd/system/kestrel-mqtthomeweb.service
+
+#put this in file content
+[Unit]
+Description=MQTT Home Web Interface
+
+[Service]
+WorkingDirectory=/home/pi/Desktop/mqtt-home-web
+ExecStart=/home/pi/dotnet-arm32/dotnet /home/pi/Desktop/mqtt-home-web/MqttHomeWeb.dll
+Restart=always
+# Restart service after 10 seconds if the dotnet service crashes:
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=dotnet-empower
+User=pi
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+[Install]
+WantedBy=multi-user.target
+
+#register and start service
+sudo systemctl enable kestrel-mqtthomeweb.service
+sudo systemctl start kestrel-mqtthomeweb.service
+sudo systemctl status kestrel-mqtthomeweb.service
+
+# add letsencrypt SSL
+# dont forget to port forward 443 and 80 -- zol will make this a mission for you, special special.
+# source: https://pimylifeup.com/raspberry-pi-ssl-lets-encrypt/
+
+# install certbot
+sudo apt-get install -y certbot
+
+# generate certificate for your domain
+sudo certbot certonly --webroot -w /home/pi/Desktop/mqtt-home-web/wwwroot -d mqtthome.jimandtraceshouse.com
+
+# edit nginx config to use ssl and show it where the keys are
+sudo nano /etc/nginx/sites-available/default
+
+# add listen 443 ssl;
+# add ssl_certificate /etc/letsencrypt/live/mqtthome.jimandtraceshouse.com/fullchain.pem;
+# add ssl_certificate_key /etc/letsencrypt/live/mqtthome.jimandtraceshouse.com/privkey.pem;
+
+# nginx config should look something like this when you are done
+
+# this listens on port 80 for connections -- required for certbot to get ssl cert
+# will redirect all non-https connections (other than certbot requests for .well-known) to https
+server {
+        listen          80 default_server;
+        server_name     _;
+
+        location /.well-known {
+                try_files $uri $uri/ =404;
+        }
+
+        location / {
+                return 301 https://$host$request_uri;
+        }
+}
+
+# this listens for port 443 (https) connections
+server {
+    listen        443 ssl;
+
+    server_name   mqtthome.jimandtraceshouse.com;
+
+    ssl_certificate /etc/letsencrypt/live/mqtthome.jimandtraceshouse.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/mqtthome.jimandtraceshouse.com/privkey.pem;
+
+    location / {
+        proxy_pass         http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection $http_connection;
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+		proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+		proxy_set_header   X-Forwarded-Proto $scheme;
+	}
+}

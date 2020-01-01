@@ -1,0 +1,15 @@
+﻿@model MqttHome.Config.Device
+@{
+    ViewData["Title"] = "Add/Edit Device";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form method="post" action="">
+    @Html.TextBoxBootstrap("Id", Model.Id, "ID", "Should match MQTT topic for MQTT devices")
+    @Html.TextBoxBootstrap("FriendlyName", Model.FriendlyName, "Friendly Name", "Display name for this device")
+    @Html.TextBoxBootstrap("Parameters", Model.Parameters, "Parameters", "Comma separated list of parameters (device dependent)")
+    @Html.CheckboxBootstrap("SaveSensorValuesToDatabase", Model.SaveSensorValuesToDatabase, "Save Sensor Values To Database", "Whether or not metrics should be saved to database")
+    @Html.DropDownListBootstrap("Type", MqttHome.Config.DeviceConfig.DeviceTypes(Model.Type), "Device Type")
+    <button class="btn btn-primary" type="submit">Save Changes</button>
+</form>

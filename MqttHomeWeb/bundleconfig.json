@@ -2,6 +2,7 @@
   {
     "inputFiles": [
       "wwwroot/css/**/*.css",
+      "wwwroot/lib/bootstrap/dist/font-awesome/font-awesome.css",
       "!wwwroot/css/**/*.bundle.css",
       "!wwwroot/css/**/*.min.css"
     ],

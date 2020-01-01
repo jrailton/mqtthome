@@ -1,0 +1,18 @@
+Venus/CCGX MQTT broker will stop publishing to subscribed topics if no publish command received every 60 seconds. You can start it pushlishing again by posting this:
+.\mosquitto_pub.exe -h 10.0.0.59 -t "R/7c386655e76b/system/0/Serial" -n
+NOTICE ITS A PUB, NOT A SUB! AND THAT 7c386655e76b IS THE SERIAL NUMBER OF THE VENUS/CCGX
+https://github.com/victronenergy/dbus-mqtt
+
+To bridge the Venus/CCGX broker to another broker i.e. to make it post all its topics to another broker or to make it subscribe to another broker, edit the mosquitto.conf:
+nano /etc/mosquitto/mosquitto.conf
+
+#connection CoreMqtt
+connection bridge-01
+
+# ip/port of remote broker
+address 10.0.0.70:1883
+
+# you can also use "both" instead of a line for "in" and another for "out", or exclude one or the other to not bridge subscribe/publish respectively
+# if you want to remap topics you can specify them here. See this link for more info: http://www.steves-internet-guide.com/mosquitto-bridge-configuration/
+topic # out 0
+topic # in 0

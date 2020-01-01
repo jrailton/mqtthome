@@ -1,0 +1,9 @@
+push notifications - https://developers.google.com/web/fundamentals/codelabs/push-notifications
+add ability for multiple switches and/or conditions to each condition, essentially making a condition group out of a condition
+add weather sensor
+influx caching -- cache points for 5 seconds, then write. to reduce amount of continuous disk activity
+dashboard designer 
+- to show certain widgets 
+- ability to create a visualisation widget from a Sensor's value (starting with basic SoC gauge)
+- dashboard to become "home" page
+add pylontech serial sensor (so we can replace ICC altogether)
