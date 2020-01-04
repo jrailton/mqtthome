@@ -11,6 +11,7 @@ namespace MqttHome
         TimeSensor,
         Accuweather,
         SonoffBasic,
-        HuaweiHGRouter
+        HuaweiHGRouter,
+        AxpertInverter
     }
 }

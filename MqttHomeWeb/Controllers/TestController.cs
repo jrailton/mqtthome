@@ -12,7 +12,7 @@ namespace MqttHomeWeb.Controllers
     {
         public IActionResult Index()
         {
-            var commander = new AxpertCommand("", 115200, null);
+            var commander = new AxpertCommand("", 115200, null, true);
             //pwrsys
             //@
             // Power System Information

@@ -7,7 +7,12 @@
     <StartupObject />
     <ExcludeFilesFromDeployment>appsettings.json;rules.json;conditions.json;devices.json;log4net.config</ExcludeFilesFromDeployment> 
     <ExcludeFilesFromDeployment>**\.svn\**\*.*</ExcludeFilesFromDeployment>
-    <ExcludeFoldersFromDeployment></ExcludeFoldersFromDeployment> 
+    <ExcludeFoldersFromDeployment></ExcludeFoldersFromDeployment>
+    <Authors>James Railton</Authors>
+    <Product>MqttHome</Product>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.1</Version> 
   </PropertyGroup>
 
   <ItemGroup>

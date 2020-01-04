@@ -1,4 +1,5 @@
-﻿using System;
+﻿using log4net;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,7 +26,7 @@ namespace MqttHome.Devices.Serial.Axpert
         public float BatterySoc { get; set; }
         public int InverterTemp { get; set; }
         public int PvInputCurrent { get; set; }
-        public int PvInputVoltage { get; set; }
+        public float PvInputVoltage { get; set; }
         public float BatteryVoltage2 { get; set; }
         public int BatteryDischargeCurrent { get; set; }
         public DeviceStatus DeviceStatus { get; set; }
@@ -35,29 +36,40 @@ namespace MqttHome.Devices.Serial.Axpert
         public DeviceStatus2 DeviceStatus2 { get; set; }
 
         public QpigsResponse(string input) {
-            var vals = input.Split(' ');
+            try
+            {
+                var vals = input.Split(' ');
 
-            GridVoltage = float.Parse(vals[0]);
-            GridFrequency = float.Parse(vals[1]);
-            OutputVoltage = float.Parse(vals[2]);
-            OutputFrequency = float.Parse(vals[3]);
-            OutputVA = int.Parse(vals[4]);
-            OutputWatts = int.Parse(vals[5]);
-            OutputLoadPcnt = int.Parse(vals[6]);
-            BusVoltage = int.Parse(vals[7]);
-            BatteryVoltage = float.Parse(vals[8]);
-            BatteryChargingCurrent = float.Parse(vals[9]);
-            BatterySoc = float.Parse(vals[10]);
-            InverterTemp = int.Parse(vals[11]);
-            PvInputCurrent = int.Parse(vals[12]);
-            PvInputVoltage = int.Parse(vals[13]);
-            BatteryVoltage2 = float.Parse(vals[14]);
-            BatteryDischargeCurrent = int.Parse(vals[15]);
-            DeviceStatus = new DeviceStatus(vals[16]);
-            InverterFanCentiVolts = int.Parse(vals[17]);
-            EepromVersion = int.Parse(vals[18]);
-            PvWatts = int.Parse(vals[19]);
-            DeviceStatus2 = new DeviceStatus2(vals[20]);
+                // 233.3 49.9 230.0 49.8 0230 0212 004 374 54.00 002 100 0038 0004 097.6 54.07 00000 00010111 00 00 00254 110
+                // 0     1    2     3    4    5    6   7   8     9   10  11   12   13    14    15    16       17 18 19    20
+
+                GridVoltage = float.Parse(vals[0]);
+                GridFrequency = float.Parse(vals[1]);
+                OutputVoltage = float.Parse(vals[2]);
+                OutputFrequency = float.Parse(vals[3]);
+                OutputVA = int.Parse(vals[4]);
+                OutputWatts = int.Parse(vals[5]);
+                OutputLoadPcnt = int.Parse(vals[6]);
+                BusVoltage = int.Parse(vals[7]);
+                BatteryVoltage = float.Parse(vals[8]);
+                BatteryChargingCurrent = float.Parse(vals[9]);
+                BatterySoc = float.Parse(vals[10]);
+                InverterTemp = int.Parse(vals[11]);
+                PvInputCurrent = int.Parse(vals[12]);
+                PvInputVoltage = float.Parse(vals[13]);
+                BatteryVoltage2 = float.Parse(vals[14]);
+                BatteryDischargeCurrent = int.Parse(vals[15]);
+                DeviceStatus = new DeviceStatus(vals[16]);
+                InverterFanCentiVolts = int.Parse(vals[17]);
+                EepromVersion = int.Parse(vals[18]);
+                PvWatts = int.Parse(vals[19]);
+                DeviceStatus2 = new DeviceStatus2(vals[20]);
+            }
+            catch (Exception err) {
+                throw new Exception($@"QpigsResponse :: Parse message failed - {err.Message}
+Input was:
+{input}", err);
+            }
         }
 
         //1. (Start byte N: the integer from 0 to 9
@@ -110,14 +122,17 @@ namespace MqttHome.Devices.Serial.Axpert
 
         public DeviceStatus(string input)
         {
-            //b83: add SBU priority version, 1: yes, 0: no
-            //b84: configuration status: 1: Change 0: unchanged
-            //b85: SCC firmware version 1: Updated 0: unchanged
-            //b86: Load status: 0: Load off 1:Load on
-            //b87: battery voltage to steady while charging
-            //b88: Charging status(Charging on/off)
-            //b89: Charging status(SCC1 charging on/off)
-            //B90: Charging status(AC charging on/off)
+            // 00010111
+            // 01234567 <-- position
+
+            //b83 0: add SBU priority version, 1: yes, 0: no
+            //b84 1: configuration status: 1: Change 0: unchanged
+            //b85 2: SCC firmware version 1: Updated 0: unchanged
+            //b86 3: Load status: 0: Load off 1:Load on
+            //b87 4: battery voltage to steady while charging
+            //b88 5: Charging status(Charging on/off)
+            //b89 6: Charging status(SCC1 charging on/off)
+            //B90 7: Charging status(AC charging on/off)
 
             //Example of b88b89b90:
             //000: Do nothing

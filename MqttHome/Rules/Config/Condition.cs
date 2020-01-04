@@ -1,4 +1,5 @@
-﻿using MqttHome.Mqtt;
+﻿using MqttHome.Devices.Base;
+using MqttHome.Mqtt;
 using MqttHome.Mqtt.Devices;
 using MqttHome.Presence;
 using System;
@@ -61,7 +62,7 @@ namespace MqttHome
             }
         }
 
-        public void CheckDeviceCondition(IMqttSensorDevice<ISensorData> device, Dictionary<string, object> sensorValues)
+        public void CheckDeviceCondition(ISensorDevice<ISensorData> device, Dictionary<string, object> sensorValues)
         {
             var array = Criteria.Split(' ');
             var property = array[0];

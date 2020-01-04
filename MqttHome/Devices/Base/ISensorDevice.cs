@@ -7,7 +7,7 @@ namespace MqttHome.Devices.Base
 {
     public interface ISensorDevice<ISensorData>
     {
-        event EventHandler<SensorDataChangedEventArgs> SensorDataChanged;
+        public event EventHandler<SensorDataChangedEventArgs> SensorDataChanged;
 
         DateTime? LastCommunication { get; set; }
         bool SaveSensorValuesToDatabase { get; }

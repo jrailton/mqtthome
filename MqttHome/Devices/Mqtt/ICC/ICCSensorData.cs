@@ -97,7 +97,7 @@ namespace MqttHome.Mqtt.Devices
             BatteryAmps = qpigs.BatteryDischargeCurrent + qpigs.BatteryChargingCurrent;
             InverterFreq = qpigs.OutputFrequency;
             //BatteryWatts = 
-            PvVolts = qpigs.PvInputVoltage;
+            PvVolts = (decimal)qpigs.PvInputVoltage;
             InverterVolts = qpigs.OutputVoltage;
             //InverterMode = 
         }
@@ -107,9 +107,10 @@ namespace MqttHome.Mqtt.Devices
             return UpdateValues(new ICCSensorData(message));
         }
 
-        public Dictionary<string, object> Update(QpigsResponse message)
+        public override Dictionary<string, object> Update(string message)
         {
-            return UpdateValues(new ICCSensorData(message));
+            // convert serial port response to qpigs message
+            return UpdateValues(new ICCSensorData(new QpigsResponse(message)));
         }
 
         /// <summary>

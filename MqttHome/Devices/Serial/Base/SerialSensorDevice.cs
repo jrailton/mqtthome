@@ -21,5 +21,27 @@ namespace MqttHome.Devices.Serial.Base
         public virtual bool SaveSensorValuesToDatabase => true;
 
         public virtual Dictionary<string, object> SensorValues => SensorData.ToDictionary();
+
+        public void UpdateSensorData(string response)
+        {
+            LastCommunication = DateTime.Now;
+
+            var updated = SensorData.Update(response);
+
+            if (Controller.Settings.SaveAllSensorValuesToDatabaseEveryTime)
+            {
+                SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
+                {
+                    ChangedValues = SensorData.ToDictionary()
+                });
+            }
+            else if ((updated?.Count ?? 0) > 0 && SensorDataChanged != null)
+            {
+                SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
+                {
+                    ChangedValues = updated
+                });
+            }
+        }
     }
 }

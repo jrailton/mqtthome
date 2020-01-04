@@ -1,4 +1,5 @@
-﻿using MqttHome.Devices.Base;
+﻿using log4net;
+using MqttHome.Devices.Base;
 using MqttHome.Devices.Serial.Base;
 using MqttHome.Mqtt.Devices;
 using System;
@@ -10,16 +11,22 @@ using System.Threading;
 
 namespace MqttHome.Devices.Serial.Axpert
 {
-    public class Axpert : SerialSensorDevice<ICCSensorData>
+    public class Axpert : SerialSensorDevice<ICCSensorData>, IDisposable
     {
         private Timer _statusTimer;
         private object _statusTimerLocker = new object();
         private AxpertCommand _commander;
+        private ILog _logger;
+        public bool _debug;
+        private string _logIdentity;
 
-        public Axpert(MqttHomeController controller, DeviceType type, Config.Device config) : base(controller, type, config)
+        public Axpert(MqttHomeController controller, Config.Device config) : base(controller, DeviceType.AxpertInverter, config)
         {
             try
             {
+                _logIdentity = $"Axpert (Device ID: {Id})";
+                _logger = controller.DeviceLog;
+
                 var port = config.Parameters[0];
                 int baud = 2400;
 
@@ -27,17 +34,22 @@ namespace MqttHome.Devices.Serial.Axpert
                 if (config.Parameters.Length > 1)
                     baud = int.Parse(config.Parameters[1]);
 
-                _commander = new AxpertCommand(port, baud, this);
+                _commander = new AxpertCommand(port, baud, this, _debug);
 
                 int statusInterval = 1000;
                 if (config.Parameters.Length > 2)
                     statusInterval = int.Parse(config.Parameters[2]);
 
+                if (config.Parameters.Length > 3)
+                    _debug = bool.Parse(config.Parameters[3]);
+
                 // status timer will run every 1 second
                 _statusTimer = new Timer(StatusTimer, null, 0, statusInterval);
+
+                _logger.Debug($"{_logIdentity} :: Constructor :: Started on port {port}, baud {baud}, interval {statusInterval}ms, debug {_debug}");
             }
             catch (Exception err) {
-                controller.DeviceLog.Error($"Axpert..ctor :: Error - {err.Message}");
+                controller.DeviceLog.Error($"{_logIdentity} :: Constructor :: Error - {err.Message}", err);
                 throw;
             }
         }
@@ -52,10 +64,14 @@ namespace MqttHome.Devices.Serial.Axpert
             {
                 Monitor.TryEnter(_statusTimerLocker, ref hasLock);
                 if (!hasLock)
+                {
+                    if (_debug)
+                        _logger.Warn($"{_logIdentity} :: StatusTimer :: Locked.");
                     return;
+                }
 
                 // send status inquiry request
-                var response = _commander.Send<QpigsResponse>("QPIGS");
+                var response = _commander.Send("QPIGS");
 
                 UpdateSensorData(response);
             }
@@ -66,24 +82,10 @@ namespace MqttHome.Devices.Serial.Axpert
             }
         }
 
-        private void UpdateSensorData(QpigsResponse e) {
-            //var updated = SensorData.Update(e);
-
-
-            //if (Controller.SaveAllSensorValuesToDatabaseEveryTime)
-            //{
-            //    SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
-            //    {
-            //        ChangedValues = SensorData.ToDictionary()
-            //    });
-            //}
-            //else if ((updated?.Count ?? 0) > 0 && SensorDataChanged != null)
-            //{
-            //    SensorDataChanged?.Invoke(this, new SensorDataChangedEventArgs
-            //    {
-            //        ChangedValues = updated
-            //    });
-            //}
+        public void Dispose()
+        {
+            _commander.Dispose();
+            _statusTimer.Dispose();
         }
     }
 }

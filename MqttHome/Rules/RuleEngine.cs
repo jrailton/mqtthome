@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using MqttHome.Presence;
 using MqttHome.Devices.Mqtt.Base;
+using MqttHome.Devices.Base;
 
 namespace MqttHome
 {
@@ -303,7 +304,7 @@ namespace MqttHome
         {
         }
 
-        public void OnDeviceSensorDataChanged(IMqttSensorDevice<ISensorData> device, Dictionary<string, object> allSensorValues)
+        public void OnDeviceSensorDataChanged(ISensorDevice<ISensorData> device, Dictionary<string, object> allSensorValues)
         {
             foreach (var condition in ConditionConfig.Conditions.Where(c => c.Device == device.Id))
             {

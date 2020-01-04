@@ -1,5 +1,6 @@
 ﻿@using MqttHome.Mqtt
 @using MqttHome.Mqtt.Devices
+@using MqttHome.Devices.Base
 @model MqttHome.MqttHomeController
 <div class="panel panel-default">
     <div class="panel-heading">
@@ -16,9 +17,9 @@
                 var sensorValues = string.Empty;
             }
 
-            @foreach (var device in Model.MqttDevices.Where(d => d is IMqttSensorDevice<ISensorData>))
+            @foreach (var device in Model.MqttDevices.Where(d => d is ISensorDevice<ISensorData>))
             {
-                var sensor = device as IMqttSensorDevice<ISensorData>;
+                var sensor = device as ISensorDevice<ISensorData>;
                 <div class="col-sm-4 col-lg-3">
                     <div class="panel panel-@(device.LastCommunication.HasValue ? "info" : "default")">
                         <div class="panel-heading">
@@ -80,6 +81,68 @@
                     </div>
                 </div>
             }
+
+            @foreach (var device in Model.SerialDevices.Where(d => d is ISensorDevice<ISensorData>))
+            {
+                var sensor = device as ISensorDevice<ISensorData>;
+                <div class="col-sm-4 col-lg-3">
+                    <div class="panel panel-@(device.LastCommunication.HasValue ? "info" : "default")">
+                        <div class="panel-heading">
+                            <a role="button" data-toggle="collapse" data-parent="#switch-devices" href="#collapse-sensor-@device.Id.UrlReady()" aria-expanded="false" aria-controls="collapse-sensor-@device.Id.UrlReady()">
+                                @device.FriendlyName
+                            </a>
+                        </div>
+                        @if (device.Config.Widgets != null)
+                        {
+                            sensorValues += (string.IsNullOrEmpty(sensorValues) ? "" : ",") + string.Join(",", device.Config.Widgets.Select(w => $"{device.Id}.{w.ValueName}"));
+                            await Html.RenderPartialAsync("_SensorWidgets", device);
+                        }
+                        <div id="collapse-sensor-@device.Id.UrlReady()" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div>
+                                    <label>Last Contact</label>
+                                    @device.LastCommunication.GetPrettyDateHtml()
+                                </div>
+                                <div class="technical">
+                                    <label>Class</label>
+                                    @device.DeviceClass
+                                </div>
+                                <div class="@(sensor.SaveSensorValuesToDatabase ? "technical" : "")">
+                                    <label>Save Values to Database</label>
+                                    <span class="label label-@(sensor.SaveSensorValuesToDatabase ? "success" : "danger")">@(sensor.SaveSensorValuesToDatabase ? "Yes" : "No")</span>
+                                </div>
+                                <div class="technical">
+                                    <label>Type</label>
+                                    @device.DeviceType
+                                </div>
+                                <div class="technical">
+                                    <label>ID</label>
+                                    @device.Id
+                                </div>
+
+                                @if (device.LastCommunication.HasValue)
+                                {
+                                    if (sensor.SensorValues != null)
+                                    {
+                                        <div>
+                                            <label>Sensor Data</label>
+                                            @foreach (var pair in sensor.SensorValues)
+                                            {
+                                                <div>
+                                                    <label>@pair.Key</label>
+                                                    @pair.Value
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
         </div>
     </div>
 </div>

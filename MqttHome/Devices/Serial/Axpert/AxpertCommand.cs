@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace MqttHome.Devices.Serial.Axpert
 {
-    public class AxpertCommand
+    public class AxpertCommand : IDisposable
     {
         private string _port = "/dev/ttyUSB0";
         private int _baud = 2400;
@@ -17,19 +17,30 @@ namespace MqttHome.Devices.Serial.Axpert
         private bool _commandResponseComplete = false;
         private MemoryStream _responseBuffer;
         private const int _timeoutMs = 1000;
-        private SerialDevice _parent; 
+        private SerialDevice _parent;
+        private string _logIdentity;
+        private bool _debug;
 
-        public AxpertCommand(string port, int baud, SerialDevice parent) {
+        public AxpertCommand(string port, int baud, SerialDevice parent, bool debug)
+        {
+            _debug = debug;
+            _parent = parent;
+            _logger = parent.Controller.DeviceLog;
+            _logIdentity = $"AxpertCommand (Device: {parent.Id})";
+
+            if (_debug)
+                _logger.Debug($"{_logIdentity} :: Starting on port {port}, baud {baud}");
+
             _port = port;
             _baud = baud;
-            _logger = parent.Controller.DeviceLog;
-            _parent = parent;
         }
 
-        public TResponse Send<TResponse>(string cmd) {
-
+        public string Send(string cmd) {
             try
             {
+                if (_debug)
+                    _logger.Debug($"{_logIdentity} :: Send :: {cmd}");
+
                 var sp = new SerialPort(_port, _baud, Parity.None, 8, StopBits.One);
 
                 sp.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
@@ -55,14 +66,30 @@ namespace MqttHome.Devices.Serial.Axpert
 
                 sp.Close();
 
+                // check for timeout
+                if (!_commandResponseComplete)
+                    throw new TimeoutException($"No response received within {_timeoutMs}ms");
+
                 var response = ReadResponse();
 
-                return (TResponse)Activator.CreateInstance(typeof(TResponse), response);
+                return response;
             }
-            finally {
+            catch (Exception err)
+            {
+                _logger.Error($"{_logIdentity} :: Send :: Failed - {err.Message}", err);
+                throw;
+            }
+            finally
+            {
                 _responseBuffer.Dispose();
                 _responseBuffer = null;
             }
+
+        }
+
+        public TResponse Send<TResponse>(string cmd)
+        {
+            return (TResponse)Activator.CreateInstance(typeof(TResponse), _logger, _logIdentity, Send(cmd));
         }
 
         private void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
@@ -88,16 +115,23 @@ namespace MqttHome.Devices.Serial.Axpert
 
         private void DataErrorReceivedHandler(object sender, SerialErrorReceivedEventArgs e)
         {
-            _logger.Error($"DataErrorReceivedHandler :: Device: {_parent.Id} - {e.EventType}");
+            _logger.Error($"{_logIdentity} :: DataErrorReceivedHandler :: {e.EventType}");
         }
 
         /// <summary>
         /// Returns response without leading ) character and trailing CRC and <cr> characters
         /// </summary>
-        public string ReadResponse() {
+        public string ReadResponse()
+        {
             // payload bytes excludes <cr> character and CRC value
             byte[] payloadBytes = new byte[_responseBuffer.Length - 3];
             Array.Copy(_responseBuffer.GetBuffer(), payloadBytes, payloadBytes.Length);
+
+            // convert response to ASCII
+            var response = Encoding.ASCII.GetString(payloadBytes);
+
+            if (_debug)
+                _logger.Debug($"{_logIdentity} :: Response: {response}");
 
             ushort crcMsb = _responseBuffer.GetBuffer()[_responseBuffer.Length - 3];
             ushort crcLsb = _responseBuffer.GetBuffer()[_responseBuffer.Length - 2];
@@ -107,8 +141,6 @@ namespace MqttHome.Devices.Serial.Axpert
 
             if (calculatedCrc != receivedCrc)
                 throw new Exception("Response contains invalid CRC");
-
-            var response = Encoding.ASCII.GetString(payloadBytes);
 
             if (!response.Substring(0, 1).Equals("("))
                 throw new Exception("Response doesnt start with ( character");
@@ -185,6 +217,14 @@ namespace MqttHome.Devices.Serial.Axpert
             crc = (ushort)(((ushort)bCRCHign) << 8);
             crc |= bCRCLow;
             return crc;
+        }
+
+        public void Dispose()
+        {
+            // try wait for command response to be complete for up to 5 seconds before forcibly destroying the object
+            var timeout = DateTime.Now.AddSeconds(5);
+            while (!_commandResponseComplete || DateTime.Now < timeout)
+                Thread.Sleep(100);
         }
     }
 }

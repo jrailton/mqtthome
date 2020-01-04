@@ -87,8 +87,6 @@ namespace MqttHome
 
                 SetupDeviceEventListeners();
 
-                DeviceLog.Debug($"Added {MqttDevices.Count()} MQTT devices...");
-
                 // this is a hack which needs more thought
                 MqttDeviceTopics = MqttDevices.SelectMany(d => d.AllTopics).Distinct().ToList();
 
@@ -180,8 +178,7 @@ namespace MqttHome
                     }
                 }
 
-                DeviceLog.Info($"LoadDevices :: Loaded {deviceConfig.Devices.Count} devices from devices.json");
-
+                DeviceLog.Info($"LoadDevices :: Loaded {deviceConfig.Devices.Count} devices from devices.json ({MqttDevices.Count} MQTT, {SerialDevices.Count} Serial, {PresenceDevices.Count} Presence)");
             }
             catch (Exception err)
             {
@@ -197,6 +194,11 @@ namespace MqttHome
             }
 
             foreach (IMqttSensorDevice<ISensorData> device in MqttDevices.Where(d => d is IMqttSensorDevice<ISensorData>))
+            {
+                device.SensorDataChanged += Device_SensorDataChanged;
+            }
+
+            foreach (ISensorDevice<ISensorData> device in SerialDevices.Where(d => d is ISensorDevice<ISensorData>))
             {
                 device.SensorDataChanged += Device_SensorDataChanged;
             }
@@ -227,25 +229,31 @@ namespace MqttHome
 
         private void Device_SensorDataChanged(object sender, SensorDataChangedEventArgs e)
         {
-            var device = (MqttDevice)sender;
-            var sensorDevice = device as IMqttSensorDevice<ISensorData>;
-
-            // make sure some values were specified before saving to db or running rules
-            if ((e.ChangedValues?.Count() ?? 0) > 0)
+            try
             {
-                if (sensorDevice.SaveSensorValuesToDatabase)
+                var device = (Device)sender;
+                var sensorDevice = device as ISensorDevice<ISensorData>;
+
+                // make sure some values were specified before saving to db or running rules
+                if ((e.ChangedValues?.Count() ?? 0) > 0)
                 {
-                    var lpp = new LineProtocolPoint(device.DeviceClass.ToString(),
-                    e.ChangedValues,
-                    new Dictionary<string, string>
+                    if (sensorDevice.SaveSensorValuesToDatabase)
                     {
+                        var lpp = new LineProtocolPoint(device.DeviceClass.ToString(),
+                        e.ChangedValues,
+                        new Dictionary<string, string>
+                        {
                     {"device", device.Id}
-                    });
+                        });
 
-                    InfluxCommunicator?.Write(lpp);
+                        InfluxCommunicator?.Write(lpp);
+                    }
+
+                    RuleEngine?.OnDeviceSensorDataChanged(sensorDevice, e.ChangedValues);
                 }
-
-                RuleEngine?.OnDeviceSensorDataChanged(sensorDevice, e.ChangedValues);
+            }
+            catch (Exception err) {
+                DeviceLog.Error($"MqttHomeController.Device_SensorDataChanged :: Error - {err.Message}", err);
             }
         }
 

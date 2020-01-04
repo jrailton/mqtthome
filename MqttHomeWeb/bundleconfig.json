@@ -8,7 +8,7 @@
     ],
     "outputFileName": "wwwroot/css/site.bundle.css",
     "minify": {
-      "enabled": false,
+      "enabled": true,
       "renameLocals": true
     }
   },
@@ -24,7 +24,7 @@
     ],
     "outputFileName": "wwwroot/js/site.bundle.js",
     "minify": {
-      "enabled": false,
+      "enabled": true,
       "renameLocals": true
     },
     "sourceMap": false

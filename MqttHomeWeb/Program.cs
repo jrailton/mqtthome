@@ -25,11 +25,17 @@ namespace MqttHomeWeb
         public static DateTime StartupTime;
         public static string RootFolderPath;
         public static ILog GeneralLog;
+        public static Dictionary<string, string> AppVersions;
 
         public static IConfiguration Config;
 
         public static void Main(string[] args)
         {
+            AppVersions = new Dictionary<string, string> {
+                { "MqttHomeWeb", Assembly.GetExecutingAssembly().GetName().Version.ToString() },
+                { "MqttHome", typeof(MqttHome.MqttHomeController).Assembly.GetName().Version.ToString() },
+            };
+
             StartupTime = DateTime.Now;
 
             // configure log4net
