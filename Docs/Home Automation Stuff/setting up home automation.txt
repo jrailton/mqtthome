@@ -234,3 +234,27 @@ server {
 		proxy_set_header   X-Forwarded-Proto $scheme;
 	}
 }
+
+# INSTALL CONKY (CPU, MEMORY, PROCESS MONITOR)
+sudo apt-get install conky -y
+wget -O /home/pi/.conkyrc https://raw.githubusercontent.com/novaspirit/rpi_conky/master/rpi3_conkyrc
+sudo nano /usr/bin/conky.sh
+
+#paste this into the conky.sh file
+
+#!/bin/sh
+(sleep 4s && conky) &
+exit 0
+
+sudo nano /etc/xdg/autostart/conky.desktop
+#and paste this into the file
+
+[Desktop Entry]
+Name=conky
+Type=Application
+Exec=sh /usr/bin/conky.sh
+Terminal=false
+Comment=system monitoring tool.
+Categories=Utility;
+
+#reboot to make sure all working
