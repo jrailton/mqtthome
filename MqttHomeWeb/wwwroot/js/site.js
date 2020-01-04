@@ -1,5 +1,13 @@
 ﻿$(function () {
-    $('a[data-toggle="tooltip"]').tooltip({
+    //$('a[data-toggle="tooltip"]').tooltip({
+    //    animated: 'fade',
+    //    //placement: 'bottom',
+    //    trigger: 'click',
+    //    delay: { "show": 500, "hide": 100 }
+    //});
+
+    $('body').tooltip({
+        selector: '[data-toggle=tooltip]',
         animated: 'fade',
         //placement: 'bottom',
         trigger: 'click',

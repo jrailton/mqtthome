@@ -58,12 +58,16 @@ namespace MqttHomeWeb
 
         public static void RestartMqttHomeController()
         {
+            MqttHomeController?.Stop();
+
             MqttHomeController = new MqttHomeController(WebsocketManager);
 
             MqttHomeController.Start();
         }
 
         public static void StopMqttHomeController() {
+            MqttHomeController?.Stop();
+
             MqttHomeController = null;
         }
 

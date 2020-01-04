@@ -91,15 +91,15 @@ namespace MqttHome.Mqtt.Devices
             PvWatts = qpigs.PvWatts;
             LoadPcnt = qpigs.OutputLoadPcnt;
             InverterTemp = qpigs.InverterTemp;
-            //GridWatts = 
+            //GridWatts = qpigs.grid
             BatteryVoltage = qpigs.BatteryVoltage;
             BatterySoC = qpigs.BatterySoc;
             BatteryAmps = qpigs.BatteryDischargeCurrent + qpigs.BatteryChargingCurrent;
             InverterFreq = qpigs.OutputFrequency;
-            //BatteryWatts = 
+            //BatteryWatts = qpig
             PvVolts = (decimal)qpigs.PvInputVoltage;
             InverterVolts = qpigs.OutputVoltage;
-            //InverterMode = 
+            InverterMode = qpigs.DeviceStatus.SBUPriority ? "B" : "U";
         }
 
         public override Dictionary<string, object> Update(MqttApplicationMessage message)

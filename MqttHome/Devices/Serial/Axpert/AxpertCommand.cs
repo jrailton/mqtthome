@@ -36,55 +36,54 @@ namespace MqttHome.Devices.Serial.Axpert
         }
 
         public string Send(string cmd) {
-            try
-            {
-                if (_debug)
-                    _logger.Debug($"{_logIdentity} :: Send :: {cmd}");
+            using (var sp = new SerialPort(_port, _baud, Parity.None, 8, StopBits.One)) {
 
-                var sp = new SerialPort(_port, _baud, Parity.None, 8, StopBits.One);
+                try
+                {
+                    if (_debug)
+                        _logger.Debug($"{_logIdentity} :: Send :: {cmd}");
 
-                sp.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-                sp.ErrorReceived += new SerialErrorReceivedEventHandler(DataErrorReceivedHandler);
+                    sp.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+                    sp.ErrorReceived += new SerialErrorReceivedEventHandler(DataErrorReceivedHandler);
 
-                sp.Open();
+                    sp.Open();
 
-                byte[] commandBytes = GetMessageBytes(cmd);
+                    byte[] commandBytes = GetMessageBytes(cmd);
 
-                _commandResponseComplete = false;
-                _responseBuffer = new MemoryStream();
+                    _commandResponseComplete = false;
+                    _responseBuffer = new MemoryStream();
 
-                //Flush out any existing chars
-                sp.ReadExisting();
+                    //Flush out any existing chars
+                    sp.ReadExisting();
 
-                //Send request
-                sp.Write(commandBytes, 0, commandBytes.Length);
+                    //Send request
+                    sp.Write(commandBytes, 0, commandBytes.Length);
 
-                //Wait for response (or timeout)
-                var startTime = DateTime.Now;
-                while (!_commandResponseComplete && ((DateTime.Now - startTime).TotalMilliseconds < _timeoutMs))
-                    Thread.Sleep(20);
+                    //Wait for response (or timeout)
+                    var startTime = DateTime.Now;
+                    while (!_commandResponseComplete && ((DateTime.Now - startTime).TotalMilliseconds < _timeoutMs))
+                        Thread.Sleep(20);
 
-                sp.Close();
+                    // check for timeout
+                    if (!_commandResponseComplete)
+                        throw new TimeoutException($"No response received within {_timeoutMs}ms");
 
-                // check for timeout
-                if (!_commandResponseComplete)
-                    throw new TimeoutException($"No response received within {_timeoutMs}ms");
+                    var response = ReadResponse();
 
-                var response = ReadResponse();
-
-                return response;
+                    return response;
+                }
+                catch (Exception err)
+                {
+                    _logger.Error($"{_logIdentity} :: Send :: Failed - {err.Message}", err);
+                    throw;
+                }
+                finally
+                {
+                    _responseBuffer.Dispose();
+                    _responseBuffer = null;
+                    sp.Close();
+                }
             }
-            catch (Exception err)
-            {
-                _logger.Error($"{_logIdentity} :: Send :: Failed - {err.Message}", err);
-                throw;
-            }
-            finally
-            {
-                _responseBuffer.Dispose();
-                _responseBuffer = null;
-            }
-
         }
 
         public TResponse Send<TResponse>(string cmd)

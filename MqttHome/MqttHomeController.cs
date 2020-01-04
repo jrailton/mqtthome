@@ -294,5 +294,31 @@ namespace MqttHome
             foreach (var communicator in MqttCommunicators)
                 communicator.Start();
         }
+
+        public void Stop()
+        {
+            GeneralLog.Warn("MqttHomeController :: Stop called. Disposing devices.");
+
+            try
+            {
+                foreach (IDisposable device in MqttDevices.Where(d => d is IDisposable))
+                {
+                    device.Dispose();
+                }
+                foreach (IDisposable device in SerialDevices.Where(d => d is IDisposable))
+                {
+                    device.Dispose();
+                }
+                foreach (IDisposable device in PresenceDevices.Where(d => d is IDisposable))
+                {
+                    device.Dispose();
+                }
+            }
+            catch (Exception err) {
+                GeneralLog.Warn("MqttHomeController :: Dispose of one or more devices failed. " + err.Message);
+            }
+
+            GeneralLog.Warn("MqttHomeController :: Stopped.");
+        }
     }
 }

@@ -9,7 +9,7 @@ using MqttHome.Mqtt.Devices;
 
 namespace MqttHome.Devices.Serial.Base
 {
-    public abstract class SerialDevice : Device, ISerialDevice
+    public abstract class SerialDevice : Device, ISerialDevice, IDisposable
     {
         /// <summary>
         /// Constructor
@@ -22,5 +22,7 @@ namespace MqttHome.Devices.Serial.Base
         }
 
         public DateTime? LastCommunication { get; set; }
+
+        public abstract void Dispose();
     }
 }

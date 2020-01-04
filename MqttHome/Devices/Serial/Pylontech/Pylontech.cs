@@ -46,8 +46,10 @@ namespace MqttHome.Devices.Serial.Pylontech
             //    Controller.DeviceLog.Info($"Pylontech comm. completed in {DateTime.Now.Subtract(_rxStart).TotalMilliseconds}ms");
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
+            _timer.Dispose();
+
             if (_sp != null && _sp.IsOpen)
             {
                 _sp.Close();
